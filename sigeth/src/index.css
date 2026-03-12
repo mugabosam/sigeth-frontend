@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "DM Sans", sans-serif;
+  --font-display: "Playfair Display", serif;
+  --color-amber-500: #f59e0b;
+  --color-amber-600: #d97706;
+  --color-sidebar: #1e1e2d;
+  --color-sidebar-hover: #2a2a3d;
+  --color-sidebar-active: #f59e0b;
+
+  /* SIGETH brand palette */
+  --color-sigeth-50: #f0f4f8;
+  --color-sigeth-100: #d9e2ec;
+  --color-sigeth-200: #bcccdc;
+  --color-sigeth-300: #9fb3c8;
+  --color-sigeth-400: #829ab1;
+  --color-sigeth-500: #627d98;
+  --color-sigeth-600: #486581;
+  --color-sigeth-700: #334e68;
+  --color-sigeth-800: #243b53;
+  --color-sigeth-900: #1a2b3f;
+  --color-sigeth-950: #102a43;
+
+  /* Gold accent */
+  --color-gold-300: #fcd34d;
+  --color-gold-400: #fbbf24;
+  --color-gold-500: #f59e0b;
+}
+
+body {
+  margin: 0;
+  font-family: "DM Sans", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f5f5f5;
+}
+
+* {
+  box-sizing: border-box;
+}
