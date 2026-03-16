@@ -65,6 +65,10 @@ const sections: NavSection[] = [
         path: "/rooms-attendant/checkin-group",
         labelKey: "checkInGroupReservation",
       },
+      {
+        path: "/rooms-attendant/checkout",
+        labelKey: "checkedOutRooms",
+      },
       { path: "/rooms-attendant/find-room", labelKey: "findRoom" },
       { path: "/rooms-attendant/move-guest", labelKey: "moveGuest" },
       { path: "/rooms-attendant/invoice-preview", labelKey: "invoicePreview" },
@@ -272,7 +276,6 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
           );
         })}
 
-        {/* Cashier section removed — will be included later */}
       </nav>
 
       {/* Collapse toggle */}

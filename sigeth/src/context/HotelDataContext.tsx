@@ -139,6 +139,7 @@ export function HotelDataProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    // ── Core reference data (all roles need these) ──
     const [statusData, paymentModeData, roomCategoryData, exchangeData, requisData] =
       await Promise.all([
         coreApi.statuses(),
@@ -154,37 +155,71 @@ export function HotelDataProvider({ children }: { children: ReactNode }) {
     setCurrencies(exchangeData);
     setRequisitions(requisData);
 
-    if (user.level === "Manager_R") {
-      const [roomsData, reservationsData, archivesData, groupsData, groupArchivesData] =
-        await Promise.all([
-          frontOfficeApi.rooms(),
-          frontOfficeApi.reservations(),
-          frontOfficeApi.archives(),
-          frontOfficeApi.groups(),
-          frontOfficeApi.groupArchives(),
-        ]);
+    // ── ALL roles need rooms (RDF.dat) ──
+    const roomsData = await frontOfficeApi.rooms();
+    setRooms(roomsData);
 
-      setRooms(roomsData);
+    // ── Role-specific data ──
+    if (user.level === "Manager_R") {
+      const [
+        reservationsData,
+        archivesData,
+        groupsData,
+        groupArchivesData,
+      ] = await Promise.all([
+        frontOfficeApi.reservations(),
+        frontOfficeApi.archives(),
+        frontOfficeApi.groups(),
+        frontOfficeApi.groupArchives(),
+      ]);
+
       setReservations(reservationsData);
       setReservationArchive(archivesData);
       setGroupReservations(groupsData);
       setGroupArchive(groupArchivesData);
+
+      // Manager_R also needs laundry + banquet journals
+      // for Invoice Preview and Daily Consumptions
+      try {
+        const [laundryJournalData, laundryArchiveData] = await Promise.all([
+          housekeepingApi.laundryJournal(),
+          housekeepingApi.laundryArchive(),
+        ]);
+        setJlaundry(laundryJournalData.concat(laundryArchiveData));
+      } catch {
+        // Laundry data may not be accessible — fail silently
+      }
+
+      try {
+        const [banquetJournalData, banquetArchiveData] = await Promise.all([
+          banquetingApi.journal(),
+          banquetingApi.archive(),
+        ]);
+        setJbanquet(banquetJournalData.concat(banquetArchiveData));
+      } catch {
+        // Banquet data may not be accessible — fail silently
+      }
+
       return;
     }
 
     if (user.level === "Manager_H") {
-      const [roomsData, staffData, dispatchingData, laundryCategoryData, laundryServiceData, laundryJournalData, laundryArchiveData] =
-        await Promise.all([
-          frontOfficeApi.rooms(),
-          housekeepingApi.staff(),
-          housekeepingApi.dispatching(),
-          housekeepingApi.laundryCategories(),
-          housekeepingApi.laundryServices(),
-          housekeepingApi.laundryJournal(),
-          housekeepingApi.laundryArchive(),
-        ]);
+      const [
+        staffData,
+        dispatchingData,
+        laundryCategoryData,
+        laundryServiceData,
+        laundryJournalData,
+        laundryArchiveData,
+      ] = await Promise.all([
+        housekeepingApi.staff(),
+        housekeepingApi.dispatching(),
+        housekeepingApi.laundryCategories(),
+        housekeepingApi.laundryServices(),
+        housekeepingApi.laundryJournal(),
+        housekeepingApi.laundryArchive(),
+      ]);
 
-      setRooms(roomsData);
       setStaff(staffData);
       setRstaff(dispatchingData);
       setCatlaundry(laundryCategoryData);
@@ -194,14 +229,19 @@ export function HotelDataProvider({ children }: { children: ReactNode }) {
     }
 
     if (user.level === "Manager_B") {
-      const [groupsData, eventData, banquetServiceData, banquetJournalData, banquetArchiveData] =
-        await Promise.all([
-          frontOfficeApi.groups(),
-          banquetingApi.events(),
-          banquetingApi.services(),
-          banquetingApi.journal(),
-          banquetingApi.archive(),
-        ]);
+      const [
+        groupsData,
+        eventData,
+        banquetServiceData,
+        banquetJournalData,
+        banquetArchiveData,
+      ] = await Promise.all([
+        frontOfficeApi.groups(),
+        banquetingApi.events(),
+        banquetingApi.services(),
+        banquetingApi.journal(),
+        banquetingApi.archive(),
+      ]);
 
       setGroupReservations(groupsData);
       setEvents(eventData);

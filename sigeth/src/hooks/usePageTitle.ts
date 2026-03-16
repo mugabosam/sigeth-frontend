@@ -10,6 +10,7 @@ const routeTitles: Record<string, TranslationKey> = {
     '/rooms-attendant/twin-recording': 'twinRecording',
     '/rooms-attendant/checkin-no-reservation': 'checkInWithoutReservation',
     '/rooms-attendant/checkin-group': 'checkInGroupReservation',
+    '/rooms-attendant/checkout': 'checkedOutRooms',
     '/rooms-attendant/find-room': 'findRoom',
     '/rooms-attendant/move-guest': 'moveGuest',
     '/rooms-attendant/invoice-preview': 'invoicePreview',
