@@ -18,13 +18,22 @@ import { useAuth } from "../context/AuthContext";
 import { getLoginDesign } from "../utils/LoginDesigns";
 import type { TranslationKey } from "../i18n/translations";
 
+// Default routes for each role
+const ROLE_ROUTES: Record<string, string> = {
+  "rooms-attendant": "/rooms-attendant/group-reservation",
+  housekeeping: "/housekeeping/room-categories",
+  banqueting: "/banqueting/events-lots",
+};
+
 export default function Login() {
   const { t, lang, dark, toggleDark, toggleLang } = useLang();
   const { login, logout } = useAuth();
   const navigate = useNavigate();
   const { submodule } = useParams<{ submodule: string }>();
 
-  const design = getLoginDesign(submodule);
+  // If no submodule is provided, use a default design for generic login
+  const design = getLoginDesign(submodule || "rooms");
+  const isGenericLogin = !submodule;
 
   const SubIcon = design.icon;
 
@@ -55,13 +64,21 @@ export default function Login() {
 
     try {
       const authenticatedUser = await login(username, password);
-      if (authenticatedUser.level !== design.level) {
-        setError(t("loginError"));
-        await logout();
-        setLoading(false);
-        return;
+      
+      // For generic login, redirect based on user's role
+      if (isGenericLogin) {
+        const defaultRoute = ROLE_ROUTES[authenticatedUser.submodule] || "/rooms-attendant/group-reservation";
+        navigate(defaultRoute, { replace: true });
+      } else {
+        // For specific submodule login, validate the user's role matches
+        if (authenticatedUser.level !== design.level) {
+          setError(t("loginError"));
+          await logout();
+          setLoading(false);
+          return;
+        }
+        navigate(design.defaultRoute, { replace: true });
       }
-      navigate(design.defaultRoute, { replace: true });
     } catch (err: unknown) {
       const responseData =
         typeof err === "object" && err !== null && "response" in err
@@ -123,13 +140,13 @@ export default function Login() {
   const gradientClass = `bg-gradient-to-br ${design.gradientFrom} ${design.gradientVia} ${design.gradientTo}`;
 
   return (
-    <div className={`min-h-screen flex ${dark ? "dark" : ""} overflow-hidden`}>
+    <div className={`min-h-screen flex ${dark ? "dark" : ""} overflow-hidden selection:bg-amber-300 dark:selection:bg-amber-600 selection:text-gray-950`}>
       {/* ───── Left branding panel with enhanced visuals ───── */}
       <motion.div
         initial={{ x: -100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 0.8, ease: [0.6, -0.05, 0.01, 0.99] }}
-        className={`hidden lg:flex lg:w-1/2 relative overflow-hidden ${gradientClass}`}
+        className={`hidden lg:flex lg:w-5/12 relative overflow-hidden ${gradientClass} shadow-2xl`}
       >
         {/* Animated background patterns */}
         <div className="absolute inset-0 opacity-10">
@@ -392,33 +409,62 @@ export default function Login() {
         initial={{ x: 100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 0.8, ease: [0.6, -0.05, 0.01, 0.99] }}
-        className={`w-full lg:w-1/2 flex flex-col bg-gradient-to-br ${
+        className={`w-full lg:w-7/12 flex flex-col ${
           dark
-            ? "from-gray-950 via-gray-900 to-gray-950"
-            : "from-white via-gray-50 to-white"
-        } transition-colors duration-300 relative overflow-hidden`}
+            ? "from-gray-950 via-gray-900 to-black"
+            : "from-gradient-start via-gradient-middle to-gradient-end"
+        } bg-gradient-to-br ${dark ? "from-gray-950 via-gray-900 to-black" : "from-slate-50 via-white to-gray-50"} transition-colors duration-300 relative overflow-hidden`}
       >
-        {/* Decorative elements */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div
-            className={`absolute top-0 right-0 w-96 h-96 ${design.ambientGlow1} rounded-full blur-3xl`}
+        {/* Premium animated background mesh */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          {/* Gradient mesh animation */}
+          <motion.div
+            animate={{
+              backgroundPosition: ["0% 0%", "100% 100%", "0% 0%"],
+            }}
+            transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+            className="absolute inset-0 opacity-30 dark:opacity-10"
+            style={{
+              backgroundImage: `linear-gradient(45deg, 
+                transparent 0%, 
+                rgba(168, 85, 247, 0.1) 25%, 
+                transparent 50%, 
+                rgba(59, 130, 246, 0.1) 75%, 
+                transparent 100%)`,
+              backgroundSize: "400% 400%",
+            }}
           />
-          <div
-            className={`absolute bottom-0 left-0 w-96 h-96 ${design.ambientGlow2} rounded-full blur-3xl`}
+          
+          {/* Floating orbs */}
+          <motion.div
+            className="absolute top-12 right-12 w-72 h-72 bg-gradient-to-r from-blue-400/10 to-purple-400/10 rounded-full blur-3xl"
+            animate={{
+              y: [-20, 20, -20],
+              x: [10, -10, 10],
+            }}
+            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute -bottom-12 -left-12 w-96 h-96 bg-gradient-to-r from-amber-400/5 to-orange-400/5 rounded-full blur-3xl"
+            animate={{
+              y: [20, -20, 20],
+              x: [-10, 10, -10],
+            }}
+            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
           />
         </div>
 
-        {/* Top bar with enhanced styling */}
-        <div className="relative z-10 flex justify-between items-center px-8 py-4 backdrop-blur-md border-b border-gray-200/30 dark:border-gray-800/30 bg-gradient-to-r from-white/50 to-gray-50/30 dark:from-gray-900/50 dark:to-gray-800/30">
+        {/* Top bar with premium styling */}
+        <div className="relative z-20 flex justify-between items-center px-8 py-4 backdrop-blur-md border-b border-white/10 dark:border-gray-800/20 bg-white/30 dark:bg-gray-950/30 flex-shrink-0">
           {/* Back button with modern styling */}
           <motion.button
             whileHover={{ x: -3, scale: 1.05 }}
             whileTap={{ scale: 0.92 }}
-            onClick={() => navigate("/front-office")}
-            className="relative group flex items-center gap-1.5 px-2 py-2 rounded-lg text-xs font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+            onClick={() => navigate(isGenericLogin ? "/" : "/front-office")}
+            className="relative group flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
           >
             {/* Subtle hover background */}
-            <div className="absolute inset-0 -z-10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity bg-gray-100/40 dark:bg-gray-800/40" />
+            <div className="absolute inset-0 -z-10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity bg-gray-200/30 dark:bg-gray-700/30" />
 
             <motion.div
               className="relative"
@@ -434,73 +480,63 @@ export default function Login() {
           </motion.button>
 
           {/* Right side controls */}
-          <div className="flex items-center gap-3">
-            {/* Divider */}
-            <div className="hidden sm:block w-px h-6 bg-gray-200 dark:bg-gray-700" />
-
+          <div className="flex items-center gap-2 sm:gap-3">
             {/* Dark mode toggle - Premium style */}
             <motion.button
               whileHover={{ scale: 1.12 }}
               whileTap={{ scale: 0.88 }}
               type="button"
               onClick={toggleDark}
-              className="relative group p-2.5 rounded-lg bg-gradient-to-br from-yellow-100/50 to-amber-100/50 dark:from-gray-800/60 dark:to-gray-700/60 backdrop-blur-sm text-yellow-600 dark:text-blue-300 hover:shadow-lg transition-all border border-yellow-200/50 dark:border-gray-600/50"
+              className="relative group p-2.5 rounded-lg bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm text-amber-600 dark:text-blue-300 hover:shadow-lg transition-all border border-white/40 dark:border-gray-700/40"
               aria-label="Toggle dark mode"
             >
               {/* Glow effect on hover */}
               <motion.div
-                className="absolute -inset-1 rounded-lg bg-gradient-to-r from-yellow-400/0 to-amber-400/0 blur opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute -inset-1.5 rounded-lg bg-gradient-to-r from-yellow-400/0 to-amber-400/0 blur opacity-0 group-hover:opacity-75 transition-opacity"
                 initial={{ opacity: 0 }}
-                whileHover={{ opacity: 0.5 }}
+                whileHover={{ opacity: 0.75 }}
               />
               <motion.div
                 className="relative"
                 animate={{ rotate: dark ? 360 : 0 }}
                 transition={{ duration: 0.6 }}
               >
-                {dark ? <Sun size={20} /> : <Moon size={20} />}
+                {dark ? <Sun size={18} /> : <Moon size={18} />}
               </motion.div>
-              <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xs font-medium rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                {dark ? t("lightMode") : t("darkMode")}
-              </div>
             </motion.button>
 
-            {/* Language selector - Match Header style */}
+            {/* Language selector */}
             <motion.button
               whileHover={{ scale: 1.08 }}
               whileTap={{ scale: 0.92 }}
               type="button"
               onClick={toggleLang}
-              className="relative group px-3 py-2 rounded-lg hover:bg-blue-100/50 dark:hover:bg-blue-900/30 transition-colors flex items-center gap-2 border border-blue-200/50 dark:border-blue-700/30"
+              className="relative group px-2.5 py-2 rounded-lg hover:bg-blue-100/50 dark:hover:bg-blue-900/30 transition-colors flex items-center gap-1.5 border border-blue-200/50 dark:border-blue-700/30 bg-white/40 dark:bg-gray-800/40 backdrop-blur-sm"
             >
               {/* Flag image */}
               {lang === "en" ? (
                 <img
                   src="https://flagcdn.com/w40/gb.png"
                   alt="English"
-                  className="w-5 h-3 rounded"
+                  className="w-4 h-2.5 rounded"
                 />
               ) : (
                 <img
                   src="https://flagcdn.com/w40/fr.png"
                   alt="Français"
-                  className="w-5 h-3 rounded"
+                  className="w-4 h-2.5 rounded"
                 />
               )}
               {/* Language code */}
               <span className="text-xs font-bold text-blue-700 dark:text-blue-300">
                 {lang === "en" ? "EN" : "FR"}
               </span>
-              {/* Tooltip */}
-              <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xs font-medium rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                {lang === "en" ? t("englishLanguage") : t("frenchLanguage")}
-              </div>
             </motion.button>
           </div>
         </div>
 
         {/* Centered form with animations */}
-        <div className="relative z-10 flex-1 flex items-center justify-center px-8 py-6">
+        <div className="relative z-10 flex-1 flex items-center justify-center px-6 sm:px-8 py-8 overflow-y-auto">
           <motion.div
             variants={containerVariants}
             initial="hidden"
@@ -510,7 +546,7 @@ export default function Login() {
             {/* Mobile-only logo */}
             <motion.div
               variants={itemVariants}
-              className="lg:hidden flex items-center gap-3 mb-6 justify-center"
+              className="lg:hidden flex items-center gap-3 mb-8 justify-center"
             >
               <motion.div
                 whileHover={{ rotate: 360 }}
@@ -521,125 +557,70 @@ export default function Login() {
                 }}
                 className="relative"
               >
+                <div className="absolute -inset-1 bg-gradient-to-r from-blue-400 to-purple-400 rounded-xl blur opacity-50 group-hover:opacity-75 transition duration-300" />
                 <img
                   src="/logo.jpeg"
                   alt="SIGETH"
-                  className="w-12 h-12 rounded-xl object-cover shadow-lg"
+                  className="relative w-14 h-14 rounded-xl object-cover shadow-xl"
                 />
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white animate-pulse" />
-              </motion.div>
-              <span className="text-2xl font-bold text-gray-900 dark:text-white">
-                {t("hotelName")}
-              </span>
-            </motion.div>
-
-            {/* Enhanced submodule badge with animation */}
-            <motion.div
-              variants={itemVariants}
-              whileHover={{ scale: 1.02, y: -2 }}
-              className={`flex items-center gap-3 mb-4 p-3 rounded-2xl ${design.accentBgLight} dark:${design.accentBgDark} border ${design.accentBorder} dark:${design.accentBorderDark} backdrop-blur-sm transition-all cursor-default shadow-xl`}
-            >
-              <motion.div
-                animate={{ rotate: [0, 10, 0] }}
-                transition={{ duration: 3, repeat: Infinity }}
-                className={`w-12 h-12 rounded-xl bg-gradient-to-br ${design.gradientFrom} ${design.gradientTo} flex items-center justify-center shadow-lg`}
-              >
-                <SubIcon size={20} className="text-white" />
               </motion.div>
               <div>
-                <span
-                  className={`text-xs uppercase tracking-wider font-bold ${design.accentText} dark:${design.accentTextDark} opacity-75`}
-                >
-                  {t("signInAs")}
+                <span className="block text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                  {t("hotelName")}
                 </span>
-                <span
-                  className={`block text-base font-bold ${design.accentText} dark:${design.accentTextDark}`}
-                >
-                  {t(design.labelKey as TranslationKey)}
+                <span className="text-xs text-gray-500 dark:text-gray-400 tracking-widest uppercase">
+                  Suite Hôtelière
                 </span>
               </div>
-              <motion.div
-                animate={{ x: [0, 5, 0] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="ml-auto"
-              >
-                <SubIcon
-                  size={20}
-                  className={`${design.accentText} dark:${design.accentTextDark} opacity-40`}
-                />
-              </motion.div>
             </motion.div>
 
-            {/* Main heading */}
-            <motion.div variants={itemVariants} className="mb-4">
-              <h2
-                className={`text-2xl font-bold text-gray-900 dark:text-white mb-1`}
+            {/* Welcome message */}
+            <motion.div variants={itemVariants} className="mb-6 text-center">
+              <motion.div
+                animate={{ opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 3, repeat: Infinity }}
+                className="mb-3 inline-block"
               >
-                {t("loginTitle")}
-              </h2>
-              <p className={`text-gray-500 dark:text-gray-400 text-sm`}>
-                {t(design.descriptionKey as TranslationKey)}
+                <span className="text-sm font-semibold text-blue-600 dark:text-blue-400 px-3 py-1 rounded-full bg-blue-100/50 dark:bg-blue-900/30 backdrop-blur border border-blue-200/50 dark:border-blue-800/50">
+                  ✨ Welcome Back
+                </span>
+              </motion.div>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 dark:from-white dark:via-gray-100 dark:to-white bg-clip-text text-transparent mb-2">
+                Hotel Management Suite
+              </h1>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Manage your hotel operations efficiently
               </p>
             </motion.div>
 
-            {/* Enhanced demo credentials banner */}
-            <motion.div
-              variants={itemVariants}
-              whileHover={{ scale: 1.02, y: -2 }}
-              className={`relative overflow-hidden p-3 mb-4 rounded-2xl ${design.accentBgLight} dark:${design.accentBgDark} border ${design.accentBorder} dark:${design.accentBorderDark} cursor-default`}
-            >
-              {/* Shine effect */}
+            {/* Enhanced submodule badge with animation */}
+            {!isGenericLogin && (
               <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                animate={{ x: ["-100%", "200%"] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-              />
-
-              <div className="flex items-center justify-between relative z-10">
-                <div className="flex items-center gap-2">
-                  <Shield
-                    className={`w-5 h-5 ${design.accentText} dark:${design.accentTextDark}`}
-                  />
-                  <span
-                    className={`text-sm font-semibold ${design.accentText} dark:${design.accentTextDark}`}
-                  >
-                    {t("demoAccounts")}
-                  </span>
-                </div>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  type="button"
-                  onClick={fillDemoCredentials}
-                  className={`text-xs px-4 py-1.5 rounded-full ${design.accentBgDark} ${design.accentTextDark} hover:${design.accentBgDark} transition-all font-medium shadow-sm`}
+                variants={itemVariants}
+                whileHover={{ scale: 1.02, y: -2 }}
+                className={`flex items-center gap-3 mb-6 p-4 rounded-2xl ${design.accentBgLight} dark:${design.accentBgDark} border ${design.accentBorder} dark:${design.accentBorderDark} backdrop-blur-sm transition-all cursor-default shadow-lg`}
+              >
+                <motion.div
+                  animate={{ rotate: [0, 8, 0] }}
+                  transition={{ duration: 4, repeat: Infinity }}
+                  className={`w-12 h-12 rounded-xl bg-gradient-to-br ${design.gradientFrom} ${design.gradientTo} flex items-center justify-center shadow-lg flex-shrink-0`}
                 >
-                  {t("autoFill")}
-                </motion.button>
-              </div>
-
-              <div className="mt-3 flex items-center gap-3 text-sm">
-                <div className="flex items-center gap-2">
-                  <span className="text-gray-500 dark:text-gray-400">
-                    {t("demoUsername")}
-                  </span>
-                  <code
-                    className={`${design.accentText} dark:${design.accentTextDark} font-mono font-semibold bg-white/50 dark:bg-black/20 px-2 py-1 rounded`}
+                  <SubIcon size={22} className="text-white" />
+                </motion.div>
+                <div className="flex-1">
+                  <span
+                    className={`text-xs uppercase tracking-widest font-bold ${design.accentText} dark:${design.accentTextDark} opacity-70`}
                   >
-                    {design.demoUser}
-                  </code>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-gray-500 dark:text-gray-400">
-                    {t("demoPassword")}
+                    Department
                   </span>
-                  <code
-                    className={`${design.accentText} dark:${design.accentTextDark} font-mono font-semibold bg-white/50 dark:bg-black/20 px-2 py-1 rounded`}
+                  <span
+                    className={`block text-base font-bold ${design.accentText} dark:${design.accentTextDark}`}
                   >
-                    {design.demoPass}
-                  </code>
+                    {isGenericLogin ? t("user") : t(design.labelKey as TranslationKey)}
+                  </span>
                 </div>
-              </div>
-            </motion.div>
+              </motion.div>
+            )}
 
             {/* Error alert with animation */}
             <AnimatePresence>
@@ -648,9 +629,11 @@ export default function Login() {
                   initial={{ opacity: 0, y: -20, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                  className="flex items-center gap-3 p-4 mb-6 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-xl text-sm text-red-700 dark:text-red-300"
+                  className="flex items-center gap-3 p-4 mb-6 bg-red-50/80 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 rounded-xl text-sm text-red-700 dark:text-red-300 backdrop-blur-sm"
                 >
-                  <AlertCircle size={18} className="shrink-0" />
+                  <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 2, repeat: Infinity }}>
+                    <AlertCircle size={18} className="shrink-0" />
+                  </motion.div>
                   <span>{error}</span>
                 </motion.div>
               )}
@@ -660,12 +643,10 @@ export default function Login() {
             <form onSubmit={handleSubmit} className="space-y-4 mb-6">
               {/* Username field */}
               <motion.div variants={itemVariants}>
-                <label
-                  className={`block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2`}
-                >
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2.5">
                   {t("username")}
                 </label>
-                <motion.div whileFocus={{ scale: 1.02 }} className="relative">
+                <motion.div whileFocus={{ scale: 1.01 }} className="relative group">
                   <input
                     type="text"
                     value={username}
@@ -675,28 +656,26 @@ export default function Login() {
                     required
                     autoComplete="username"
                     placeholder={t("usernamePlaceholder")}
-                    className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-300 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-xs placeholder:text-gray-400 dark:placeholder:text-gray-500
+                    className={`w-full px-4 py-3.5 rounded-xl border-2 transition-all duration-300 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm text-gray-900 dark:text-white text-sm placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none
                       ${
                         isFocused === "username"
-                          ? `border-${design.accentColor}-500 ring-4 ring-${design.accentColor}-500/20`
+                          ? "border-blue-500 ring-4 ring-blue-500/20"
                           : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
                       }`}
                   />
                   <motion.div
                     animate={{ scale: isFocused === "username" ? 1 : 0 }}
-                    className={`absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r ${design.gradientFrom} ${design.gradientTo} rounded-full`}
+                    className="absolute -bottom-1 left-4 right-4 h-0.5 bg-gradient-to-r from-blue-400 via-blue-500 to-purple-500 rounded-full"
                   />
                 </motion.div>
               </motion.div>
 
               {/* Password field */}
               <motion.div variants={itemVariants}>
-                <label
-                  className={`block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2`}
-                >
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2.5">
                   {t("password")}
                 </label>
-                <motion.div whileFocus={{ scale: 1.02 }} className="relative">
+                <motion.div whileFocus={{ scale: 1.01 }} className="relative group">
                   <input
                     type={showPassword ? "text" : "password"}
                     value={password}
@@ -706,15 +685,15 @@ export default function Login() {
                     required
                     autoComplete="current-password"
                     placeholder={t("passwordPlaceholder")}
-                    className={`w-full px-4 py-3 pr-12 rounded-xl border-2 transition-all duration-300 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-xs placeholder:text-gray-400 dark:placeholder:text-gray-500
+                    className={`w-full px-4 py-3.5 pr-12 rounded-xl border-2 transition-all duration-300 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm text-gray-900 dark:text-white text-sm placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none
                       ${
                         isFocused === "password"
-                          ? `border-${design.accentColor}-500 ring-4 ring-${design.accentColor}-500/20`
+                          ? "border-purple-500 ring-4 ring-purple-500/20"
                           : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
                       }`}
                   />
                   <motion.button
-                    whileHover={{ scale: 1.1 }}
+                    whileHover={{ scale: 1.12 }}
                     whileTap={{ scale: 0.9 }}
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
@@ -724,7 +703,7 @@ export default function Login() {
                   </motion.button>
                   <motion.div
                     animate={{ scale: isFocused === "password" ? 1 : 0 }}
-                    className={`absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r ${design.gradientFrom} ${design.gradientTo} rounded-full`}
+                    className="absolute -bottom-1 left-4 right-4 h-0.5 bg-gradient-to-r from-purple-400 via-purple-500 to-pink-500 rounded-full"
                   />
                 </motion.div>
               </motion.div>
@@ -732,61 +711,115 @@ export default function Login() {
               {/* Submit button with enhanced animation */}
               <motion.div
                 variants={itemVariants}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+                className="pt-2"
               >
                 <button
                   type="submit"
                   disabled={loading || !username || !password}
-                  className={`relative w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-sm transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden group
-                    bg-gradient-to-r ${design.gradientFrom} ${design.gradientTo} text-white
-                    hover:shadow-2xl hover:shadow-${design.accentColor}-500/25
+                  className={`relative w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-bold text-sm transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden group
+                    bg-gradient-to-r from-blue-600 via-blue-500 to-purple-600 text-white
+                    hover:shadow-2xl hover:shadow-blue-500/30 disabled:shadow-none
                   `}
                 >
-                  {/* Shine effect */}
+                  {/* Animated shine effect */}
                   <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
                     animate={{ x: ["-100%", "200%"] }}
                     transition={{
-                      duration: 1.5,
+                      duration: 2,
                       repeat: Infinity,
                       ease: "linear",
-                      repeatDelay: 1,
+                      repeatDelay: 0.5,
                     }}
                   />
 
                   {loading ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                    />
                   ) : (
                     <>
-                      <LogIn
-                        size={20}
-                        className="group-hover:rotate-12 transition-transform"
-                      />
-                      <span>{t("loginButton")}</span>
-                      <ChevronRight
-                        size={20}
+                      <motion.div
+                        whileHover={{ rotate: 15 }}
+                        transition={{ type: "spring", stiffness: 300 }}
+                      >
+                        <LogIn size={20} />
+                      </motion.div>
+                      <span className="font-semibold">{t("loginButton")}</span>
+                      <motion.div
                         className="group-hover:translate-x-1 transition-transform"
-                      />
+                      >
+                        <ChevronRight size={20} />
+                      </motion.div>
                     </>
                   )}
                 </button>
               </motion.div>
             </form>
 
-            {/* Demo credentials reminder */}
-            <motion.div variants={itemVariants} className="text-center">
-              <p className="text-xs text-gray-400 dark:text-gray-500">
-                {t("secureLoginMessage")}
+            {/* Demo credentials info box */}
+            <motion.div
+              variants={itemVariants}
+              whileHover={{ scale: 1.01, y: -1 }}
+              className="relative overflow-hidden p-4 rounded-xl bg-gradient-to-br from-blue-50/60 to-purple-50/60 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200/50 dark:border-blue-800/50 backdrop-blur-sm"
+            >
+              {/* Animated shine on info box */}
+              <motion.div
+                className="absolute -inset-full bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                animate={{ x: ["-200%", "200%"] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+              />
+              
+              <div className="relative z-10">
+                <div className="flex items-center gap-2 mb-3">
+                  <Shield size={16} className="text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                  <span className="text-xs font-semibold text-blue-700 dark:text-blue-300">
+                    {t("demoAccounts")} Available
+                  </span>
+                  <motion.button
+                    whileHover={{ scale: 1.08 }}
+                    whileTap={{ scale: 0.92 }}
+                    type="button"
+                    onClick={fillDemoCredentials}
+                    className="ml-auto text-xs px-3 py-1.5 rounded-full font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-all hover:shadow-lg"
+                  >
+                    {t("autoFill")}
+                  </motion.button>
+                </div>
+                <div className="space-y-2 text-xs">
+                  <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                    <span className="text-gray-500 dark:text-gray-400">User:</span>
+                    <code className="font-mono font-semibold text-blue-600 dark:text-blue-300 bg-white/40 dark:bg-gray-900/40 px-2 py-1 rounded">
+                      {design.demoUser}
+                    </code>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                    <span className="text-gray-500 dark:text-gray-400">Pass:</span>
+                    <code className="font-mono font-semibold text-purple-600 dark:text-purple-300 bg-white/40 dark:bg-gray-900/40 px-2 py-1 rounded">
+                      {design.demoPass}
+                    </code>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Footer message */}
+            <motion.div variants={itemVariants} className="text-center mt-6">
+              <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                Secure hotel management at your fingertips
               </p>
             </motion.div>
 
             {/* Mobile footer */}
             <motion.p
               variants={itemVariants}
-              className="lg:hidden text-center text-xs text-gray-400 dark:text-gray-500 mt-8 font-light"
+              className="lg:hidden text-center text-xs text-gray-400 dark:text-gray-500 mt-6 font-light"
             >
-              © 2026 SIGETH — {t("allRightsReserved")}
+              © 2026 SIGETH
             </motion.p>
           </motion.div>
         </div>
