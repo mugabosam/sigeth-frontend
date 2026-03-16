@@ -2,8 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./components/layout/Layout";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Login from "./pages/Login";
-import ModuleSelection from "./pages/ModuleSelection";
-import SubmoduleSelection from "./pages/SubmoduleSelection";
+import RoleBasedRedirect from "./pages/RoleBasedRedirect";
 
 // ── 1.1 Rooms Attendant – Forms ──
 import GroupReservation from "./pages/rooms-attendant/GroupReservation";
@@ -60,8 +59,8 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         {/* ── Public routes ── */}
-        <Route path="/" element={<ModuleSelection />} />
-        <Route path="/front-office" element={<SubmoduleSelection />} />
+        <Route path="/" element={<RoleBasedRedirect />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/login/:submodule" element={<Login />} />
 
         {/* ── Protected routes ── */}
