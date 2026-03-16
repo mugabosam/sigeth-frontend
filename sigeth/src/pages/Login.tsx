@@ -12,12 +12,6 @@ const ROLE_ROUTES: Record<string, string> = {
   banqueting: "/banqueting/events-lots",
 };
 
-// Demo credentials - customize as needed
-const DEMO_CREDENTIALS = {
-  username: "Rooms",
-  password: "Guest",
-};
-
 export default function Login() {
   const { t, lang, dark, toggleDark, toggleLang } = useLang();
   const { login } = useAuth();
@@ -38,12 +32,17 @@ export default function Login() {
     try {
       const authenticatedUser = await login(username, password);
       const defaultRoute =
-        ROLE_ROUTES[authenticatedUser.submodule] || "/rooms-attendant/group-reservation";
+        ROLE_ROUTES[authenticatedUser.submodule] ||
+        "/rooms-attendant/group-reservation";
       navigate(defaultRoute, { replace: true });
     } catch (err: unknown) {
       const responseData =
         typeof err === "object" && err !== null && "response" in err
-          ? (err as { response?: { data?: { detail?: string; message?: string } } }).response?.data
+          ? (
+              err as {
+                response?: { data?: { detail?: string; message?: string } };
+              }
+            ).response?.data
           : undefined;
 
       if (
@@ -57,11 +56,6 @@ export default function Login() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const fillDemoCredentials = () => {
-    setUsername(DEMO_CREDENTIALS.username);
-    setPassword(DEMO_CREDENTIALS.password);
   };
 
   const containerVariants = {
@@ -119,8 +113,15 @@ export default function Login() {
           animate="visible"
           className="relative z-10"
         >
-          <motion.div variants={itemVariants} className="flex items-center gap-4 mb-12">
-            <motion.div whileHover={{ rotate: 360 }} transition={{ duration: 0.6 }} className="relative">
+          <motion.div
+            variants={itemVariants}
+            className="flex items-center gap-4 mb-12"
+          >
+            <motion.div
+              whileHover={{ rotate: 360 }}
+              transition={{ duration: 0.6 }}
+              className="relative"
+            >
               <img
                 src="/logo.jpeg"
                 alt="SIGETH"
@@ -128,10 +129,14 @@ export default function Login() {
               />
             </motion.div>
             <div>
-              <h1 className={`text-2xl font-semibold mb-1 ${dark ? "text-white" : "text-slate-900"}`}>
+              <h1
+                className={`text-2xl font-semibold mb-1 ${dark ? "text-white" : "text-slate-900"}`}
+              >
                 SIGETH
               </h1>
-              <p className={`text-xs tracking-widest uppercase ${dark ? "text-slate-400" : "text-slate-600"}`}>
+              <p
+                className={`text-xs tracking-widest uppercase ${dark ? "text-slate-400" : "text-slate-600"}`}
+              >
                 Hotel Management Suite
               </p>
             </div>
@@ -153,33 +158,36 @@ export default function Login() {
                 dark ? "text-slate-300" : "text-slate-600"
               }`}
             >
-              Streamline your hotel operations with our comprehensive management system. Designed for hoteliers
-              who demand elegance, efficiency, and excellence.
+              Streamline your hotel operations with our comprehensive management
+              system. Designed for hoteliers who demand elegance, efficiency,
+              and excellence.
             </p>
           </motion.div>
 
           {/* Features List */}
           <motion.div variants={itemVariants} className="space-y-4">
-            {["Seamless Operations", "Guest Satisfaction", "Real-time Analytics"].map(
-              (feature, index) => (
-                <motion.div
-                  key={feature}
-                  initial={{ x: -20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 0.7 + index * 0.1 }}
-                  className="flex items-center gap-3"
-                >
-                  <div
-                    className={`w-2 h-2 rounded-full ${
-                      dark ? "bg-blue-400" : "bg-blue-500"
-                    }`}
-                  />
-                  <span className={dark ? "text-slate-300" : "text-slate-700"}>
-                    {feature}
-                  </span>
-                </motion.div>
-              )
-            )}
+            {[
+              "Seamless Operations",
+              "Guest Satisfaction",
+              "Real-time Analytics",
+            ].map((feature, index) => (
+              <motion.div
+                key={feature}
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.7 + index * 0.1 }}
+                className="flex items-center gap-3"
+              >
+                <div
+                  className={`w-2 h-2 rounded-full ${
+                    dark ? "bg-blue-400" : "bg-blue-500"
+                  }`}
+                />
+                <span className={dark ? "text-slate-300" : "text-slate-700"}>
+                  {feature}
+                </span>
+              </motion.div>
+            ))}
           </motion.div>
         </motion.div>
 
@@ -200,13 +208,17 @@ export default function Login() {
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 0.8 }}
         className={`w-full lg:w-7/12 flex flex-col justify-between ${
-          dark ? "from-white/5 to-white/5" : "from-white via-blue-50/20 to-white"
+          dark
+            ? "from-white/5 to-white/5"
+            : "from-white via-blue-50/20 to-white"
         } bg-gradient-to-br backdrop-blur-md relative overflow-hidden`}
       >
         {/* Mobile Logo */}
         <div className="lg:hidden absolute top-6 left-6 flex items-center gap-2 z-10">
           <img src="/logo.jpeg" alt="SIGETH" className="w-10 h-10 rounded-lg" />
-          <span className={`font-semibold ${dark ? "text-white" : "text-slate-900"}`}>
+          <span
+            className={`font-semibold ${dark ? "text-white" : "text-slate-900"}`}
+          >
             SIGETH
           </span>
         </div>
@@ -247,12 +259,20 @@ export default function Login() {
           >
             {lang === "en" ? (
               <>
-                <img src="https://flagcdn.com/w40/gb.png" alt="EN" className="w-4 h-2.5 rounded" />
+                <img
+                  src="https://flagcdn.com/w40/gb.png"
+                  alt="EN"
+                  className="w-4 h-2.5 rounded"
+                />
                 <span>EN</span>
               </>
             ) : (
               <>
-                <img src="https://flagcdn.com/w40/fr.png" alt="FR" className="w-4 h-2.5 rounded" />
+                <img
+                  src="https://flagcdn.com/w40/fr.png"
+                  alt="FR"
+                  className="w-4 h-2.5 rounded"
+                />
                 <span>FR</span>
               </>
             )}
@@ -293,7 +313,9 @@ export default function Login() {
               >
                 Login
               </h1>
-              <p className={`text-sm ${dark ? "text-slate-400" : "text-slate-600"}`}>
+              <p
+                className={`text-sm ${dark ? "text-slate-400" : "text-slate-600"}`}
+              >
                 Access your hotel management dashboard
               </p>
             </motion.div>
@@ -349,8 +371,8 @@ export default function Login() {
                             ? "border-blue-500 ring-2 ring-blue-500/30"
                             : "border-blue-400 ring-2 ring-blue-400/30"
                           : dark
-                          ? "border-slate-700 hover:border-slate-600"
-                          : "border-slate-200 hover:border-slate-300"
+                            ? "border-slate-700 hover:border-slate-600"
+                            : "border-slate-200 hover:border-slate-300"
                       }
                       backdrop-blur focus:outline-none`}
                   />
@@ -387,8 +409,8 @@ export default function Login() {
                             ? "border-blue-500 ring-2 ring-blue-500/30"
                             : "border-blue-400 ring-2 ring-blue-400/30"
                           : dark
-                          ? "border-slate-700 hover:border-slate-600"
-                          : "border-slate-200 hover:border-slate-300"
+                            ? "border-slate-700 hover:border-slate-600"
+                            : "border-slate-200 hover:border-slate-300"
                       }
                       backdrop-blur focus:outline-none`}
                   />
@@ -421,32 +443,15 @@ export default function Login() {
                     : "bg-gradient-to-r from-blue-500 to-blue-600 text-white border-blue-400/50 hover:from-blue-600 hover:to-blue-700 disabled:opacity-50"
                 }`}
               >
-                <motion.div animate={{ rotate: loading ? 360 : 0 }} transition={{ duration: 1, repeat: Infinity }}>
+                <motion.div
+                  animate={{ rotate: loading ? 360 : 0 }}
+                  transition={{ duration: 1, repeat: Infinity }}
+                >
                   <LogIn size={18} />
                 </motion.div>
                 {loading ? "Logging in..." : "Login"}
               </motion.button>
             </form>
-
-            {/* Demo Credentials Info */}
-            <motion.div
-              variants={itemVariants}
-              whileHover={{ scale: 1.01 }}
-              className={`p-4 rounded-lg text-xs text-center ${
-                dark ? "bg-slate-800/50" : "bg-blue-50/60"
-              } backdrop-blur border ${dark ? "border-slate-700/50" : "border-blue-200/50"}`}
-            >
-              <p className={dark ? "text-slate-400 mb-3" : "text-slate-600 mb-3"}>
-                Demo Account Available
-              </p>
-              <button
-                type="button"
-                onClick={fillDemoCredentials}
-                className="text-blue-600 dark:text-blue-400 hover:underline font-semibold"
-              >
-                Click here to auto-fill demo credentials
-              </button>
-            </motion.div>
           </motion.div>
         </div>
 
