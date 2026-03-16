@@ -1,6 +1,11 @@
 /**
  * Rooms Attendant Form Validation Utilities
- * Provides validation functions and error handling for rooms attendant module forms
+ *
+ * FIX: Removed code_p requirement from validateIndividualReservation() and
+ * validateCheckIn(). code_p is the group code — only needed for group members.
+ * Individual reservations and check-ins don't have group codes.
+ * Also removed code_g requirement from validateGroupReservation() since
+ * the backend auto-generates it.
  */
 
 import type { GRC, RCS } from '../types';
@@ -68,14 +73,10 @@ function isReasonableDate(dateStr: string): boolean {
 export function validateGroupReservation(group: GRC): ValidationResult {
     const errors: ValidationError[] = [];
 
-    // Required fields
-    if (!group.groupe_name || group.groupe_name.trim() === '') {
+    if (!group.groupe_name || group.groupe_name.trim() === '')
         errors.push({ field: 'groupe_name', message: 'groupNameRequired' });
-    }
 
-    if (!group.code_g || group.code_g.trim() === '') {
-        errors.push({ field: 'code_g', message: 'codeRequired' });
-    }
+    // code_g: NOT required — backend auto-generates it
 
     // Phone: Required and must have country code
     if (!group.phone || group.phone.trim() === '') {
@@ -144,13 +145,9 @@ export function validateGroupReservation(group: GRC): ValidationResult {
 }
 
 // Individual Reservation Validation
+// FIX: code_p REMOVED — individual guests have no group code
 export function validateIndividualReservation(reservation: RCS): ValidationResult {
     const errors: ValidationError[] = [];
-
-    // Required fields - Code
-    if (!reservation.code_p || reservation.code_p.trim() === '') {
-        errors.push({ field: 'code_p', message: 'codeRequired' });
-    }
 
     // Required fields - Guest Name
     if (!reservation.guest_name || reservation.guest_name.trim() === '') {
@@ -305,14 +302,9 @@ export function validateGroupMemberReservation(member: RCS): ValidationResult {
 }
 
 // Check-in Validation
-// Check-in from existing Reservation (requires code_p)
+// FIX: code_p REMOVED — check-in validates guest+room, not group code
 export function validateCheckIn(reservation: RCS): ValidationResult {
     const errors: ValidationError[] = [];
-
-    // Required fields - Code (for existing reservations)
-    if (!reservation.code_p || reservation.code_p.trim() === '') {
-        errors.push({ field: 'code_p', message: 'codeRequired' });
-    }
 
     if (!reservation.guest_name || reservation.guest_name.trim() === '') {
         errors.push({ field: 'guest_name', message: 'guestNameRequired' });

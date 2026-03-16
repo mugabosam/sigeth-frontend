@@ -11,6 +11,7 @@ import GroupMemberReservation from "./pages/rooms-attendant/GroupMemberReservati
 import CheckInReservation from "./pages/rooms-attendant/CheckInReservation";
 import CheckInWalkIn from "./pages/rooms-attendant/CheckInWalkIn";
 import CheckInGroup from "./pages/rooms-attendant/CheckInGroup";
+import CheckOut from "./pages/rooms-attendant/CheckOut";
 import TwinRecording from "./pages/rooms-attendant/TwinRecording";
 import FindRoom from "./pages/rooms-attendant/FindRoom";
 import MoveGuest from "./pages/rooms-attendant/MoveGuest";
@@ -93,6 +94,10 @@ export default function App() {
             <Route
               path="/rooms-attendant/checkin-group"
               element={<CheckInGroup />}
+            />
+            <Route
+              path="/rooms-attendant/checkout"
+              element={<CheckOut />}
             />
             <Route path="/rooms-attendant/find-room" element={<FindRoom />} />
             <Route path="/rooms-attendant/move-guest" element={<MoveGuest />} />

@@ -323,6 +323,51 @@ const normalizeInvoicePreview = (raw: ApiRecord): InvoicePreviewResponse => ({
   tax: (raw.tax as Record<string, unknown> | undefined) ?? {},
 });
 
+// ══════════════════════════════════════════════════════
+// WRITE payload transformers (frontend → backend)
+// ══════════════════════════════════════════════════════
+
+/** Transform a frontend RDF to backend room payload */
+const toRoomPayload = (room: Partial<RDF>): ApiRecord => {
+  const payload: ApiRecord = { ...room };
+  if ("categorie" in payload) {
+    payload.categorie_code = payload.categorie;
+    delete payload.categorie;
+  }
+  if ("status" in payload) {
+    payload.status_code = payload.status;
+    delete payload.status;
+  }
+  if ("qty" in payload) {
+    payload.nights = payload.qty;
+    delete payload.qty;
+  }
+  delete payload.id;
+  return payload;
+};
+
+/** Transform a frontend RCS to backend reservation payload */
+const toReservationPayload = (res: Partial<RCS>): ApiRecord => {
+  const payload: ApiRecord = { ...res };
+  if ("status" in payload) {
+    payload.reservation_status = payload.status;
+    delete payload.status;
+  }
+  delete payload.id;
+  return payload;
+};
+
+/** Transform a frontend GRC to backend group payload */
+const toGroupPayload = (group: Partial<GRC>): ApiRecord => {
+  const payload: ApiRecord = { ...group };
+  if ("status" in payload) {
+    payload.group_status = payload.status;
+    delete payload.status;
+  }
+  delete payload.id;
+  return payload;
+};
+
 export const authApi = {
   async login(username: string, password: string) {
     const { data } = await api.post<AuthTokens>("/auth/login/", {
@@ -434,13 +479,13 @@ export const frontOfficeApi = {
     return normalizeRoom(data);
   },
   async createRoom(payload: Partial<RDF>) {
-    const { data } = await api.post<ApiRecord>("/v1/front-office/rooms/", payload);
+    const { data } = await api.post<ApiRecord>("/v1/front-office/rooms/", toRoomPayload(payload));
     return normalizeRoom(data);
   },
   async updateRoom(id: string, payload: Partial<RDF>) {
     const { data } = await api.patch<ApiRecord>(
       `/v1/front-office/rooms/${id}/`,
-      payload,
+      toRoomPayload(payload),
     );
     return normalizeRoom(data);
   },
@@ -488,14 +533,14 @@ export const frontOfficeApi = {
   async createReservation(payload: Partial<RCS>) {
     const { data } = await api.post<ApiRecord>(
       "/v1/front-office/reservations/",
-      payload,
+      toReservationPayload(payload),
     );
     return normalizeReservation(data);
   },
   async updateReservation(id: string, payload: Partial<RCS>) {
     const { data } = await api.patch<ApiRecord>(
       `/v1/front-office/reservations/${id}/`,
-      payload,
+      toReservationPayload(payload),
     );
     return normalizeReservation(data);
   },
@@ -516,7 +561,7 @@ export const frontOfficeApi = {
   async walkin(payload: Partial<RCS>) {
     const { data } = await api.post<ApiRecord>(
       "/v1/front-office/reservations/walkin/",
-      payload,
+      toReservationPayload(payload),
     );
     return {
       detail: stringValue(data.detail),
@@ -607,11 +652,11 @@ export const frontOfficeApi = {
     return data.map(normalizeGroupReservation);
   },
   async createGroup(payload: Partial<GRC>) {
-    const { data } = await api.post<ApiRecord>("/v1/front-office/groups/", payload);
+    const { data } = await api.post<ApiRecord>("/v1/front-office/groups/", toGroupPayload(payload));
     return normalizeGroupReservation(data);
   },
   async updateGroup(id: string, payload: Partial<GRC>) {
-    const { data } = await api.patch<ApiRecord>(`/v1/front-office/groups/${id}/`, payload);
+    const { data } = await api.patch<ApiRecord>(`/v1/front-office/groups/${id}/`, toGroupPayload(payload));
     return normalizeGroupReservation(data);
   },
   async deleteGroup(id: string) {
