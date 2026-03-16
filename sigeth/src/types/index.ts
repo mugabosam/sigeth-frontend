@@ -8,7 +8,7 @@ export type Language = "en" | "fr";
 // ── STATUS.dat — Room Status Reference ──
 export type RoomStatusCode =
     | "VC" | "VD" | "OOO" | "DU" | "DND"
-    | "CO" | "OD" | "OCC" | "LC/O" | "DL" | "ARR";
+    | "CO" | "OD" | "OCC" | "LC/O" | "DL" | "ARR" | "CC";
 
 export interface StatusRef {
     code: RoomStatusCode;
@@ -34,6 +34,7 @@ export interface RDF {
     puv: number;
     deposit: number;
     date: string;
+    groupe_name?: string;
 }
 
 // ── RCS.dat — Reservation-Confirmation Journal ──
@@ -226,6 +227,7 @@ export interface SalesEntry {
     item: string;
     room_num: string;
     guest_name: string;
+    groupe_name?: string;
     unity: number;
     qty_s: number;
     price_s: number;
@@ -245,6 +247,13 @@ export interface UserRecord {
     level: string;
     name: string;
     submodule: string;
+}
+
+// ── MONNAIES.dat — Currencies Reference ──
+export interface Currency {
+    code: string;
+    label: string;
+    exchange_rate: number;
 }
 
 // ── MODEP.dat — Payment Modes ──

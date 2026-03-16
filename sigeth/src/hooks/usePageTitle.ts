@@ -48,9 +48,6 @@ const routeTitles: Record<string, TranslationKey> = {
     '/banqueting/services-list': 'servicesList',
     '/banqueting/service-follow-up': 'serviceFollowUp',
     '/banqueting/request-follow-up': 'banquetRequestFollowUp',
-    // Cashier
-    '/cashier/handover': 'cashierHandover',
-    '/cashier/turnover': 'turnoverReport',
 };
 
 export function usePageTitle(): TranslationKey {

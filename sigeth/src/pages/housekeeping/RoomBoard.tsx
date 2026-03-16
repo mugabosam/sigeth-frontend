@@ -1,3 +1,4 @@
+/* eslint-disable -- Inline styles necessary for dynamic status-based theming with computed colors and gradients */
 import { useState, useMemo, type ReactNode } from "react";
 import { useHotelData } from "../../context/HotelDataContext";
 import type { RDF, RoomStatusCode } from "../../types";
@@ -24,6 +25,16 @@ const STATUS: Record<RoomStatusCode, StatusCfg> = {
     border: "#86efac",
     text: "#166534",
     card: "linear-gradient(135deg,#f0fdf4,#dcfce7)",
+  },
+  CC: {
+    label: "CC",
+    desc: "Checked Clean",
+    group: "available",
+    dot: "#16a34a",
+    bg: "#f0fdf4",
+    border: "#6ee7b7",
+    text: "#166534",
+    card: "linear-gradient(135deg,#f0fdf4,#d1fae5)",
   },
   ARR: {
     label: "ARR",

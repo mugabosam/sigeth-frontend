@@ -29,30 +29,31 @@ export default function DailyRoomReport() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800">
-          {t("dailyRoomReport")} — Ldaily_r.prt
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50 p-6 space-y-6">
+      <div className="space-y-2">
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
+          {t("dailyRoomReport")}
         </h1>
-        <div className="flex gap-2">
-          <button
-            onClick={() => window.print()}
-            className="bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm hover:bg-gray-700"
-          >
-            <Printer size={16} />
-            {t("print")}
-          </button>
-          <button
-            onClick={handleExport}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm hover:bg-green-700"
-          >
-            <FileSpreadsheet size={16} />
-            {t("excel")}
-          </button>
-        </div>
+        <p className="text-sm text-gray-600">{t("dailyRoomReportDesc")}</p>
       </div>
-      <div className="bg-white rounded-xl shadow-sm border p-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+      <div className="flex gap-3">
+        <button
+          onClick={() => window.print()}
+          className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-all"
+        >
+          <Printer size={16} />
+          {t("print")}
+        </button>
+        <button
+          onClick={handleExport}
+          className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-all"
+        >
+          <FileSpreadsheet size={16} />
+          {t("excel")}
+        </button>
+      </div>
+      <div className="bg-white rounded-xl shadow-md border border-emerald-100 p-4">
+        <label className="block text-sm font-semibold text-gray-700 mb-3">
           {t("selectStatus")}
         </label>
         <select
@@ -61,7 +62,7 @@ export default function DailyRoomReport() {
             setStatusFilter(e.target.value as RoomStatusCode | "")
           }
           title={t("selectStatus")}
-          className="border rounded-lg px-3 py-2 text-sm w-full max-w-xs"
+          className="border-2 border-gray-200 hover:border-gray-300 focus:border-emerald-500 focus:outline-none rounded-lg px-4 py-2.5 text-sm font-medium transition-all w-full max-w-xs"
         >
           <option value="">{t("allStatuses")}</option>
           {statuses.map((s) => (
@@ -71,9 +72,9 @@ export default function DailyRoomReport() {
           ))}
         </select>
       </div>
-      <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+      <div className="bg-white rounded-xl shadow-md border border-emerald-100 overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b">
+          <thead className="bg-gray-50 border-b-2 border-emerald-200">
             <tr>
               {[
                 t("roomNum"),
@@ -84,7 +85,7 @@ export default function DailyRoomReport() {
               ].map((h) => (
                 <th
                   key={h}
-                  className="text-left px-4 py-3 font-medium text-gray-600"
+                  className="text-left px-6 py-3 font-bold text-gray-700"
                 >
                   {h}
                 </th>
@@ -93,13 +94,22 @@ export default function DailyRoomReport() {
           </thead>
           <tbody>
             {filtered.map((r) => (
-              <tr key={r.room_num} className="border-b hover:bg-gray-50">
-                <td className="px-4 py-3 font-mono">{r.room_num}</td>
-                <td className="px-4 py-3">{r.designation}</td>
-                <td className="px-4 py-3">{r.price_1.toLocaleString()}</td>
-                <td className="px-4 py-3">{r.price_2.toLocaleString()}</td>
-                <td className="px-4 py-3">
-                  <span className="px-2 py-1 rounded-full text-xs bg-blue-50 text-blue-700">
+              <tr
+                key={r.room_num}
+                className="border-b hover:bg-emerald-50/50 transition-colors duration-150"
+              >
+                <td className="px-6 py-3 font-semibold text-emerald-600">
+                  {r.room_num}
+                </td>
+                <td className="px-6 py-3 text-gray-700">{r.designation}</td>
+                <td className="px-6 py-3 text-gray-700">
+                  {r.price_1.toLocaleString()}
+                </td>
+                <td className="px-6 py-3 text-gray-700">
+                  {r.price_2.toLocaleString()}
+                </td>
+                <td className="px-6 py-3">
+                  <span className="px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
                     {r.status}
                   </span>
                 </td>
@@ -107,8 +117,9 @@ export default function DailyRoomReport() {
             ))}
           </tbody>
         </table>
-        <div className="px-4 py-3 bg-gray-50 text-sm text-gray-600">
-          {t("totalRooms")}: {filtered.length}
+        <div className="px-6 py-3 bg-gradient-to-r from-emerald-50 to-green-50 border-t-2 border-emerald-200 text-sm font-semibold text-gray-800">
+          {t("totalRooms")}:{" "}
+          <span className="text-emerald-700">{filtered.length}</span>
         </div>
       </div>
     </div>

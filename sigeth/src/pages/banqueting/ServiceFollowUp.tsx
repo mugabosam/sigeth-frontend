@@ -3,6 +3,18 @@ import { Printer, FileSpreadsheet } from "lucide-react";
 import { useLang } from "../../hooks/useLang";
 import { useHotelData } from "../../context/HotelDataContext";
 
+// Predefined event types per Banqueting specifications
+const EVENT_TYPES = [
+  { value: "Conference", label: "Conferences" },
+  { value: "Seminar", label: "Seminars" },
+  { value: "Wedding", label: "Weddings" },
+  { value: "Celebration", label: "Celebrations" },
+  { value: "Evening", label: "Evenings" },
+  { value: "Concert", label: "Concerts" },
+  { value: "Dinner", label: "Dinners" },
+  { value: "SportsActivity", label: "Sports Activities" },
+];
+
 export default function ServiceFollowUp() {
   const { t } = useLang();
   const { jbanquet } = useHotelData();
@@ -21,10 +33,10 @@ export default function ServiceFollowUp() {
   const grandTotal = filtered.reduce((s, j) => s + j.total, 0);
 
   const handleExport = () => {
-    const header = "Date,Group,Nature,Item,Unity,Qty,Price,Total";
+    const header = "Date,Lot,Item,Nature,Unity,Qty,Price,Total";
     const rows = filtered.map(
       (j) =>
-        `${j.date},${j.groupe_name},${j.nature},${j.item},${j.unity},${j.qty},${j.price},${j.total}`,
+        `${j.date},${j.lot},${j.item},${EVENT_TYPES.find((t) => t.value === j.nature)?.label || j.nature},${j.unity},${j.qty},${j.price},${j.total}`,
     );
     const blob = new Blob([header + "\n" + rows.join("\n")], {
       type: "text/csv",
@@ -36,116 +48,231 @@ export default function ServiceFollowUp() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800">
-          {t("serviceFollowUp")} — Ljbanquet.prt
-        </h1>
-        <div className="flex gap-2">
-          <button
-            onClick={() => window.print()}
-            className="bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm hover:bg-gray-700"
-          >
-            <Printer size={16} />
-            {t("print")}
-          </button>
-          <button
-            onClick={handleExport}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm hover:bg-green-700"
-          >
-            <FileSpreadsheet size={16} />
-            {t("excel")}
-          </button>
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50 p-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Page Title */}
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
+            {t("serviceFollowUp")}
+          </h1>
+          <div className="flex gap-2">
+            <button
+              onClick={() => window.print()}
+              className="bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm hover:bg-gray-700 transition-all"
+            >
+              <Printer size={16} />
+              {t("print")}
+            </button>
+            <button
+              onClick={handleExport}
+              className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-all"
+            >
+              <FileSpreadsheet size={16} />
+              {t("excel")}
+            </button>
+          </div>
         </div>
-      </div>
-      <div className="bg-white rounded-xl shadow-sm border p-4 flex flex-wrap gap-4">
-        <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">
-            {t("groupName")}
-          </label>
-          <input
-            type="text"
-            value={groupQ}
-            onChange={(e) => setGroupQ(e.target.value)}
-            placeholder={t("searchGroup")}
-            className="border rounded-lg px-3 py-2 text-sm"
-          />
+
+        {/* Search/Filter Section */}
+        <div className="bg-white rounded-xl shadow-sm border-2 border-emerald-200 p-4">
+          <h3 className="text-sm font-semibold text-gray-700 mb-4">
+            {t("filters")}
+          </h3>
+          <div className="flex flex-wrap gap-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1">
+                {t("groupName")} / {t("selectGroup")}
+              </label>
+              <input
+                type="text"
+                value={groupQ}
+                onChange={(e) => setGroupQ(e.target.value)}
+                placeholder={t("searchGroup")}
+                className="border-2 border-gray-200 hover:border-gray-300 focus:border-emerald-500 focus:outline-none rounded-lg px-4 py-2.5 text-sm font-medium transition-all"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1">
+                {t("arrivalDateLabel")}
+              </label>
+              <input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                title={t("dateFrom")}
+                className="border-2 border-gray-200 hover:border-gray-300 focus:border-emerald-500 focus:outline-none rounded-lg px-4 py-2.5 text-sm font-medium transition-all"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1">
+                {t("departureDateLabel")}
+              </label>
+              <input
+                type="date"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+                title={t("dateTo")}
+                className="border-2 border-gray-200 hover:border-gray-300 focus:border-emerald-500 focus:outline-none rounded-lg px-4 py-2.5 text-sm font-medium transition-all"
+              />
+            </div>
+          </div>
         </div>
-        <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">
-            {t("dateFrom")}
-          </label>
-          <input
-            type="date"
-            value={dateFrom}
-            onChange={(e) => setDateFrom(e.target.value)}
-            title={t("dateFrom")}
-            className="border rounded-lg px-3 py-2 text-sm"
-          />
-        </div>
-        <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">
-            {t("dateTo")}
-          </label>
-          <input
-            type="date"
-            value={dateTo}
-            onChange={(e) => setDateTo(e.target.value)}
-            title={t("dateTo")}
-            className="border rounded-lg px-3 py-2 text-sm"
-          />
-        </div>
-      </div>
-      <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b">
-            <tr>
-              {[
-                t("date"),
-                t("groupName"),
-                t("nature"),
-                t("item"),
-                t("unity"),
-                t("qty"),
-                t("price"),
-                t("total"),
-              ].map((h) => (
-                <th
-                  key={h}
-                  className="text-left px-4 py-3 font-medium text-gray-600"
-                >
-                  {h}
+
+        {/* Report Section */}
+        <div className="bg-white rounded-xl shadow-md border-2 border-emerald-200 overflow-hidden print:border-black print:shadow-none">
+          {/* Header Information */}
+          <div className="p-6 border-b-2 border-emerald-200 print:border-black bg-emerald-50 print:bg-white space-y-3">
+            <div className="grid grid-cols-2 gap-4 print:grid-cols-1 text-sm">
+              <div>
+                <span className="font-semibold text-gray-800">
+                  {t("mPEName")}:
+                </span>
+                <span className="text-gray-600 ml-2">
+                  SIGETH Hotel Management
+                </span>
+              </div>
+              <div>
+                <span className="font-semibold text-gray-800">
+                  {t("address")}:
+                </span>
+                <span className="text-gray-600 ml-2">Kigali, Rwanda</span>
+              </div>
+              <div>
+                <span className="font-semibold text-gray-800">
+                  {t("phone")}:
+                </span>
+                <span className="text-gray-600 ml-2">+250 (0) 1234567</span>
+              </div>
+              <div>
+                <span className="font-semibold text-gray-800">
+                  {t("email")}:
+                </span>
+                <span className="text-gray-600 ml-2">info@sigeth.com</span>
+              </div>
+            </div>
+            <div className="text-center py-3 border-y border-emerald-300 print:border-black">
+              <h2 className="text-lg font-bold text-emerald-700 print:text-black">
+                {t("serviceFollowUp")}
+              </h2>
+            </div>
+            {groupQ && (
+              <div className="grid grid-cols-3 gap-4 text-sm print:grid-cols-2">
+                <div>
+                  <span className="font-semibold text-gray-800">
+                    {t("groupName")}:
+                  </span>
+                  <span className="text-gray-600 ml-2">{groupQ}</span>
+                </div>
+                {dateFrom && (
+                  <div>
+                    <span className="font-semibold text-gray-800">
+                      {t("arrivalDateLabel")}:
+                    </span>
+                    <span className="text-gray-600 ml-2">{dateFrom}</span>
+                  </div>
+                )}
+                {dateTo && (
+                  <div>
+                    <span className="font-semibold text-gray-800">
+                      {t("departureDateLabel")}:
+                    </span>
+                    <span className="text-gray-600 ml-2">{dateTo}</span>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Services Table */}
+          <table className="w-full text-sm">
+            <thead className="bg-gray-100 border-b-2 border-emerald-200 print:border-black print:bg-gray-50">
+              <tr>
+                <th className="text-left px-4 py-3 font-bold text-gray-700 border-r border-gray-300 print:border-black">
+                  {t("date")}
                 </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((j, i) => (
-              <tr key={i} className="border-b hover:bg-gray-50">
-                <td className="px-4 py-3">{j.date}</td>
-                <td className="px-4 py-3">{j.groupe_name}</td>
-                <td className="px-4 py-3">{j.nature}</td>
-                <td className="px-4 py-3">{j.item}</td>
-                <td className="px-4 py-3">{j.unity}</td>
-                <td className="px-4 py-3">{j.qty}</td>
-                <td className="px-4 py-3">{j.price.toLocaleString()}</td>
-                <td className="px-4 py-3 font-semibold">
-                  {j.total.toLocaleString()}
+                <th className="text-left px-4 py-3 font-bold text-gray-700 border-r border-gray-300 print:border-black">
+                  {t("lot")}
+                </th>
+                <th className="text-left px-4 py-3 font-bold text-gray-700 border-r border-gray-300 print:border-black">
+                  {t("item")}
+                </th>
+                <th className="text-left px-4 py-3 font-bold text-gray-700 border-r border-gray-300 print:border-black">
+                  {t("nature")}
+                </th>
+                <th className="text-left px-4 py-3 font-bold text-gray-700 border-r border-gray-300 print:border-black">
+                  {t("unity")}
+                </th>
+                <th className="text-center px-4 py-3 font-bold text-gray-700 border-r border-gray-300 print:border-black">
+                  {t("qty")}
+                </th>
+                <th className="text-right px-4 py-3 font-bold text-gray-700 border-r border-gray-300 print:border-black">
+                  {t("puv")}
+                </th>
+                <th className="text-right px-4 py-3 font-bold text-gray-700">
+                  {t("amount")}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.length > 0 ? (
+                filtered.map((j, i) => (
+                  <tr
+                    key={i}
+                    className="border-b border-gray-200 hover:bg-emerald-50/50 transition-colors print:border-black print:hover:bg-white"
+                  >
+                    <td className="px-4 py-3 border-r border-gray-200 print:border-black">
+                      {j.date}
+                    </td>
+                    <td className="px-4 py-3 border-r border-gray-200 print:border-black font-medium">
+                      {j.lot}
+                    </td>
+                    <td className="px-4 py-3 border-r border-gray-200 print:border-black">
+                      {j.item}
+                    </td>
+                    <td className="px-4 py-3 border-r border-gray-200 print:border-black">
+                      {EVENT_TYPES.find((t) => t.value === j.nature)?.label ||
+                        j.nature}
+                    </td>
+                    <td className="px-4 py-3 border-r border-gray-200 print:border-black">
+                      {j.unity}
+                    </td>
+                    <td className="px-4 py-3 text-center border-r border-gray-200 print:border-black">
+                      {j.qty}
+                    </td>
+                    <td className="px-4 py-3 text-right font-medium border-r border-gray-200 print:border-black">
+                      {j.price.toLocaleString()}
+                    </td>
+                    <td className="px-4 py-3 text-right font-semibold text-emerald-700 print:text-black">
+                      {j.total.toLocaleString()}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan={8}
+                    className="px-4 py-3 text-gray-400 text-center"
+                  >
+                    {t("noRecords")}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+            <tfoot className="bg-emerald-50 border-t-2 border-emerald-200 print:border-black print:bg-white">
+              <tr>
+                <td
+                  colSpan={7}
+                  className="px-4 py-3 font-semibold text-right border-r border-gray-200 print:border-black"
+                >
+                  {t("grandTotal")}
+                </td>
+                <td className="px-4 py-3 font-bold text-emerald-700 text-right print:text-black">
+                  {grandTotal.toLocaleString()}
                 </td>
               </tr>
-            ))}
-          </tbody>
-          <tfoot className="bg-amber-50 border-t">
-            <tr>
-              <td colSpan={7} className="px-4 py-3 font-semibold text-right">
-                {t("grandTotal")}
-              </td>
-              <td className="px-4 py-3 font-bold">
-                {grandTotal.toLocaleString()}
-              </td>
-            </tr>
-          </tfoot>
-        </table>
+            </tfoot>
+          </table>
+        </div>
       </div>
     </div>
   );

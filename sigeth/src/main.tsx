@@ -7,15 +7,18 @@ import App from "./App.tsx";
 import { LangProvider } from "./hooks/useLang";
 import { HotelDataProvider } from "./context/HotelDataContext";
 import { AuthProvider } from "./context/AuthContext";
+import { NotificationProvider } from "./context/NotificationContext";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <LangProvider>
         <AuthProvider>
-          <HotelDataProvider>
-            <App />
-          </HotelDataProvider>
+          <NotificationProvider>
+            <HotelDataProvider>
+              <App />
+            </HotelDataProvider>
+          </NotificationProvider>
         </AuthProvider>
       </LangProvider>
     </QueryClientProvider>

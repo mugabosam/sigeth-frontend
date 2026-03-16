@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Building2, Sun, Moon, Globe } from "lucide-react";
+import { Building2, Sun, Moon } from "lucide-react";
 import { useLang } from "../hooks/useLang";
 
 export default function ModuleSelection() {
@@ -33,11 +33,27 @@ export default function ModuleSelection() {
             <button
               type="button"
               onClick={toggleLang}
-              className="p-2 rounded-lg bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-1.5 text-sm font-medium shadow-sm"
+              className="p-2 rounded-lg bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-1.5 shadow-sm"
               aria-label="Toggle language"
             >
-              <Globe size={16} />
-              {lang.toUpperCase()}
+              {/* Flag image */}
+              {lang === "en" ? (
+                <img
+                  src="https://flagcdn.com/w40/gb.png"
+                  alt="English"
+                  className="w-5 h-3 rounded"
+                />
+              ) : (
+                <img
+                  src="https://flagcdn.com/w40/fr.png"
+                  alt="Français"
+                  className="w-5 h-3 rounded"
+                />
+              )}
+              {/* Language code */}
+              <span className="text-xs font-bold">
+                {lang === "en" ? "EN" : "FR"}
+              </span>
             </button>
           </div>
         </div>

@@ -1,3 +1,4 @@
+/* eslint-disable -- Inline styles necessary for dynamic width and progress calculations */
 import { useState, useMemo, useRef } from "react";
 import {
   Search,
@@ -32,9 +33,47 @@ export default function CheckInGroup() {
   const [processingMember, setProcessingMember] = useState<RCS | null>(null);
   const [swapRoom, setSwapRoom] = useState<string | null>(null);
   const [keyCardGuest, setKeyCardGuest] = useState<RCS | null>(null);
+  const [groupSuggestions, setGroupSuggestions] = useState<GRC[]>([]);
+  const [showGroupSuggestions, setShowGroupSuggestions] = useState(false);
 
   const getCatName = (cat: number) =>
     catrooms.find((c) => c.code === cat)?.name ?? "";
+
+  /* ── Live group search ── */
+  const handleGroupInputChange = (value: string, isCode: boolean) => {
+    if (isCode) {
+      setQueryCode(value);
+    } else {
+      setQueryGroup(value);
+    }
+
+    if (!value.trim()) {
+      setGroupSuggestions([]);
+      setShowGroupSuggestions(false);
+      return;
+    }
+
+    const q = value.toLowerCase();
+    const matches = groupReservations
+      .filter(
+        (g) =>
+          (isCode
+            ? g.code_g.toLowerCase().includes(q)
+            : g.groupe_name.toLowerCase().includes(q)) && g.status === 0,
+      )
+      .slice(0, 8);
+
+    setGroupSuggestions(matches);
+    setShowGroupSuggestions(true);
+  };
+
+  const handleSelectGroupFromSuggestions = (g: GRC) => {
+    setGroupFound(g);
+    setGroupSuggestions([]);
+    setShowGroupSuggestions(false);
+    setQueryCode(g.code_g);
+    setQueryGroup(g.groupe_name);
+  };
 
   /* ── Group search ── */
   const handleSearchGroup = () => {
@@ -50,6 +89,8 @@ export default function CheckInGroup() {
         return;
       }
       setGroupFound(g);
+      setGroupSuggestions([]);
+      setShowGroupSuggestions(false);
     } else {
       alert(t("groupNotFound"));
     }
@@ -165,36 +206,71 @@ export default function CheckInGroup() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-800">
-        {t("checkInGroupReservation")}
-      </h1>
+      <div className="flex justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-2xl shadow-sm border border-blue-100">
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+          {t("checkInGroupReservation")}
+        </h1>
+      </div>
 
       {/* ── Group Search ── */}
-      <div className="bg-white rounded-xl shadow-sm border p-6">
-        <h3 className="text-sm font-semibold text-gray-500 mb-3">
-          {t("queryWindow")} — {t("searchGroup")}
+      <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
+        <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <span className="w-1 h-6 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full" />
+          {t("searchGroup")}
         </h3>
-        <div className="flex gap-3 flex-wrap">
-          <input
-            value={queryCode}
-            onChange={(e) => setQueryCode(e.target.value)}
-            placeholder={t("groupCode")}
-            className="border rounded-lg px-4 py-2 text-sm w-32"
-          />
-          <input
-            value={queryGroup}
-            onChange={(e) => setQueryGroup(e.target.value)}
-            placeholder={t("groupName")}
-            className="flex-1 border rounded-lg px-4 py-2 text-sm"
-            onKeyDown={(e) => e.key === "Enter" && handleSearchGroup()}
-          />
-          <button
-            onClick={handleSearchGroup}
-            className="bg-amber-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm hover:bg-amber-600"
-          >
-            <Search size={16} />
-            {t("search")}
-          </button>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="relative">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {t("groupCode")}
+            </label>
+            <input
+              value={queryCode}
+              onChange={(e) => handleGroupInputChange(e.target.value, true)}
+              placeholder={t("groupCode")}
+              title={t("groupCode")}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          <div className="relative">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {t("groupName")}
+            </label>
+            <input
+              value={queryGroup}
+              onChange={(e) => handleGroupInputChange(e.target.value, false)}
+              placeholder={t("groupName")}
+              title={t("groupName")}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              onKeyDown={(e) => e.key === "Enter" && handleSearchGroup()}
+            />
+            {showGroupSuggestions && groupSuggestions.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
+                {groupSuggestions.map((g) => (
+                  <button
+                    key={g.code_g}
+                    onClick={() => handleSelectGroupFromSuggestions(g)}
+                    className="w-full text-left px-4 py-2 hover:bg-blue-50 transition-colors border-b last:border-b-0 text-sm"
+                  >
+                    <div className="font-medium text-gray-800">
+                      {g.groupe_name}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {g.code_g} • {g.number_pers} persons
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="flex items-end">
+            <button
+              onClick={handleSearchGroup}
+              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2 rounded-lg flex items-center justify-center gap-2 text-sm font-medium hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+            >
+              <Search size={16} />
+              {t("search")}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -276,15 +352,15 @@ export default function CheckInGroup() {
           </div>
 
           {/* ── Members table ── */}
-          <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
-            <div className="px-5 py-3 border-b bg-gray-50">
-              <h3 className="font-semibold text-gray-700">
+          <div className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
+            <div className="px-6 py-4 border-b bg-gradient-to-r from-blue-50 to-indigo-50">
+              <h3 className="font-bold text-gray-800 text-lg">
                 {t("groupMembers")} ({groupMembers.length})
               </h3>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-gray-50 border-b">
+                <thead className="bg-gradient-to-r from-gray-800 to-gray-700">
                   <tr>
                     {[
                       t("roomNumber"),
@@ -299,7 +375,7 @@ export default function CheckInGroup() {
                     ].map((h) => (
                       <th
                         key={h}
-                        className="text-left px-4 py-2.5 font-medium text-gray-600 text-xs"
+                        className="text-left px-4 py-3 font-semibold text-white text-xs"
                       >
                         {h}
                       </th>
@@ -310,12 +386,14 @@ export default function CheckInGroup() {
                   {groupMembers.map((m, i) => (
                     <tr
                       key={i}
-                      className={`border-b ${m.status === 1 ? "bg-emerald-50/50" : "hover:bg-gray-50"}`}
+                      className={`border-b border-gray-200 ${m.status === 1 ? "bg-green-50" : "hover:bg-blue-50"} transition-colors duration-150`}
                     >
-                      <td className="px-4 py-3 font-bold">{m.room_num}</td>
+                      <td className="px-4 py-3 font-bold text-gray-900">
+                        {m.room_num}
+                      </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-600">
+                          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-xs font-bold text-white">
                             {m.guest_name
                               .split(" ")
                               .map((n) => n[0])
@@ -325,18 +403,22 @@ export default function CheckInGroup() {
                           {m.guest_name}
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-gray-500">
+                      <td className="px-4 py-3 text-gray-600">
                         {m.nationality}
                       </td>
-                      <td className="px-4 py-3 text-gray-500">{m.id_card}</td>
-                      <td className="px-4 py-3">{m.arrival_date}</td>
-                      <td className="px-4 py-3">{m.depart_date}</td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 text-gray-600">{m.id_card}</td>
+                      <td className="px-4 py-3 text-gray-700">
+                        {m.arrival_date}
+                      </td>
+                      <td className="px-4 py-3 text-gray-700">
+                        {m.depart_date}
+                      </td>
+                      <td className="px-4 py-3 font-medium text-gray-900">
                         {m.stay_cost.toLocaleString()} {m.current_mon}
                       </td>
                       <td className="px-4 py-3">
                         {m.status === 1 ? (
-                          <span className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-700 text-xs font-semibold px-2.5 py-1 rounded-full">
+                          <span className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-1 rounded-full">
                             <CheckCircle2 size={12} />
                             {t("checkedIn")}
                           </span>
@@ -353,7 +435,7 @@ export default function CheckInGroup() {
                               setProcessingMember(m);
                               setSwapRoom(null);
                             }}
-                            className="bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-emerald-600 flex items-center gap-1"
+                            className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:shadow-lg transition-all transform hover:scale-105 flex items-center gap-1"
                           >
                             <UserCheck size={14} />
                             {t("checkIn")}
@@ -385,6 +467,7 @@ export default function CheckInGroup() {
                   setProcessingMember(null);
                   setSwapRoom(null);
                 }}
+                title="Close check-in modal"
                 className="text-gray-400 hover:text-gray-600"
               >
                 <X size={20} />
@@ -450,6 +533,7 @@ export default function CheckInGroup() {
                   )}
                 </div>
                 <select
+                  title="Select a room to swap"
                   value={swapRoom ?? ""}
                   onChange={(e) => setSwapRoom(e.target.value || null)}
                   className="mt-2 border rounded-lg px-3 py-2 text-sm w-full"
@@ -499,6 +583,7 @@ export default function CheckInGroup() {
               </h2>
               <button
                 onClick={() => setKeyCardGuest(null)}
+                title="Close key card slip"
                 className="text-gray-400 hover:text-gray-600"
               >
                 <X size={20} />

@@ -4,7 +4,6 @@ import {
   BedDouble,
   Brush,
   UtensilsCrossed,
-  Wallet,
   LogOut,
   ChevronLeft,
   ChevronRight,
@@ -135,11 +134,6 @@ const sections: NavSection[] = [
   },
 ];
 
-const cashierItems: NavItem[] = [
-  { path: "/cashier/handover", labelKey: "cashierHandover" },
-  { path: "/cashier/turnover", labelKey: "turnoverReport" },
-];
-
 export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const { t } = useLang();
   const { user, logout } = useAuth();
@@ -158,7 +152,6 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   };
   const allowedIds = user ? (LEVEL_SECTIONS[user.level] ?? []) : [];
   const visibleSections = sections.filter((s) => allowedIds.includes(s.id));
-  const showCashier = user?.level === "Manager_R";
 
   const toggleSection = (id: string) =>
     setOpenSections((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -279,38 +272,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
           );
         })}
 
-        {/* Cashier section — only for Manager_R */}
-        {showCashier && (
-          <div>
-            <button
-              onClick={() => toggleSection("cashier")}
-              className="flex items-center gap-3 w-full px-4 py-2.5 text-left text-gray-300 hover:bg-white/5 transition-colors"
-            >
-              <Wallet size={18} className="shrink-0" />
-              {!collapsed && (
-                <>
-                  <span className="text-sm font-semibold flex-1 truncate">
-                    {t("cashierSection")}
-                  </span>
-                  {openSections["cashier"] ? (
-                    <ChevronUp size={14} />
-                  ) : (
-                    <ChevronDown size={14} />
-                  )}
-                </>
-              )}
-            </button>
-            {openSections["cashier"] && !collapsed && (
-              <div className="ml-4 pl-3 border-l border-white/10 space-y-1">
-                {cashierItems.map((item) => (
-                  <NavLink key={item.path} to={item.path} className={linkClass}>
-                    {t(item.labelKey)}
-                  </NavLink>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+        {/* Cashier section removed — will be included later */}
       </nav>
 
       {/* Collapse toggle */}

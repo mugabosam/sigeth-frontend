@@ -54,10 +54,6 @@ import ServicesList from "./pages/banqueting/ServicesList";
 import ServiceFollowUp from "./pages/banqueting/ServiceFollowUp";
 import BanquetRequestFollowUp from "./pages/banqueting/BanquetRequestFollowUp";
 
-// ── Cashier ──
-import CashierHandover from "./pages/cashier/CashierHandover";
-import TurnoverReport from "./pages/cashier/TurnoverReport";
-
 export default function App() {
   return (
     <BrowserRouter>
@@ -211,10 +207,6 @@ export default function App() {
               path="/banqueting/request-follow-up"
               element={<BanquetRequestFollowUp />}
             />
-
-            {/* ── Cashier ── */}
-            <Route path="/cashier/handover" element={<CashierHandover />} />
-            <Route path="/cashier/turnover" element={<TurnoverReport />} />
 
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>

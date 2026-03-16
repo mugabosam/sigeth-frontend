@@ -2,6 +2,14 @@ import { useState } from "react";
 import { Search, Save, Trash2 } from "lucide-react";
 import { useLang } from "../../hooks/useLang";
 import { useHotelData } from "../../context/HotelDataContext";
+import { useNotification } from "../../hooks/useNotification";
+import ConfirmationModal from "../../components/common/ConfirmationModal";
+import {
+  validateGroupMemberReservation,
+  type ValidationResult,
+} from "../../utils/roomsAttendantValidation";
+import { createErrorNotification } from "../../utils/errorFormatter";
+import { COUNTRIES, getPhoneCodeByNationality } from "../../utils/countries";
 import type { RCS } from "../../types";
 
 export default function GroupMemberReservation({
@@ -17,7 +25,9 @@ export default function GroupMemberReservation({
     rooms,
     setRooms,
     paymentModes,
+    currencies,
   } = useHotelData();
+  const { addNotification } = useNotification();
   const [queryCode, setQueryCode] = useState("");
   const [queryGroup, setQueryGroup] = useState("");
   const [groupFound, setGroupFound] = useState<
@@ -25,6 +35,17 @@ export default function GroupMemberReservation({
   >(null);
   const [selected, setSelected] = useState<RCS | null>(null);
   const [isNew, setIsNew] = useState(false);
+  const [showCurrencyModal, setShowCurrencyModal] = useState(false);
+  const [groupSuggestions, setGroupSuggestions] = useState<
+    typeof groupReservations
+  >([]);
+  const [showGroupSuggestions, setShowGroupSuggestions] = useState(false);
+  const [confirmSaveOpen, setConfirmSaveOpen] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [errors, setErrors] = useState<ValidationResult>({
+    isValid: true,
+    errors: [],
+  });
 
   const blank: RCS = {
     code_p: "",
@@ -54,9 +75,48 @@ export default function GroupMemberReservation({
     status: 0,
   };
 
+  const getErrorMessage = (field: string): string => {
+    const fieldError = errors.errors.find((e) => e.field === field);
+    return fieldError ? t(fieldError.message as any) : "";
+  };
+
   const titles = {
     "1113": t("groupMemberReservation"),
     "1117": t("checkInGroupReservation"),
+  };
+
+  const handleGroupInputChange = (value: string, isCode: boolean) => {
+    if (isCode) setQueryCode(value);
+    else setQueryGroup(value);
+
+    if (!value.trim()) {
+      setGroupSuggestions([]);
+      setShowGroupSuggestions(false);
+      return;
+    }
+
+    const q = value.toLowerCase();
+    const matches = groupReservations
+      .filter(
+        (g) =>
+          (isCode
+            ? g.code_g.toLowerCase().includes(q)
+            : g.groupe_name.toLowerCase().includes(q)) && g.status === 0,
+      )
+      .slice(0, 8);
+
+    setGroupSuggestions(matches);
+    setShowGroupSuggestions(true);
+  };
+
+  const handleSelectGroupFromSuggestions = (
+    g: (typeof groupReservations)[0],
+  ) => {
+    setGroupFound(g);
+    setGroupSuggestions([]);
+    setShowGroupSuggestions(false);
+    setQueryCode(g.code_g);
+    setQueryGroup(g.groupe_name);
   };
 
   const handleSearchGroup = () => {
@@ -72,6 +132,8 @@ export default function GroupMemberReservation({
         return;
       }
       setGroupFound(g);
+      setGroupSuggestions([]);
+      setShowGroupSuggestions(false);
     } else {
       alert(t("groupNotFound"));
     }
@@ -113,11 +175,33 @@ export default function GroupMemberReservation({
 
   const handleChange = (field: keyof RCS, value: string | number) => {
     if (!selected) return;
-    setSelected(calc({ ...selected, [field]: value }));
+    const updated = calc({ ...selected, [field]: value });
+    setSelected(updated);
+    // Validate in real-time
+    const validationResult = validateGroupMemberReservation(updated);
+    setErrors(validationResult);
   };
 
   const handleSave = () => {
+    setConfirmSaveOpen(true);
+  };
+
+  const confirmSave = () => {
     if (!selected) return;
+
+    // Validate before saving
+    const validationResult = validateGroupMemberReservation(selected);
+    setErrors(validationResult);
+
+    if (!validationResult.isValid) {
+      addNotification(
+        createErrorNotification(validationResult.errors, t),
+        "Validation Error",
+        "error",
+      );
+      return;
+    }
+
     if (isNew) setReservations((prev) => [...prev, selected]);
     else
       setReservations((prev) =>
@@ -130,25 +214,55 @@ export default function GroupMemberReservation({
       );
     // For check-in mode (1117), also update RDF.dat
     if (mode === "1117" && selected.room_num) {
+      const arr = selected.arrival_date
+        ? new Date(selected.arrival_date)
+        : null;
+      const dep = selected.depart_date ? new Date(selected.depart_date) : null;
+      const qty =
+        arr && dep
+          ? Math.max(Math.round((dep.getTime() - arr.getTime()) / 86400000), 0)
+          : 0;
+
       setRooms((prev) =>
         prev.map((room) =>
           room.room_num === selected.room_num
-            ? {
-                ...room,
-                guest_name: selected.guest_name,
-                arrival_date: selected.arrival_date,
-                depart_date: selected.depart_date,
-                puv: selected.puv,
-                status: "OCC" as const,
-              }
+            ? isNew
+              ? {
+                  ...room,
+                  guest_name: selected.guest_name,
+                  arrival_date: selected.arrival_date,
+                  depart_date: selected.depart_date,
+                  puv: selected.puv,
+                  status: "OCC" as const,
+                }
+              : {
+                  ...room,
+                  groupe_name: selected.groupe_name,
+                  guest_name: selected.guest_name,
+                  arrival_date: selected.arrival_date,
+                  depart_date: selected.depart_date,
+                  qty,
+                  puv: selected.puv,
+                  status: "CC" as const,
+                }
             : room,
         ),
       );
     }
+    addNotification(
+      `Group member ${selected.guest_name} ${isNew ? "created" : "updated"}`,
+      "Rooms Attendant",
+      "success",
+    );
     setSelected(null);
+    setConfirmSaveOpen(false);
   };
 
   const handleDelete = () => {
+    setConfirmDeleteOpen(true);
+  };
+
+  const confirmDelete = () => {
     if (!selected) return;
     setReservations((prev) =>
       prev.filter(
@@ -159,7 +273,13 @@ export default function GroupMemberReservation({
           ),
       ),
     );
+    addNotification(
+      `Group member ${selected.guest_name} deleted`,
+      "Rooms Attendant",
+      "success",
+    );
     setSelected(null);
+    setConfirmDeleteOpen(false);
   };
 
   const groupMembers = groupFound
@@ -172,33 +292,70 @@ export default function GroupMemberReservation({
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-800">{titles[mode]}</h1>
+      <div className="flex justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-2xl shadow-sm border border-blue-100">
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+          {titles[mode]}
+        </h1>
+      </div>
       {/* Group query */}
-      <div className="bg-white rounded-xl shadow-sm border p-6">
-        <h3 className="text-sm font-semibold text-gray-500 mb-3">
-          {t("queryWindow")} — {t("searchGroup")}
+      <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
+        <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <span className="w-1 h-6 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full" />
+          {t("searchGroup")}
         </h3>
-        <div className="flex gap-3 flex-wrap">
-          <input
-            value={queryCode}
-            onChange={(e) => setQueryCode(e.target.value)}
-            placeholder={t("groupCode")}
-            className="border rounded-lg px-4 py-2 text-sm w-32"
-          />
-          <input
-            value={queryGroup}
-            onChange={(e) => setQueryGroup(e.target.value)}
-            placeholder={t("groupName")}
-            className="flex-1 border rounded-lg px-4 py-2 text-sm"
-            onKeyDown={(e) => e.key === "Enter" && handleSearchGroup()}
-          />
-          <button
-            onClick={handleSearchGroup}
-            className="bg-amber-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm hover:bg-amber-600"
-          >
-            <Search size={16} />
-            {t("search")}
-          </button>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="relative">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {t("groupCode")}
+            </label>
+            <input
+              value={queryCode}
+              onChange={(e) => handleGroupInputChange(e.target.value, true)}
+              placeholder={t("groupCode")}
+              title={t("groupCode")}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          <div className="relative">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {t("groupName")}
+            </label>
+            <input
+              value={queryGroup}
+              onChange={(e) => handleGroupInputChange(e.target.value, false)}
+              placeholder={t("groupName")}
+              title={t("groupName")}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              onKeyDown={(e) => e.key === "Enter" && handleSearchGroup()}
+            />
+            {showGroupSuggestions && groupSuggestions.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
+                {groupSuggestions.map((g) => (
+                  <button
+                    key={g.code_g}
+                    onClick={() => handleSelectGroupFromSuggestions(g)}
+                    className="w-full text-left px-4 py-2 hover:bg-blue-50 transition-colors border-b last:border-b-0 text-sm"
+                  >
+                    <div className="font-medium text-gray-800">
+                      {g.groupe_name}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {g.code_g} • {g.number_pers} persons
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="flex items-end">
+            <button
+              onClick={handleSearchGroup}
+              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2 rounded-lg flex items-center justify-center gap-2 text-sm font-medium hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+            >
+              <Search size={16} />
+              {t("search")}
+            </button>
+          </div>
         </div>
       </div>
       {/* Group info + members browser */}
@@ -292,45 +449,161 @@ export default function GroupMemberReservation({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {(
               [
-                ["groupe_name", t("groupName"), "text"],
-                ["room_num", t("roomNumber"), "text"],
-                ["guest_name", t("guestName"), "text"],
-                ["id_card", t("idCard"), "text"],
-                ["nationality", t("nationality"), "text"],
-                ["phone", t("phone"), "text"],
-                ["email", t("email"), "email"],
-                ["city", t("city"), "text"],
-                ["country", t("country"), "text"],
-                ["arrival_date", t("arrivalDate"), "date"],
-                ["depart_date", t("departDate"), "date"],
-                ["adulte", t("adults"), "number"],
-                ["children", t("children"), "number"],
-                ["age", t("age"), "number"],
-                ["current_mon", t("currency"), "text"],
-                ["puv", t("pricePerNight"), "number"],
-              ] as [keyof RCS, string, string][]
-            ).map(([field, label, type]) => (
-              <div key={field}>
-                <label className="block text-xs font-medium text-gray-500 mb-1">
-                  {label}
-                </label>
-                <input
-                  type={type}
-                  value={selected[field] ?? ""}
-                  readOnly={field === "groupe_name"}
-                  onChange={(e) =>
-                    handleChange(
-                      field,
-                      type === "number"
-                        ? Number(e.target.value)
-                        : e.target.value,
-                    )
-                  }
-                  title={label}
-                  className={`w-full border rounded-lg px-3 py-2 text-sm ${field === "groupe_name" ? "bg-gray-50" : ""}`}
-                />
-              </div>
-            ))}
+                ["groupe_name", t("groupName"), "text", false, {}],
+                ["room_num", t("roomNumber"), "text", true, {}],
+                [
+                  "guest_name",
+                  t("guestName"),
+                  "text",
+                  true,
+                  {
+                    pattern: "^[a-zA-Z\\s\\-']{2,}$",
+                    placeholder: "Letters only",
+                  },
+                ],
+                [
+                  "id_card",
+                  t("idCard"),
+                  "text",
+                  false,
+                  {
+                    pattern: "^[A-Za-z0-9]{5,}$",
+                    placeholder: "Alphanumeric (5+ chars)",
+                  },
+                ],
+                ["nationality", t("nationality"), "text", false, {}],
+                [
+                  "phone",
+                  t("phone"),
+                  "tel",
+                  true,
+                  { pattern: "^\\+[1-9]\\d{1,14}$", placeholder: "+250..." },
+                ],
+                ["email", t("email"), "email", false, {}],
+                ["city", t("city"), "text", false, {}],
+                ["country", t("country"), "text", false, {}],
+                ["arrival_date", t("arrivalDate"), "date", false, {}],
+                ["depart_date", t("departDate"), "date", false, {}],
+                ["adulte", t("adults"), "number", false, { min: "0" }],
+                ["children", t("children"), "number", false, { min: "0" }],
+                ["age", t("age"), "number", false, { min: "0" }],
+                ["puv", t("pricePerNight"), "number", false, { min: "0" }],
+              ] as [keyof RCS, string, string, boolean, Record<string, any>][]
+            ).map(([field, label, type, required, attrs]) => {
+              const errorMsg = getErrorMessage(field as string);
+
+              // Special handling for country and nationality selects
+              if (field === "nationality" || field === "country") {
+                return (
+                  <div key={field}>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">
+                      {label}{" "}
+                      {required && <span className="text-red-500">*</span>}
+                    </label>
+                    <select
+                      value={selected[field] ?? ""}
+                      onChange={(e) => handleChange(field, e.target.value)}
+                      required={required}
+                      title={label}
+                      className={`w-full border rounded-lg px-3 py-2 text-sm ${
+                        errorMsg
+                          ? "border-red-500 focus:ring-red-500"
+                          : "border-gray-300"
+                      }`}
+                    >
+                      <option value="">Select</option>
+                      {field === "nationality" &&
+                        COUNTRIES.map((c) => (
+                          <option key={c.code} value={c.nationality}>
+                            {c.flag} {c.name} ({c.phoneCode})
+                          </option>
+                        ))}
+                      {field === "country" &&
+                        COUNTRIES.map((c) => (
+                          <option key={c.code} value={c.name}>
+                            {c.flag} {c.name}
+                          </option>
+                        ))}
+                    </select>
+                    {errorMsg && (
+                      <p className="text-xs text-red-600 mt-1">{errorMsg}</p>
+                    )}
+                  </div>
+                );
+              }
+
+              const phoneCode =
+                field === "phone"
+                  ? getPhoneCodeByNationality(selected.nationality)
+                  : undefined;
+
+              return (
+                <div key={field}>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">
+                    {label}{" "}
+                    {required && <span className="text-red-500">*</span>}
+                  </label>
+                  {field === "phone" && phoneCode ? (
+                    <div className="flex items-center gap-1">
+                      <span className="bg-gray-100 border border-gray-300 rounded-l-lg px-3 py-2 text-xs font-semibold text-gray-600">
+                        {phoneCode}
+                      </span>
+                      <input
+                        type={type}
+                        placeholder="788 123 456"
+                        value={selected[field] ?? ""}
+                        required={required}
+                        onChange={(e) => handleChange(field, e.target.value)}
+                        title={label}
+                        className={`flex-1 border rounded-r-lg px-3 py-2 text-sm ${
+                          errorMsg
+                            ? "border-red-500 focus:ring-red-500"
+                            : "border-gray-300"
+                        }`}
+                      />
+                    </div>
+                  ) : (
+                    <input
+                      type={type}
+                      value={selected[field] ?? ""}
+                      readOnly={field === "groupe_name"}
+                      required={required}
+                      onChange={(e) =>
+                        handleChange(
+                          field,
+                          type === "number"
+                            ? Number(e.target.value)
+                            : e.target.value,
+                        )
+                      }
+                      {...attrs}
+                      title={label}
+                      className={`w-full border rounded-lg px-3 py-2 text-sm ${field === "groupe_name" ? "bg-gray-50" : ""} ${
+                        errorMsg
+                          ? "border-red-500 focus:ring-red-500"
+                          : "border-gray-300"
+                      }`}
+                    />
+                  )}
+                  {errorMsg && (
+                    <p className="text-xs text-red-600 mt-1">{errorMsg}</p>
+                  )}
+                </div>
+              );
+            })}
+            {/* Currency field — opens Monnaies.dat lookup */}
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1">
+                {t("currency")}
+              </label>
+              <button
+                type="button"
+                onClick={() => setShowCurrencyModal(true)}
+                className="w-full border rounded-lg px-3 py-2 text-sm text-left bg-white hover:bg-gray-50"
+              >
+                {selected.current_mon || t("selectCurrency")}
+              </button>
+            </div>
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">
                 {t("paymentMode")}
@@ -354,28 +627,38 @@ export default function GroupMemberReservation({
                 ["stay_cost", t("stayCost"), "number"],
                 ["deposit", t("deposit"), "number"],
               ] as [keyof RCS, string, string][]
-            ).map(([field, label, type]) => (
-              <div key={field}>
-                <label className="block text-xs font-medium text-gray-500 mb-1">
-                  {label}
-                </label>
-                <input
-                  type={type}
-                  value={selected[field] ?? ""}
-                  readOnly={field === "stay_cost"}
-                  onChange={(e) =>
-                    handleChange(
-                      field,
-                      type === "number"
-                        ? Number(e.target.value)
-                        : e.target.value,
-                    )
-                  }
-                  title={label}
-                  className={`w-full border rounded-lg px-3 py-2 text-sm ${field === "stay_cost" ? "bg-gray-50" : ""}`}
-                />
-              </div>
-            ))}
+            ).map(([field, label, type]) => {
+              const errorMsg = getErrorMessage(field as string);
+              return (
+                <div key={field}>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">
+                    {label}
+                  </label>
+                  <input
+                    type={type}
+                    value={selected[field] ?? ""}
+                    readOnly={field === "stay_cost"}
+                    onChange={(e) =>
+                      handleChange(
+                        field,
+                        type === "number"
+                          ? Number(e.target.value)
+                          : e.target.value,
+                      )
+                    }
+                    title={label}
+                    className={`w-full border rounded-lg px-3 py-2 text-sm ${field === "stay_cost" ? "bg-gray-50" : ""} ${
+                      errorMsg
+                        ? "border-red-500 focus:ring-red-500"
+                        : "border-gray-300"
+                    }`}
+                  />
+                  {errorMsg && (
+                    <p className="text-xs text-red-600 mt-1">{errorMsg}</p>
+                  )}
+                </div>
+              );
+            })}
           </div>
           {/* Available rooms for check-in mode */}
           {mode === "1117" && (
@@ -449,6 +732,75 @@ export default function GroupMemberReservation({
           </div>
         </div>
       )}
+      {/* Monnaies.dat currency lookup modal */}
+      {showCurrencyModal && selected && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+              {t("selectCurrency")}
+            </h3>
+            <table className="w-full text-sm mb-4">
+              <thead className="bg-gray-50 border-b">
+                <tr>
+                  <th className="text-left px-3 py-2">{t("currency")}</th>
+                  <th className="text-left px-3 py-2">{t("localRate")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currencies.map((c) => (
+                  <tr
+                    key={c.code}
+                    className="border-b hover:bg-amber-50 cursor-pointer"
+                    onClick={() => {
+                      handleChange("current_mon", c.code);
+                      if (c.code !== "RWF") {
+                        handleChange("puv", c.exchange_rate);
+                      }
+                      setShowCurrencyModal(false);
+                    }}
+                  >
+                    <td className="px-3 py-2 font-medium">
+                      {c.code} — {c.label}
+                    </td>
+                    <td className="px-3 py-2">
+                      {c.exchange_rate.toLocaleString()} RWF
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <button
+              onClick={() => setShowCurrencyModal(false)}
+              className="border px-4 py-2 rounded-lg text-sm w-full"
+            >
+              {t("cancel")}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modals */}
+      <ConfirmationModal
+        isOpen={confirmSaveOpen}
+        title={isNew ? "Create Group Member" : "Update Group Member"}
+        message={`Are you sure you want to ${isNew ? "create a new" : "update this"} group member record for ${selected?.guest_name}?`}
+        confirmText={isNew ? "Create" : "Update"}
+        cancelText="Cancel"
+        isDangerous={false}
+        onConfirm={confirmSave}
+        onCancel={() => setConfirmSaveOpen(false)}
+      />
+
+      <ConfirmationModal
+        isOpen={confirmDeleteOpen}
+        title="Delete Group Member"
+        message={`Are you sure you want to delete the group member record for ${selected?.guest_name}? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        isDangerous={true}
+        onConfirm={confirmDelete}
+        onCancel={() => setConfirmDeleteOpen(false)}
+      />
     </div>
   );
 }

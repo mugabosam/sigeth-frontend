@@ -1,14 +1,15 @@
 import { useState, useMemo, useRef } from "react";
-import {
-  UserPlus,
-  CreditCard,
-  Printer,
-  X,
-  Wifi,
-  Check,
-} from "lucide-react";
+import { UserPlus, CreditCard, Printer, X, Wifi, Check } from "lucide-react";
 import { useLang } from "../../hooks/useLang";
 import { useHotelData } from "../../context/HotelDataContext";
+import { useNotification } from "../../hooks/useNotification";
+import ConfirmationModal from "../../components/common/ConfirmationModal";
+import {
+  validateCheckInWalkIn,
+  type ValidationResult,
+} from "../../utils/roomsAttendantValidation";
+import { createErrorNotification } from "../../utils/errorFormatter";
+import { COUNTRIES, getPhoneCodeByNationality } from "../../utils/countries";
 import type { RCS } from "../../types";
 
 /* ── helper ── */
@@ -16,8 +17,9 @@ const today = () => new Date().toISOString().slice(0, 10);
 
 export default function CheckInWalkIn() {
   const { t } = useLang();
-  const { reservations, setReservations, rooms, setRooms, paymentModes, catrooms } =
+  const { setReservations, rooms, setRooms, paymentModes, catrooms } =
     useHotelData();
+  const { addNotification } = useNotification();
   const printRef = useRef<HTMLDivElement>(null);
 
   const blank: RCS = {
@@ -51,15 +53,36 @@ export default function CheckInWalkIn() {
   const [form, setForm] = useState<RCS>({ ...blank });
   const [keyCardGuest, setKeyCardGuest] = useState<RCS | null>(null);
   const [selectedRoomNum, setSelectedRoomNum] = useState<string | null>(null);
+  const [roomSearch, setRoomSearch] = useState("");
+  const [confirmSubmitOpen, setConfirmSubmitOpen] = useState(false);
+  const [errors, setErrors] = useState<ValidationResult>({
+    isValid: true,
+    errors: [],
+  });
 
-  /* Vacant rooms */
+  /* Vacant rooms with search */
   const vacantRooms = useMemo(
     () => rooms.filter((r) => r.status === "VC"),
     [rooms],
   );
 
+  const filteredRooms = useMemo(() => {
+    if (!roomSearch.trim()) return vacantRooms;
+    const q = roomSearch.toLowerCase();
+    return vacantRooms.filter(
+      (r) =>
+        r.room_num.toLowerCase().includes(q) ||
+        r.designation.toLowerCase().includes(q),
+    );
+  }, [vacantRooms, roomSearch]);
+
   const getCatName = (cat: number) =>
     catrooms.find((c) => c.code === cat)?.name ?? "";
+
+  const getErrorMessage = (field: string): string => {
+    const fieldError = errors.errors.find((e) => e.field === field);
+    return fieldError ? t(fieldError.message as any) : "";
+  };
 
   /* ── Auto-calc ── */
   const calc = (f: RCS): RCS => {
@@ -75,7 +98,13 @@ export default function CheckInWalkIn() {
   };
 
   const handleChange = (field: keyof RCS, value: string | number) => {
-    setForm((prev) => calc({ ...prev, [field]: value }));
+    setForm((prev) => {
+      const updated = calc({ ...prev, [field]: value });
+      // Validate in real-time
+      const validationResult = validateCheckInWalkIn(updated);
+      setErrors(validationResult);
+      return updated;
+    });
   };
 
   /* ── Select room from grid ── */
@@ -103,6 +132,24 @@ export default function CheckInWalkIn() {
 
   const handleSubmit = () => {
     if (!canSubmit) return;
+    setConfirmSubmitOpen(true);
+  };
+
+  const confirmSubmit = () => {
+    if (!canSubmit) return;
+
+    // Validate form data before submitting
+    const validationResult = validateCheckInWalkIn(form);
+    setErrors(validationResult);
+
+    if (!validationResult.isValid) {
+      addNotification(
+        createErrorNotification(validationResult.errors, t),
+        "Validation Error",
+        "error",
+      );
+      return;
+    }
 
     // Create RCS with status=1 (already checked in)
     const newRes: RCS = { ...form, status: 1 };
@@ -124,9 +171,17 @@ export default function CheckInWalkIn() {
       ),
     );
 
+    // Trigger notification
+    addNotification(
+      `Guest ${form.guest_name} checked in to room ${form.room_num}`,
+      "Rooms Attendant",
+      "success",
+    );
+
     setKeyCardGuest(newRes);
     setForm({ ...blank });
     setSelectedRoomNum(null);
+    setConfirmSubmitOpen(false);
   };
 
   /* ── Calc nights ── */
@@ -164,15 +219,18 @@ export default function CheckInWalkIn() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-800">
-        {t("checkInWithoutReservation")}
-      </h1>
+      <div className="flex justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-2xl shadow-sm border border-blue-100">
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+          {t("checkInWithoutReservation")}
+        </h1>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* ── Left: Quick Registration Form ── */}
-        <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border p-6 space-y-5">
-          <h2 className="text-lg font-semibold text-gray-700 flex items-center gap-2">
-            <UserPlus size={18} className="text-amber-600" />
+        <div className="lg:col-span-2 bg-white rounded-2xl shadow-md border border-gray-100 p-6 space-y-5">
+          <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <span className="w-1 h-6 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full" />
+            <UserPlus size={20} className="text-blue-600" />
             {t("quickRegistration")}
           </h2>
 
@@ -180,38 +238,154 @@ export default function CheckInWalkIn() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {(
               [
-                ["guest_name", t("guestName"), "text", true],
-                ["id_card", t("idCard"), "text", true],
-                ["nationality", t("nationality"), "text", false],
-                ["phone", t("phone"), "tel", false],
-                ["email", t("email"), "email", false],
-                ["city", t("city"), "text", false],
-                ["country", t("country"), "text", false],
-              ] as [keyof RCS, string, string, boolean][]
-            ).map(([field, label, type, required]) => (
-              <div key={field}>
-                <label className="block text-xs font-medium text-gray-500 mb-1">
-                  {label} {required && <span className="text-red-400">*</span>}
-                </label>
-                <input
-                  type={type}
-                  value={String(form[field] ?? "")}
-                  onChange={(e) => handleChange(field, e.target.value)}
-                  className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-300 focus:border-amber-400 outline-none"
-                />
-              </div>
-            ))}
+                [
+                  "guest_name",
+                  t("guestName"),
+                  "text",
+                  true,
+                  {
+                    pattern: "^[a-zA-Z\\s\\-']{2,}$",
+                    placeholder: "Letters only",
+                  },
+                ],
+                [
+                  "id_card",
+                  t("idCard"),
+                  "text",
+                  true,
+                  {
+                    pattern: "^[A-Za-z0-9]{5,}$",
+                    placeholder: "Alphanumeric (5+ chars)",
+                  },
+                ],
+                ["nationality", t("nationality"), "text", false, {}],
+                [
+                  "phone",
+                  t("phone"),
+                  "tel",
+                  true,
+                  { pattern: "^\\+[1-9]\\d{1,14}$", placeholder: "+250..." },
+                ],
+                ["email", t("email"), "email", false, {}],
+                ["city", t("city"), "text", false, {}],
+                ["country", t("country"), "text", false, {}],
+              ] as [keyof RCS, string, string, boolean, Record<string, any>][]
+            ).map(([field, label, type, required, attrs]) => {
+              const errorMsg = getErrorMessage(field as string);
+
+              // Special handling for country and nationality selects
+              if (field === "nationality" || field === "country") {
+                return (
+                  <div key={field}>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">
+                      {label}{" "}
+                      {required && <span className="text-red-500">*</span>}
+                    </label>
+                    <select
+                      value={String(form[field] ?? "")}
+                      onChange={(e) => handleChange(field, e.target.value)}
+                      required={required}
+                      title={label}
+                      className={`w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-300 focus:border-amber-400 outline-none ${
+                        errorMsg
+                          ? "border-red-500 focus:ring-red-500"
+                          : "border-gray-300"
+                      }`}
+                    >
+                      <option value="">{t("select")}</option>
+                      {field === "nationality" &&
+                        COUNTRIES.map((c) => (
+                          <option key={c.code} value={c.nationality}>
+                            {c.flag} {c.name} ({c.phoneCode})
+                          </option>
+                        ))}
+                      {field === "country" &&
+                        COUNTRIES.map((c) => (
+                          <option key={c.code} value={c.name}>
+                            {c.flag} {c.name}
+                          </option>
+                        ))}
+                    </select>
+                    {errorMsg && (
+                      <p className="text-xs text-red-600 mt-1">{errorMsg}</p>
+                    )}
+                  </div>
+                );
+              }
+
+              const phoneCode =
+                field === "phone"
+                  ? getPhoneCodeByNationality(form.nationality)
+                  : undefined;
+
+              return (
+                <div key={field}>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">
+                    {label}{" "}
+                    {required && <span className="text-red-500">*</span>}
+                  </label>
+                  {field === "phone" && phoneCode ? (
+                    <div className="flex items-center gap-1">
+                      <span className="bg-gray-100 border border-gray-300 rounded-l-lg px-3 py-2 text-xs font-semibold text-gray-600">
+                        {phoneCode}
+                      </span>
+                      <input
+                        type={type}
+                        title={label}
+                        placeholder="788 123 456"
+                        value={String(form[field] ?? "")}
+                        required={required}
+                        onChange={(e) => handleChange(field, e.target.value)}
+                        className={`flex-1 border rounded-r-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-300 focus:border-amber-400 outline-none ${
+                          errorMsg
+                            ? "border-red-500 focus:ring-red-500"
+                            : "border-gray-300"
+                        }`}
+                      />
+                    </div>
+                  ) : (
+                    <input
+                      type={type}
+                      title={label}
+                      value={String(form[field] ?? "")}
+                      required={required}
+                      onChange={(e) => handleChange(field, e.target.value)}
+                      {...attrs}
+                      className={`w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-300 focus:border-amber-400 outline-none ${
+                        errorMsg
+                          ? "border-red-500 focus:ring-red-500"
+                          : "border-gray-300"
+                      }`}
+                    />
+                  )}
+                  {errorMsg && (
+                    <p className="text-xs text-red-600 mt-1">{errorMsg}</p>
+                  )}
+                </div>
+              );
+            })}
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">
-                {t("adults")}
+                {t("adults")} <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
+                title="Number of adults"
                 value={form.adulte}
+                required
                 onChange={(e) => handleChange("adulte", Number(e.target.value))}
                 min={1}
-                className="w-full border rounded-lg px-3 py-2 text-sm"
+                className={`w-full border rounded-lg px-3 py-2 text-sm ${
+                  getErrorMessage("adulte")
+                    ? "border-red-500"
+                    : "border-gray-300"
+                }`}
               />
+              {getErrorMessage("adulte") && (
+                <p className="text-xs text-red-600 mt-1">
+                  {getErrorMessage("adulte")}
+                </p>
+              )}
             </div>
           </div>
 
@@ -219,34 +393,57 @@ export default function CheckInWalkIn() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">
-                {t("arrivalDate")} <span className="text-red-400">*</span>
+                {t("arrivalDate")} <span className="text-red-500">*</span>
               </label>
               <input
                 type="date"
+                title="Arrival date"
                 value={form.arrival_date}
+                required
                 onChange={(e) => handleChange("arrival_date", e.target.value)}
-                className="w-full border rounded-lg px-3 py-2 text-sm"
+                className={`w-full border rounded-lg px-3 py-2 text-sm ${
+                  getErrorMessage("arrival_date")
+                    ? "border-red-500"
+                    : "border-gray-300"
+                }`}
               />
+              {getErrorMessage("arrival_date") && (
+                <p className="text-xs text-red-600 mt-1">
+                  {getErrorMessage("arrival_date")}
+                </p>
+              )}
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">
-                {t("departDate")} <span className="text-red-400">*</span>
+                {t("departDate")} <span className="text-red-500">*</span>
               </label>
               <input
                 type="date"
+                title="Departure date"
                 value={form.depart_date}
+                required
                 onChange={(e) => handleChange("depart_date", e.target.value)}
-                className="w-full border rounded-lg px-3 py-2 text-sm"
+                className={`w-full border rounded-lg px-3 py-2 text-sm ${
+                  getErrorMessage("depart_date")
+                    ? "border-red-500"
+                    : "border-gray-300"
+                }`}
               />
+              {getErrorMessage("depart_date") && (
+                <p className="text-xs text-red-600 mt-1">
+                  {getErrorMessage("depart_date")}
+                </p>
+              )}
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">
                 {t("paymentMode")}
               </label>
               <select
+                title="Payment mode"
                 value={form.payt_mode}
                 onChange={(e) => handleChange("payt_mode", e.target.value)}
-                className="w-full border rounded-lg px-3 py-2 text-sm"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
               >
                 {paymentModes.map((m) => (
                   <option key={m.code} value={m.label}>
@@ -264,12 +461,24 @@ export default function CheckInWalkIn() {
               </label>
               <input
                 type="number"
+                title="Discount percentage"
                 value={form.discount}
                 min={0}
                 max={100}
-                onChange={(e) => handleChange("discount", Number(e.target.value))}
-                className="w-full border rounded-lg px-3 py-2 text-sm"
+                onChange={(e) =>
+                  handleChange("discount", Number(e.target.value))
+                }
+                className={`w-full border rounded-lg px-3 py-2 text-sm ${
+                  getErrorMessage("discount")
+                    ? "border-red-500"
+                    : "border-gray-300"
+                }`}
               />
+              {getErrorMessage("discount") && (
+                <p className="text-xs text-red-600 mt-1">
+                  {getErrorMessage("discount")}
+                </p>
+              )}
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">
@@ -277,17 +486,29 @@ export default function CheckInWalkIn() {
               </label>
               <input
                 type="number"
+                title="Deposit amount"
                 value={form.deposit}
                 min={0}
-                onChange={(e) => handleChange("deposit", Number(e.target.value))}
-                className="w-full border rounded-lg px-3 py-2 text-sm"
+                onChange={(e) =>
+                  handleChange("deposit", Number(e.target.value))
+                }
+                className={`w-full border rounded-lg px-3 py-2 text-sm ${
+                  getErrorMessage("deposit")
+                    ? "border-red-500"
+                    : "border-gray-300"
+                }`}
               />
+              {getErrorMessage("deposit") && (
+                <p className="text-xs text-red-600 mt-1">
+                  {getErrorMessage("deposit")}
+                </p>
+              )}
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">
                 {t("stayCost")}
               </label>
-              <div className="w-full border rounded-lg px-3 py-2 text-sm bg-gray-50 font-semibold">
+              <div className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-gray-50 font-semibold">
                 {form.stay_cost.toLocaleString()} {form.current_mon}
               </div>
             </div>
@@ -328,40 +549,57 @@ export default function CheckInWalkIn() {
         </div>
 
         {/* ── Right: Available Rooms Grid ── */}
-        <div className="bg-white rounded-xl shadow-sm border p-5">
-          <h3 className="text-sm font-semibold text-gray-600 mb-3">
-            {t("availableRooms")} ({vacantRooms.length})
+        <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-5">
+          <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <span className="w-1 h-6 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full" />
+            {t("availableRooms")} ({filteredRooms.length}/{vacantRooms.length})
           </h3>
-          <div className="space-y-2 max-h-[70vh] overflow-y-auto pr-1">
-            {vacantRooms.map((room) => (
-              <div
-                key={room.room_num}
-                onClick={() => handleSelectRoom(room.room_num)}
-                className={`border rounded-lg px-4 py-3 cursor-pointer transition-all ${
-                  selectedRoomNum === room.room_num
-                    ? "border-emerald-400 bg-emerald-50 ring-2 ring-emerald-200"
-                    : "hover:border-amber-300 hover:bg-amber-50"
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-bold text-gray-800">{room.room_num}</p>
-                    <p className="text-xs text-gray-500">
-                      {getCatName(room.categorie)}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-semibold text-gray-700">
-                      {room.price_1.toLocaleString()}
-                    </p>
-                    <p className="text-xs text-gray-400">{room.current_mon}</p>
-                  </div>
-                </div>
-                <p className="text-xs text-gray-400 mt-1">
-                  {room.designation}
-                </p>
+          <input
+            type="text"
+            value={roomSearch}
+            onChange={(e) => setRoomSearch(e.target.value)}
+            placeholder={`${t("search")} ${t("room")}...`}
+            title={`${t("search")} ${t("room")}...`}
+            className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <div className="space-y-2 max-h-[60vh] overflow-y-auto pr-1">
+            {filteredRooms.length === 0 ? (
+              <div className="text-center py-8 text-gray-400 text-sm">
+                No rooms match "{roomSearch}"
               </div>
-            ))}
+            ) : (
+              filteredRooms.map((room) => (
+                <div
+                  key={room.room_num}
+                  onClick={() => handleSelectRoom(room.room_num)}
+                  className={`border rounded-lg px-4 py-3 cursor-pointer transition-all ${
+                    selectedRoomNum === room.room_num
+                      ? "border-emerald-400 bg-emerald-50 ring-2 ring-emerald-200"
+                      : "hover:border-amber-300 hover:bg-amber-50"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-bold text-gray-800">{room.room_num}</p>
+                      <p className="text-xs text-gray-500">
+                        {getCatName(room.categorie)}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-semibold text-gray-700">
+                        {room.price_1.toLocaleString()}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        {room.current_mon}
+                      </p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-400 mt-1">
+                    {room.designation}
+                  </p>
+                </div>
+              ))
+            )}
             {vacantRooms.length === 0 && (
               <p className="text-sm text-gray-400 text-center py-8">
                 {t("noResults")}
@@ -384,6 +622,7 @@ export default function CheckInWalkIn() {
               </h2>
               <button
                 onClick={() => setKeyCardGuest(null)}
+                title="Close key card slip"
                 className="text-gray-400 hover:text-gray-600"
               >
                 <X size={20} />
@@ -392,9 +631,7 @@ export default function CheckInWalkIn() {
 
             <div ref={printRef} className="p-6">
               <div className="text-center border-b-2 border-gray-800 pb-3 mb-4">
-                <h1 className="text-xl font-bold">
-                  {t("hotelFullName")}
-                </h1>
+                <h1 className="text-xl font-bold">{t("hotelFullName")}</h1>
                 <p className="text-xs text-gray-500">{t("keyCardSlip")}</p>
               </div>
               <div className="space-y-2 text-sm">
@@ -458,6 +695,18 @@ export default function CheckInWalkIn() {
           </div>
         </div>
       )}
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={confirmSubmitOpen}
+        title="Check-In Walk-In Guest"
+        message={`Are you sure you want to check in ${form.guest_name} to room ${form.room_num}?`}
+        confirmText="Check In"
+        cancelText="Cancel"
+        isDangerous={false}
+        onConfirm={confirmSubmit}
+        onCancel={() => setConfirmSubmitOpen(false)}
+      />
     </div>
   );
 }

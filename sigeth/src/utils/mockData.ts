@@ -2,7 +2,7 @@ import type {
     RDF, RCS, RCSA, GRC, GRCA, StatusRef, InvoiceRecord, TEMPO,
     CATROOM, HSTAFF, RSTAFF, CATLAUNDRY, HSERVICE, JLAUNDRY,
     REQUIS, EventRecord, BanquetService, JBANQUET, SalesEntry,
-    UserRecord, PaymentMode,
+    UserRecord, PaymentMode, Currency,
 } from "../types";
 
 // ── STATUS.dat ──
@@ -18,6 +18,7 @@ export const mockStatuses: StatusRef[] = [
     { code: "LC/O", label: "Late Check Out", meaning: "Guest staying beyond standard checkout" },
     { code: "DL", label: "Double Lock", meaning: "Room is double-locked" },
     { code: "ARR", label: "Arrival", meaning: "Guest arrival expected" },
+    { code: "CC", label: "Check-in Confirmed", meaning: "Group member check-in confirmed" },
 ];
 
 // ── CATROOM.dat ──
@@ -198,11 +199,15 @@ export const mockJbanquet: JBANQUET[] = [
 
 // ── SALES.dat / JCASHIER.dat ──
 export const mockSales: SalesEntry[] = [
-    { date: "2026-03-10", order_num: "ORD-001", code_art: "ROOM", item: "Room 101 - Executive Single", room_num: "101", guest_name: "Jean Dupont", unity: 1, qty_s: 4, price_s: 75000, montant: 300000, paid: 75000, credit: 225000, username: "Rooms", invoice_num: "1001", mode_payt: "Cash", current_mon: "RWF" },
-    { date: "2026-03-09", order_num: "ORD-002", code_art: "ROOM", item: "Room 103 - Executive Double", room_num: "103", guest_name: "Alice Mukamana", unity: 1, qty_s: 3, price_s: 120000, montant: 324000, paid: 200000, credit: 124000, username: "Rooms", invoice_num: "1000", mode_payt: "Visa-card", current_mon: "RWF" },
-    { date: "2026-03-08", order_num: "ORD-003", code_art: "ROOM", item: "Room 202 - Suite Deluxe", room_num: "202", guest_name: "Robert Smith", unity: 1, qty_s: 7, price_s: 250, montant: 1750, paid: 500, credit: 1250, username: "Rooms", invoice_num: "1002", mode_payt: "Visa-card", current_mon: "USD" },
-    { date: "2026-03-10", order_num: "ORD-004", code_art: "LDRY", item: "Laundry - Shirt x3", room_num: "101", guest_name: "Jean Dupont", unity: 1, qty_s: 3, price_s: 3000, montant: 9000, paid: 0, credit: 9000, username: "Rooms", invoice_num: "", mode_payt: "Cash", current_mon: "RWF" },
-    { date: "2026-03-09", order_num: "ORD-005", code_art: "BNQT", item: "Dinner - Private Room", room_num: "202", guest_name: "Robert Smith", unity: 1, qty_s: 1, price_s: 100000, montant: 100000, paid: 100000, credit: 0, username: "Rooms", invoice_num: "", mode_payt: "Visa-card", current_mon: "RWF" },
+    { date: "2026-03-10", order_num: "ORD-001", code_art: "ROOM", item: "Room 101 - Executive Single", room_num: "101", guest_name: "Jean Dupont", groupe_name: "", unity: 1, qty_s: 4, price_s: 75000, montant: 300000, paid: 75000, credit: 225000, username: "Rooms", invoice_num: "1001", mode_payt: "Cash", current_mon: "RWF" },
+    { date: "2026-03-09", order_num: "ORD-002", code_art: "ROOM", item: "Room 103 - Executive Double", room_num: "103", guest_name: "Alice Mukamana", groupe_name: "", unity: 1, qty_s: 3, price_s: 120000, montant: 324000, paid: 200000, credit: 124000, username: "Rooms", invoice_num: "1000", mode_payt: "Visa-card", current_mon: "RWF" },
+    { date: "2026-03-08", order_num: "ORD-003", code_art: "ROOM", item: "Room 202 - Suite Deluxe", room_num: "202", guest_name: "Robert Smith", groupe_name: "", unity: 1, qty_s: 7, price_s: 250, montant: 1750, paid: 500, credit: 1250, username: "Rooms", invoice_num: "1002", mode_payt: "Visa-card", current_mon: "USD" },
+    { date: "2026-03-10", order_num: "ORD-004", code_art: "LDRY", item: "Laundry - Shirt x3", room_num: "101", guest_name: "Jean Dupont", groupe_name: "", unity: 1, qty_s: 3, price_s: 3000, montant: 9000, paid: 0, credit: 9000, username: "Rooms", invoice_num: "", mode_payt: "Cash", current_mon: "RWF" },
+    { date: "2026-03-09", order_num: "ORD-005", code_art: "BNQT", item: "Dinner - Private Room", room_num: "202", guest_name: "Robert Smith", groupe_name: "", unity: 1, qty_s: 1, price_s: 100000, montant: 100000, paid: 100000, credit: 0, username: "Rooms", invoice_num: "", mode_payt: "Visa-card", current_mon: "RWF" },
+    { date: "2026-03-15", order_num: "ORD-006", code_art: "ROOM", item: "Room 501 - Group Suite", room_num: "501", guest_name: "David Nkurunziza", groupe_name: "African Tech Summit 2026", unity: 1, qty_s: 3, price_s: 500000, montant: 1500000, paid: 500000, credit: 1000000, username: "Rooms", invoice_num: "1003", mode_payt: "Credit", current_mon: "RWF" },
+    { date: "2026-03-15", order_num: "ORD-007", code_art: "ROOM", item: "Room 301 - Deluxe Room", room_num: "301", guest_name: "Grace Akinyi", groupe_name: "African Tech Summit 2026", unity: 1, qty_s: 3, price_s: 120000, montant: 360000, paid: 150000, credit: 210000, username: "Rooms", invoice_num: "1003", mode_payt: "Credit", current_mon: "RWF" },
+    { date: "2026-03-20", order_num: "ORD-008", code_art: "ROOM", item: "Room 404 - Suite Deluxe", room_num: "404", guest_name: "Eric Mugisha", groupe_name: "Wedding Party Mugisha", unity: 1, qty_s: 2, price_s: 350000, montant: 700000, paid: 0, credit: 700000, username: "Rooms", invoice_num: "1004", mode_payt: "Cash", current_mon: "RWF" },
+    { date: "2026-03-20", order_num: "ORD-009", code_art: "ROOM", item: "Room 203 - Executive Double", room_num: "203", guest_name: "Claire Ingabire", groupe_name: "Wedding Party Mugisha", unity: 1, qty_s: 2, price_s: 180000, montant: 360000, paid: 0, credit: 360000, username: "Rooms", invoice_num: "1004", mode_payt: "Cash", current_mon: "RWF" },
 ];
 
 // ── USERS.dat ──
@@ -210,6 +215,18 @@ export const mockUsers: UserRecord[] = [
     { username: "Rooms", password: "Guest", level: "Manager_R", name: "Rooms", submodule: "rooms" },
     { username: "House", password: "Keep", level: "Manager_H", name: "Housekeeping", submodule: "housekeeping" },
     { username: "Banquet", password: "Bguest", level: "Manager_B", name: "Banqueting", submodule: "banqueting" },
+];
+
+// ── MONNAIES.dat ──
+export const mockCurrencies: Currency[] = [
+    { code: "RWF", label: "Rwandan Franc", exchange_rate: 1 },
+    { code: "USD", label: "US Dollar", exchange_rate: 1380 },
+    { code: "EUR", label: "Euro", exchange_rate: 1510 },
+    { code: "GBP", label: "British Pound", exchange_rate: 1750 },
+    { code: "KES", label: "Kenyan Shilling", exchange_rate: 10.7 },
+    { code: "UGX", label: "Ugandan Shilling", exchange_rate: 0.37 },
+    { code: "TZS", label: "Tanzanian Shilling", exchange_rate: 0.53 },
+    { code: "BIF", label: "Burundian Franc", exchange_rate: 0.48 },
 ];
 
 // ── MODEP.dat ──

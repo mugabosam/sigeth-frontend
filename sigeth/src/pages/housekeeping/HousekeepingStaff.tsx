@@ -1,37 +1,120 @@
 import { useState } from "react";
-import { Plus, Save, Trash2 } from "lucide-react";
+import { Plus, Save, Trash2, Search, X } from "lucide-react";
 import { useLang } from "../../hooks/useLang";
 import { useHotelData } from "../../context/HotelDataContext";
+import { useNotification } from "../../hooks/useNotification";
+import ConfirmationModal from "../../components/common/ConfirmationModal";
+import {
+  validateHousekeepingStaff,
+  type ValidationResult,
+} from "../../utils/housekeepingValidation";
+import { createErrorNotification } from "../../utils/errorFormatter";
 import type { HSTAFF } from "../../types";
 
 export default function HousekeepingStaff() {
   const { t } = useLang();
+  const { addNotification } = useNotification();
   const { staff, setStaff } = useHotelData();
   const [selected, setSelected] = useState<HSTAFF | null>(null);
   const [isNew, setIsNew] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [errors, setErrors] = useState<ValidationResult>({
+    isValid: true,
+    errors: [],
+  });
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
+
+  // Live search filter
+  const filteredStaff = staff.filter((s) => {
+    const search = searchTerm.toLowerCase();
+    return (
+      s.number.toString().includes(search) ||
+      s.first_name.toLowerCase().includes(search) ||
+      s.last_name.toLowerCase().includes(search) ||
+      s.poste.toLowerCase().includes(search)
+    );
+  });
 
   const handleSave = () => {
     if (!selected) return;
+
+    // Validate form
+    const validation = validateHousekeepingStaff(selected);
+    if (!validation.isValid) {
+      setErrors(validation);
+      const errorMessage = createErrorNotification(validation.errors, t);
+      addNotification(errorMessage, "Housekeeping", "error");
+      return;
+    }
+
+    // Check for duplicates when creating new
+    if (isNew && staff.some((s) => s.number === selected.number)) {
+      setErrors({
+        isValid: false,
+        errors: [{ field: "number", message: "codeAlreadyExists" }],
+      });
+      addNotification(t("codeAlreadyExists"), "Housekeeping", "error");
+      return;
+    }
+
+    setShowSaveConfirm(true);
+  };
+
+  const confirmSave = () => {
+    if (!selected) return;
+
+    setErrors({ isValid: true, errors: [] });
+
     if (isNew) setStaff((prev) => [...prev, selected]);
     else
       setStaff((prev) =>
         prev.map((s) => (s.number === selected.number ? selected : s)),
       );
     setSelected(null);
+    setShowSaveConfirm(false);
   };
 
   const handleDelete = () => {
     if (!selected) return;
     setStaff((prev) => prev.filter((s) => s.number !== selected.number));
     setSelected(null);
+    setShowDeleteConfirm(false);
+  };
+
+  const getErrorMessage = (field: string) => {
+    const error = errors.errors.find((e) => e.field === field);
+    return error ? t(error.message as any) : "";
+  };
+
+  const handleFieldChange = (field: keyof HSTAFF, value: any) => {
+    if (!selected) return;
+    const updated: HSTAFF = {
+      number: field === "number" ? (value as number) : selected.number,
+      first_name:
+        field === "first_name" ? (value as string) : selected.first_name,
+      last_name: field === "last_name" ? (value as string) : selected.last_name,
+      poste: field === "poste" ? (value as string) : selected.poste,
+    };
+    setSelected(updated);
+
+    // Real-time validation
+    const validation = validateHousekeepingStaff(updated);
+    setErrors(validation);
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800">
-          {t("housekeepingStaff")}
-        </h1>
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50 p-6 space-y-6">
+      {/* Header Section */}
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent mb-1">
+            {t("housekeepingStaff")}
+          </h1>
+          <p className="text-sm text-gray-600">
+            Manage your housekeeping team members and personnel
+          </p>
+        </div>
         <button
           onClick={() => {
             setSelected({
@@ -41,105 +124,202 @@ export default function HousekeepingStaff() {
               poste: "",
             });
             setIsNew(true);
+            setErrors({ isValid: true, errors: [] });
           }}
-          className="bg-amber-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm hover:bg-amber-600"
+          className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-all duration-200"
         >
-          <Plus size={16} />
+          <Plus size={18} />
           {t("newRecord")}
         </button>
       </div>
       {selected && (
-        <div className="bg-white rounded-xl shadow-sm border p-6 space-y-4">
-          <h3 className="text-lg font-semibold">
-            {isNew ? t("newStaff") : t("editStaff")} — Staff_form
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="bg-white rounded-xl shadow-md border border-emerald-100 p-7 space-y-5">
+          <div>
+            <h3 className="text-xl font-bold text-gray-800">
+              {isNew ? t("newStaff") : t("editStaff")}
+            </h3>
+            <p className="text-xs text-gray-500 mt-1">
+              Fill in the staff information below
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 {t("staffNumber")}
               </label>
               <input
                 type="number"
                 value={selected.number}
                 onChange={(e) =>
-                  setSelected({ ...selected, number: Number(e.target.value) })
+                  handleFieldChange("number", Number(e.target.value))
                 }
                 title={t("staffNumber")}
-                className="w-full border rounded-lg px-3 py-2 text-sm"
+                className={`w-full border-2 rounded-lg px-4 py-2.5 text-sm font-medium focus:outline-none focus:border-emerald-500 transition-colors ${
+                  getErrorMessage("number")
+                    ? "border-red-400 bg-red-50"
+                    : "border-gray-200 hover:border-gray-300"
+                }`}
               />
+              {getErrorMessage("number") && (
+                <p className="text-xs text-red-600 mt-2 font-medium">
+                  {getErrorMessage("number")}
+                </p>
+              )}
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 {t("firstName")}
               </label>
               <input
                 type="text"
                 value={selected.first_name}
                 onChange={(e) =>
-                  setSelected({ ...selected, first_name: e.target.value })
+                  handleFieldChange("first_name", e.target.value)
                 }
+                pattern="^[a-zA-Z\s\-']{2,}$"
                 title={t("firstName")}
-                className="w-full border rounded-lg px-3 py-2 text-sm"
+                placeholder="Letters only"
+                className={`w-full border-2 rounded-lg px-4 py-2.5 text-sm font-medium focus:outline-none focus:border-emerald-500 transition-colors ${
+                  getErrorMessage("first_name")
+                    ? "border-red-400 bg-red-50"
+                    : "border-gray-200 hover:border-gray-300"
+                }`}
               />
+              {getErrorMessage("first_name") && (
+                <p className="text-xs text-red-600 mt-2 font-medium">
+                  {getErrorMessage("first_name")}
+                </p>
+              )}
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 {t("lastName")}
               </label>
               <input
                 type="text"
                 value={selected.last_name}
-                onChange={(e) =>
-                  setSelected({ ...selected, last_name: e.target.value })
-                }
+                onChange={(e) => handleFieldChange("last_name", e.target.value)}
+                pattern="^[a-zA-Z\s\-']{2,}$"
                 title={t("lastName")}
-                className="w-full border rounded-lg px-3 py-2 text-sm"
+                placeholder="Letters only"
+                className={`w-full border-2 rounded-lg px-4 py-2.5 text-sm font-medium focus:outline-none focus:border-emerald-500 transition-colors ${
+                  getErrorMessage("last_name")
+                    ? "border-red-400 bg-red-50"
+                    : "border-gray-200 hover:border-gray-300"
+                }`}
               />
+              {getErrorMessage("last_name") && (
+                <p className="text-xs text-red-600 mt-2 font-medium">
+                  {getErrorMessage("last_name")}
+                </p>
+              )}
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 {t("poste")}
               </label>
               <input
                 type="text"
                 value={selected.poste}
-                onChange={(e) =>
-                  setSelected({ ...selected, poste: e.target.value })
-                }
+                onChange={(e) => handleFieldChange("poste", e.target.value)}
                 title={t("poste")}
-                className="w-full border rounded-lg px-3 py-2 text-sm"
+                className={`w-full border-2 rounded-lg px-4 py-2.5 text-sm font-medium focus:outline-none focus:border-emerald-500 transition-colors ${
+                  getErrorMessage("poste")
+                    ? "border-red-400 bg-red-50"
+                    : "border-gray-200 hover:border-gray-300"
+                }`}
               />
+              {getErrorMessage("poste") && (
+                <p className="text-xs text-red-600 mt-2 font-medium">
+                  {getErrorMessage("poste")}
+                </p>
+              )}
             </div>
           </div>
-          <div className="flex gap-3 pt-4 border-t">
+          <div className="flex gap-3 pt-5 border-t border-gray-200">
             <button
               onClick={handleSave}
-              className="bg-amber-500 text-white px-6 py-2 rounded-lg flex items-center gap-2 text-sm hover:bg-amber-600"
+              className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-6 py-2.5 rounded-lg flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-all duration-200"
             >
               <Save size={16} />
               {t("save")}
             </button>
             {!isNew && (
               <button
-                onClick={handleDelete}
-                className="bg-red-500 text-white px-6 py-2 rounded-lg flex items-center gap-2 text-sm hover:bg-red-600"
+                onClick={() => setShowDeleteConfirm(true)}
+                className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-2.5 rounded-lg flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-red-600 hover:to-red-700 transition-all duration-200"
               >
                 <Trash2 size={16} />
                 {t("delete")}
               </button>
             )}
             <button
-              onClick={() => setSelected(null)}
-              className="border px-6 py-2 rounded-lg text-sm"
+              onClick={() => {
+                setSelected(null);
+                setErrors({ isValid: true, errors: [] });
+              }}
+              className="border-2 border-gray-300 px-6 py-2.5 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
             >
               {t("cancel")}
             </button>
           </div>
         </div>
       )}
-      <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+
+      {/* Save Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showSaveConfirm}
+        title={isNew ? "Add Housekeeping Staff" : "Update Housekeeping Staff"}
+        message={`Are you sure you want to ${isNew ? "add" : "update"} staff member #${selected?.number} ${selected?.first_name} ${selected?.last_name}?`}
+        confirmText={isNew ? "Add" : "Update"}
+        cancelText="Cancel"
+        isDangerous={false}
+        onConfirm={confirmSave}
+        onCancel={() => setShowSaveConfirm(false)}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showDeleteConfirm}
+        title="Delete Housekeeping Staff"
+        message={`Are you sure you want to delete staff member #${selected?.number}? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        isDangerous={true}
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
+
+      {/* Staff Table */}
+      <div className="bg-white rounded-xl shadow-md border border-emerald-100 overflow-hidden">
+        <div className="bg-gradient-to-r from-emerald-50 to-green-50 px-6 py-4 border-b border-emerald-100 flex items-center justify-between">
+          <h2 className="text-lg font-bold text-gray-800">Staff Directory</h2>
+        </div>
+        <div className="px-6 py-4 border-b border-gray-200">
+          <div className="relative">
+            <Search
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+              size={18}
+            />
+            <input
+              type="text"
+              placeholder={`${t("search")} staff by name, number, or position...`}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-10 py-2.5 border-2 border-gray-200 hover:border-gray-300 focus:border-emerald-500 focus:outline-none rounded-lg text-sm font-medium transition-colors"
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm("")}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                <X size={18} />
+              </button>
+            )}
+          </div>
+        </div>
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b">
+          <thead className="bg-gray-50 border-b-2 border-emerald-200">
             <tr>
               {[
                 t("staffNumber"),
@@ -149,7 +329,7 @@ export default function HousekeepingStaff() {
               ].map((h) => (
                 <th
                   key={h}
-                  className="text-left px-4 py-3 font-medium text-gray-600"
+                  className="text-left px-6 py-3 font-bold text-gray-700"
                 >
                   {h}
                 </th>
@@ -157,23 +337,35 @@ export default function HousekeepingStaff() {
             </tr>
           </thead>
           <tbody>
-            {staff.map((s) => (
+            {filteredStaff.map((s) => (
               <tr
                 key={s.number}
-                className="border-b hover:bg-gray-50 cursor-pointer"
+                className="border-b hover:bg-emerald-50/50 cursor-pointer transition-colors duration-150"
                 onClick={() => {
                   setSelected({ ...s });
                   setIsNew(false);
+                  setErrors({ isValid: true, errors: [] });
                 }}
               >
-                <td className="px-4 py-3 font-medium">{s.number}</td>
-                <td className="px-4 py-3">{s.first_name}</td>
-                <td className="px-4 py-3">{s.last_name}</td>
-                <td className="px-4 py-3">{s.poste}</td>
+                <td className="px-6 py-3 font-semibold text-emerald-600">
+                  {s.number}
+                </td>
+                <td className="px-6 py-3 text-gray-700">{s.first_name}</td>
+                <td className="px-6 py-3 text-gray-700">{s.last_name}</td>
+                <td className="px-6 py-3 text-gray-600 italic">{s.poste}</td>
               </tr>
             ))}
           </tbody>
         </table>
+        {filteredStaff.length === 0 && (
+          <div className="px-6 py-12 text-center text-gray-500">
+            <p className="text-sm">
+              {searchTerm
+                ? `No staff members match "${searchTerm}". Try a different search.`
+                : 'No staff members found. Click "New Record" to add one.'}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

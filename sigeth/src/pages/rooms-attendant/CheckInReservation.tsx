@@ -12,7 +12,11 @@ import {
 } from "lucide-react";
 import { useLang } from "../../hooks/useLang";
 import { useHotelData } from "../../context/HotelDataContext";
-import type { RCS, RDF } from "../../types";
+import { useNotification } from "../../hooks/useNotification";
+import ConfirmationModal from "../../components/common/ConfirmationModal";
+import { validateCheckIn } from "../../utils/roomsAttendantValidation";
+import { createErrorNotification } from "../../utils/errorFormatter";
+import type { RCS } from "../../types";
 
 /* ── helper: format today as YYYY-MM-DD ── */
 const today = () => {
@@ -24,12 +28,14 @@ export default function CheckInReservation() {
   const { t } = useLang();
   const { reservations, setReservations, rooms, setRooms, catrooms } =
     useHotelData();
+  const { addNotification } = useNotification();
 
   const [search, setSearch] = useState("");
   const [processing, setProcessing] = useState<RCS | null>(null);
   const [idVerified, setIdVerified] = useState(false);
   const [swapRoom, setSwapRoom] = useState<string | null>(null);
   const [keyCardGuest, setKeyCardGuest] = useState<RCS | null>(null);
+  const [confirmCheckInOpen, setConfirmCheckInOpen] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
 
   /* Today's arrivals = open reservations arriving today or earlier (not yet checked in) */
@@ -74,6 +80,26 @@ export default function CheckInReservation() {
 
   /* ── Check-in handler ── */
   const handleCheckIn = (res: RCS) => {
+    setProcessing(res);
+    setConfirmCheckInOpen(true);
+  };
+
+  const confirmCheckIn = () => {
+    if (!processing) return;
+
+    // Validate reservation data before check-in
+    const validationResult = validateCheckIn(processing);
+    if (!validationResult.isValid) {
+      addNotification(
+        createErrorNotification(validationResult.errors, t),
+        "Validation Error",
+        "error",
+      );
+      setConfirmCheckInOpen(false);
+      return;
+    }
+
+    const res = processing;
     const targetRoom = swapRoom ?? res.room_num;
 
     // Update RCS: close reservation, set room_num if swapped
@@ -118,6 +144,14 @@ export default function CheckInReservation() {
     setProcessing(null);
     setIdVerified(false);
     setSwapRoom(null);
+    setConfirmCheckInOpen(false);
+
+    // Trigger notification
+    addNotification(
+      `Reservation for ${res.guest_name} (Room ${targetRoom}) checked in`,
+      "Rooms Attendant",
+      "success",
+    );
   };
 
   /* ── Stay nights calc ── */
@@ -165,11 +199,11 @@ export default function CheckInReservation() {
     const nights = calcNights(res.arrival_date, res.depart_date);
 
     return (
-      <div className="bg-white rounded-xl shadow-sm border p-5 hover:shadow-md transition-shadow">
+      <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-5 hover:shadow-lg transition-all duration-200">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 font-bold text-sm">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-bold text-sm">
                 {res.guest_name
                   .split(" ")
                   .map((n) => n[0])
@@ -177,7 +211,7 @@ export default function CheckInReservation() {
                   .slice(0, 2)}
               </div>
               <div>
-                <h3 className="font-semibold text-gray-800">
+                <h3 className="font-semibold text-gray-800 text-lg">
                   {res.guest_name}
                 </h3>
                 <p className="text-xs text-gray-500">
@@ -185,29 +219,40 @@ export default function CheckInReservation() {
                 </p>
               </div>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-gray-600 mt-3">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm mt-4 p-3 bg-gray-50 rounded-lg">
               <div>
-                <span className="text-gray-400">{t("roomNumber")}:</span>{" "}
-                <strong className="text-gray-800">{res.room_num}</strong>
+                <span className="text-gray-500 text-xs">{t("roomNumber")}</span>
+                <p className="font-semibold text-gray-900">{res.room_num}</p>
                 {room && (
-                  <span className="text-gray-400 ml-1">
-                    ({getCatName(room.categorie)})
+                  <span className="text-gray-500 text-xs">
+                    {getCatName(room.categorie)}
                   </span>
                 )}
               </div>
               <div>
-                <span className="text-gray-400">{t("arrivalDate")}:</span>{" "}
-                <strong>{res.arrival_date}</strong>
+                <span className="text-gray-500 text-xs">
+                  {t("arrivalDate")}
+                </span>
+                <p className="font-semibold text-gray-900">
+                  {res.arrival_date}
+                </p>
               </div>
               <div>
-                <span className="text-gray-400">{t("departDate")}:</span>{" "}
-                <strong>{res.depart_date}</strong>
+                <span className="text-gray-500 text-xs">{t("departDate")}</span>
+                <p className="font-semibold text-gray-900">{res.depart_date}</p>
               </div>
               <div>
-                <span className="text-gray-400">{t("nights")}:</span>{" "}
-                <strong>{nights}</strong> | {res.stay_cost.toLocaleString()}{" "}
-                {res.current_mon}
+                <span className="text-gray-500 text-xs">{t("nights")}</span>
+                <p className="font-semibold text-gray-900">{nights}</p>
               </div>
+            </div>
+            <div className="mt-3 p-3 bg-blue-50 rounded-lg">
+              <p className="text-sm font-semibold text-gray-800">
+                {res.stay_cost.toLocaleString()}{" "}
+                <span className="text-gray-600 font-normal">
+                  {res.current_mon}
+                </span>
+              </p>
             </div>
           </div>
           <button
@@ -216,10 +261,10 @@ export default function CheckInReservation() {
               setIdVerified(false);
               setSwapRoom(null);
             }}
-            className={`ml-4 px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-colors ${
+            className={`ml-4 px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-all transform hover:scale-105 shrink-0 ${
               isUpcoming
                 ? "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                : "bg-emerald-500 text-white hover:bg-emerald-600"
+                : "bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:shadow-lg"
             }`}
           >
             <UserCheck size={16} />
@@ -232,39 +277,48 @@ export default function CheckInReservation() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-800">
-        {t("checkInWithReservation")}
-      </h1>
+      <div className="flex justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-2xl shadow-sm border border-blue-100">
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+          {t("checkInWithReservation")}
+        </h1>
+      </div>
 
       {/* ── Search bar ── */}
-      <div className="bg-white rounded-xl shadow-sm border p-4">
+      <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
+        <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <span className="w-1 h-6 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full" />
+          {t("search")}
+        </h3>
         <div className="relative">
           <Search
-            size={18}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+            size={20}
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500"
           />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={`${t("search")} ${t("guestName")}, ${t("roomNumber")}, ${t("idCard")}...`}
-            className="w-full pl-10 pr-4 py-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-amber-300 focus:border-amber-400 outline-none"
+            title={`${t("search")} ${t("guestName")}, ${t("roomNumber")}, ${t("idCard")}...`}
+            className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
       </div>
 
       {/* ── Today's arrivals ── */}
       <div>
-        <div className="flex items-center gap-2 mb-3">
-          <CalendarDays size={18} className="text-emerald-600" />
-          <h2 className="text-lg font-semibold text-gray-700">
-            {t("todaysArrivals")}
-          </h2>
-          <span className="bg-emerald-100 text-emerald-700 text-xs font-bold px-2.5 py-0.5 rounded-full">
+        <div className="flex items-center gap-3 mb-4 bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border border-green-100">
+          <CalendarDays size={20} className="text-green-600" />
+          <div className="flex-1">
+            <h2 className="text-lg font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+              {t("todaysArrivals")}
+            </h2>
+          </div>
+          <span className="bg-green-100 text-green-700 text-sm font-bold px-3 py-1 rounded-full">
             {filtered.arrivals.length}
           </span>
         </div>
         {filtered.arrivals.length === 0 ? (
-          <div className="bg-gray-50 rounded-xl border border-dashed p-8 text-center text-gray-400 text-sm">
+          <div className="bg-gray-50 rounded-2xl border border-dashed border-gray-300 p-8 text-center text-gray-400 text-sm">
             {t("noArrivalsToday")}
           </div>
         ) : (
@@ -279,12 +333,14 @@ export default function CheckInReservation() {
       {/* ── Upcoming arrivals ── */}
       {filtered.upcoming.length > 0 && (
         <div>
-          <div className="flex items-center gap-2 mb-3">
-            <CalendarDays size={18} className="text-amber-500" />
-            <h2 className="text-lg font-semibold text-gray-700">
-              {t("expectedArrivals")}
-            </h2>
-            <span className="bg-amber-100 text-amber-700 text-xs font-bold px-2.5 py-0.5 rounded-full">
+          <div className="flex items-center gap-3 mb-4 bg-gradient-to-r from-amber-50 to-orange-50 p-4 rounded-xl border border-amber-100">
+            <CalendarDays size={20} className="text-amber-600" />
+            <div className="flex-1">
+              <h2 className="text-lg font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+                {t("expectedArrivals")}
+              </h2>
+            </div>
+            <span className="bg-amber-100 text-amber-700 text-sm font-bold px-3 py-1 rounded-full">
               {filtered.upcoming.length}
             </span>
           </div>
@@ -314,6 +370,7 @@ export default function CheckInReservation() {
                   setIdVerified(false);
                   setSwapRoom(null);
                 }}
+                title="Close check-in modal"
                 className="text-gray-400 hover:text-gray-600"
               >
                 <X size={20} />
@@ -418,6 +475,7 @@ export default function CheckInReservation() {
                 {vacantRooms.length > 0 && (
                   <div className="mt-3">
                     <select
+                      title="Select a room to swap"
                       value={swapRoom ?? ""}
                       onChange={(e) => setSwapRoom(e.target.value || null)}
                       className="border rounded-lg px-3 py-2 text-sm w-full"
@@ -500,6 +558,7 @@ export default function CheckInReservation() {
               </h2>
               <button
                 onClick={() => setKeyCardGuest(null)}
+                title="Close key card slip"
                 className="text-gray-400 hover:text-gray-600"
               >
                 <X size={20} />
@@ -573,6 +632,18 @@ export default function CheckInReservation() {
           </div>
         </div>
       )}
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={confirmCheckInOpen}
+        title="Check-In Reservation"
+        message={`Are you sure you want to check in ${processing?.guest_name} to room ${swapRoom ?? processing?.room_num}?`}
+        confirmText="Check In"
+        cancelText="Cancel"
+        isDangerous={false}
+        onConfirm={confirmCheckIn}
+        onCancel={() => setConfirmCheckInOpen(false)}
+      />
     </div>
   );
 }

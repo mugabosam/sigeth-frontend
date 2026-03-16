@@ -10,18 +10,19 @@ export default function RequestFollowUp({
 }) {
   const { t } = useLang();
   const { requisitions } = useHotelData();
+  const [poste, setPoste] = useState(posteDefault);
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
   const filtered = requisitions.filter((r) => {
-    if (r.poste !== posteDefault) return false;
+    if (r.poste !== poste) return false;
     if (dateFrom && r.date_d < dateFrom) return false;
     if (dateTo && r.date_d > dateTo) return false;
     return true;
   });
 
   const handleExport = () => {
-    const header = "Date_d,Item,Unity,Qty,Credit_1,Credit_2,Date_r";
+    const header = "Date_d,Designation,Unity,Qty,Credit_1,Credit_2,Date_r";
     const rows = filtered.map(
       (r) =>
         `${r.date_d},${r.libelle},,${r.qty},${r.credit_1},${r.credit_2},${r.date_r}`,
@@ -36,96 +37,226 @@ export default function RequestFollowUp({
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800">
-          {t("requestFollowUp")} — Lrequest.prt ({posteDefault})
-        </h1>
-        <div className="flex gap-2">
-          <button
-            onClick={() => window.print()}
-            className="bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm hover:bg-gray-700"
-          >
-            <Printer size={16} />
-            {t("print")}
-          </button>
-          <button
-            onClick={handleExport}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm hover:bg-green-700"
-          >
-            <FileSpreadsheet size={16} />
-            {t("excel")}
-          </button>
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50 p-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Page Title */}
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
+            {t("requestFollowUp")}
+          </h1>
+          <div className="flex gap-2">
+            <button
+              onClick={() => window.print()}
+              className="bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm hover:bg-gray-700 transition-all"
+            >
+              <Printer size={16} />
+              {t("print")}
+            </button>
+            <button
+              onClick={handleExport}
+              className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-all"
+            >
+              <FileSpreadsheet size={16} />
+              {t("excel")}
+            </button>
+          </div>
         </div>
-      </div>
-      <div className="bg-white rounded-xl shadow-sm border p-4 flex gap-4">
-        <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">
-            {t("dateFrom")}
-          </label>
-          <input
-            type="date"
-            value={dateFrom}
-            onChange={(e) => setDateFrom(e.target.value)}
-            title={t("dateFrom")}
-            className="border rounded-lg px-3 py-2 text-sm"
-          />
+
+        {/* Search/Filter Section */}
+        <div className="bg-white rounded-xl shadow-sm border-2 border-emerald-200 p-4">
+          <h3 className="text-sm font-semibold text-gray-700 mb-4">
+            {t("filters")}
+          </h3>
+          <div className="flex flex-wrap gap-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1">
+                {t("poste")}
+              </label>
+              <input
+                type="text"
+                value={poste}
+                onChange={(e) => setPoste(e.target.value)}
+                placeholder={t("poste")}
+                className="border-2 border-gray-200 hover:border-gray-300 focus:border-emerald-500 focus:outline-none rounded-lg px-4 py-2.5 text-sm font-medium transition-all"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1">
+                {t("dateFrom")}
+              </label>
+              <input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                title={t("dateFrom")}
+                className="border-2 border-gray-200 hover:border-gray-300 focus:border-emerald-500 focus:outline-none rounded-lg px-4 py-2.5 text-sm font-medium transition-all"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1">
+                {t("dateTo")}
+              </label>
+              <input
+                type="date"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+                title={t("dateTo")}
+                className="border-2 border-gray-200 hover:border-gray-300 focus:border-emerald-500 focus:outline-none rounded-lg px-4 py-2.5 text-sm font-medium transition-all"
+              />
+            </div>
+          </div>
         </div>
-        <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">
-            {t("dateTo")}
-          </label>
-          <input
-            type="date"
-            value={dateTo}
-            onChange={(e) => setDateTo(e.target.value)}
-            title={t("dateTo")}
-            className="border rounded-lg px-3 py-2 text-sm"
-          />
-        </div>
-      </div>
-      <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b">
-            <tr>
-              {[
-                t("dateD"),
-                t("libelle"),
-                t("qty"),
-                t("credit1"),
-                t("credit2"),
-                t("dateR"),
-                t("statut"),
-              ].map((h) => (
-                <th
-                  key={h}
-                  className="text-left px-4 py-3 font-medium text-gray-600"
-                >
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((r, i) => (
-              <tr key={i} className="border-b hover:bg-gray-50">
-                <td className="px-4 py-3">{r.date_d}</td>
-                <td className="px-4 py-3">{r.libelle}</td>
-                <td className="px-4 py-3">{r.qty}</td>
-                <td className="px-4 py-3">{r.credit_1.toLocaleString()}</td>
-                <td className="px-4 py-3">{r.credit_2.toLocaleString()}</td>
-                <td className="px-4 py-3">{r.date_r || "—"}</td>
-                <td className="px-4 py-3">
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs ${r.statut === "Approved" ? "bg-green-100 text-green-700" : r.statut === "Rejected" ? "bg-red-100 text-red-700" : "bg-yellow-100 text-yellow-700"}`}
-                  >
-                    {r.statut}
+
+        {/* Report Section */}
+        <div className="bg-white rounded-xl shadow-md border-2 border-emerald-200 overflow-hidden print:border-black print:shadow-none">
+          {/* Header Information */}
+          <div className="p-6 border-b-2 border-emerald-200 print:border-black bg-emerald-50 print:bg-white space-y-3">
+            <div className="grid grid-cols-2 gap-4 print:grid-cols-1 text-sm">
+              <div>
+                <span className="font-semibold text-gray-800">
+                  {t("mPEName")}:
+                </span>
+                <span className="text-gray-600 ml-2">
+                  SIGETH Hotel Management
+                </span>
+              </div>
+              <div>
+                <span className="font-semibold text-gray-800">
+                  {t("address")}:
+                </span>
+                <span className="text-gray-600 ml-2">Kigali, Rwanda</span>
+              </div>
+              <div>
+                <span className="font-semibold text-gray-800">
+                  {t("phone")}:
+                </span>
+                <span className="text-gray-600 ml-2">+250 (0) 1234567</span>
+              </div>
+              <div>
+                <span className="font-semibold text-gray-800">
+                  {t("email")}:
+                </span>
+                <span className="text-gray-600 ml-2">info@sigeth.com</span>
+              </div>
+              <div>
+                <span className="font-semibold text-gray-800">{t("tin")}:</span>
+                <span className="text-gray-600 ml-2">101234567890</span>
+              </div>
+            </div>
+
+            {/* Title Section */}
+            <div className="text-center py-3 border-y border-emerald-300 print:border-black">
+              <h2 className="text-lg font-bold text-emerald-700 print:text-black">
+                {t("requestFollowUp")}
+              </h2>
+            </div>
+
+            {/* Filter Display */}
+            <div className="grid grid-cols-3 gap-4 text-sm print:grid-cols-2">
+              <div>
+                <span className="font-semibold text-gray-800">
+                  {t("poste")}:
+                </span>
+                <span className="text-gray-600 ml-2">{poste}</span>
+              </div>
+              {dateFrom && (
+                <div>
+                  <span className="font-semibold text-gray-800">
+                    {t("dateFrom")}:
                   </span>
-                </td>
+                  <span className="text-gray-600 ml-2">{dateFrom}</span>
+                </div>
+              )}
+              {dateTo && (
+                <div>
+                  <span className="font-semibold text-gray-800">
+                    {t("dateTo")}:
+                  </span>
+                  <span className="text-gray-600 ml-2">{dateTo}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Requisitions Table */}
+          <table className="w-full text-sm">
+            <thead className="bg-gray-100 border-b-2 border-emerald-200 print:border-black print:bg-gray-50">
+              <tr>
+                <th className="text-left px-4 py-3 font-bold text-gray-700 border-r border-gray-300 print:border-black">
+                  {t("dateD")}
+                </th>
+                <th className="text-left px-4 py-3 font-bold text-gray-700 border-r border-gray-300 print:border-black">
+                  {t("designation")}
+                </th>
+                <th className="text-left px-4 py-3 font-bold text-gray-700 border-r border-gray-300 print:border-black">
+                  {t("unity")}
+                </th>
+                <th className="text-center px-4 py-3 font-bold text-gray-700 border-r border-gray-300 print:border-black">
+                  {t("qty")}
+                </th>
+                <th className="text-right px-4 py-3 font-bold text-gray-700 border-r border-gray-300 print:border-black">
+                  {t("credit1")}
+                </th>
+                <th className="text-right px-4 py-3 font-bold text-gray-700 border-r border-gray-300 print:border-black">
+                  {t("credit2")}
+                </th>
+                <th className="text-left px-4 py-3 font-bold text-gray-700">
+                  {t("dateR")}
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filtered.length > 0 ? (
+                filtered.map((r, i) => (
+                  <tr
+                    key={i}
+                    className="border-b border-gray-200 hover:bg-emerald-50/50 transition-colors print:border-black print:hover:bg-white"
+                  >
+                    <td className="px-4 py-3 border-r border-gray-200 print:border-black">
+                      {r.date_d}
+                    </td>
+                    <td className="px-4 py-3 border-r border-gray-200 print:border-black">
+                      {r.libelle}
+                    </td>
+                    <td className="px-4 py-3 border-r border-gray-200 print:border-black"></td>
+                    <td className="px-4 py-3 text-center border-r border-gray-200 print:border-black">
+                      {r.qty}
+                    </td>
+                    <td className="px-4 py-3 text-right font-medium border-r border-gray-200 print:border-black">
+                      {r.credit_1.toLocaleString()}
+                    </td>
+                    <td className="px-4 py-3 text-right font-medium border-r border-gray-200 print:border-black">
+                      {r.credit_2.toLocaleString()}
+                    </td>
+                    <td className="px-4 py-3">{r.date_r || "—"}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan={7}
+                    className="px-4 py-3 text-gray-400 text-center"
+                  >
+                    {t("noRecords")}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Legends */}
+        <div className="bg-white rounded-lg p-4 border border-gray-300 print:border-black text-xs text-gray-600 print:text-gray-700">
+          <p className="font-semibold mb-2">{t("legends")}:</p>
+          <div className="space-y-1">
+            <p>
+              <strong>{t("dateD")}</strong> = {t("dateOfRequestLabel")}
+            </p>
+            <p>
+              <strong>{t("dateR")}</strong> = {t("dateOfResponseLabel")}
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
