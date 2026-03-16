@@ -14,6 +14,7 @@ import {
 import { useLang } from "../../hooks/useLang";
 import { useHotelData } from "../../context/HotelDataContext";
 import type { RCS, GRC } from "../../types";
+import { frontOfficeApi } from "../../services/sigethApi";
 
 export default function CheckInGroup() {
   const { t } = useLang();
@@ -116,56 +117,45 @@ export default function CheckInGroup() {
   );
 
   /* ── Check-in one member ── */
-  const checkInMember = (member: RCS, targetRoom?: string) => {
+  const checkInMember = async (member: RCS, targetRoom?: string) => {
     const room_num = targetRoom ?? member.room_num;
 
+    const response = await frontOfficeApi.groupCheckin({
+      groupe_name: member.groupe_name,
+      guest_name: member.guest_name,
+      room_num,
+      arrival_date: member.arrival_date,
+      depart_date: member.depart_date,
+      puv: member.puv,
+      current_mon: member.current_mon,
+    });
+
     setReservations((prev) =>
-      prev.map((r) =>
-        r.room_num === member.room_num && r.guest_name === member.guest_name
-          ? { ...r, room_num, status: 1 }
-          : r,
-      ),
+      prev.map((r) => (r.id === response.reservation.id ? response.reservation : r)),
     );
-
     setRooms((prev) =>
-      prev.map((room) => {
-        if (room.room_num === room_num) {
-          return {
-            ...room,
-            guest_name: member.guest_name,
-            arrival_date: member.arrival_date,
-            depart_date: member.depart_date,
-            puv: member.puv,
-            status: "OCC" as const,
-          };
-        }
-        if (targetRoom && room.room_num === member.room_num) {
-          return {
-            ...room,
-            guest_name: "",
-            arrival_date: "",
-            depart_date: "",
-            puv: room.price_1,
-            status: "VC" as const,
-          };
-        }
-        return room;
-      }),
+      prev.map((room) => (room.id === response.room.id ? response.room : room)),
     );
 
-    return { ...member, room_num, status: 1 as const };
+    return response.reservation;
   };
 
   /* ── Batch check-in all pending ── */
-  const handleBatchCheckIn = () => {
+  const handleBatchCheckIn = async () => {
     const pending = groupMembers.filter((m) => m.status === 0);
-    pending.forEach((m) => checkInMember(m));
+    for (const member of pending) {
+      try {
+        await checkInMember(member);
+      } catch {
+        break;
+      }
+    }
   };
 
   /* ── Single member check-in from modal ── */
-  const handleConfirmMemberCheckIn = () => {
+  const handleConfirmMemberCheckIn = async () => {
     if (!processingMember) return;
-    const res = checkInMember(processingMember, swapRoom ?? undefined);
+    const res = await checkInMember(processingMember, swapRoom ?? undefined);
     setKeyCardGuest(res);
     setProcessingMember(null);
     setSwapRoom(null);

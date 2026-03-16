@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
+    import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/api";
 
 const api = axios.create({
     baseURL: API_BASE_URL,
@@ -46,10 +46,11 @@ api.interceptors.response.use(
         }
 
         // Don't try to refresh the refresh-token endpoint itself
-        if (original.url?.includes("/auth/refresh")) {
+        if (original.url?.includes("/auth/refresh/")) {
             localStorage.removeItem("access_token");
             localStorage.removeItem("refresh_token");
-            window.location.href = "/login";
+            localStorage.removeItem("sigeth_user");
+            window.location.href = "/";
             return Promise.reject(error);
         }
 
@@ -70,12 +71,12 @@ api.interceptors.response.use(
             const refreshToken = localStorage.getItem("refresh_token");
             if (!refreshToken) throw new Error("No refresh token");
 
-            const { data } = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-                refresh_token: refreshToken,
+            const { data } = await axios.post(`${API_BASE_URL}/auth/refresh/`, {
+                refresh: refreshToken,
             });
 
-            const newAccess: string = data.access_token;
-            const newRefresh: string | undefined = data.refresh_token;
+            const newAccess: string = data.access;
+            const newRefresh: string | undefined = data.refresh;
 
             localStorage.setItem("access_token", newAccess);
             if (newRefresh) localStorage.setItem("refresh_token", newRefresh);
@@ -87,7 +88,8 @@ api.interceptors.response.use(
             processQueue(refreshError, null);
             localStorage.removeItem("access_token");
             localStorage.removeItem("refresh_token");
-            window.location.href = "/login";
+            localStorage.removeItem("sigeth_user");
+            window.location.href = "/";
             return Promise.reject(refreshError);
         } finally {
             isRefreshing = false;

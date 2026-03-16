@@ -1,38 +1,29 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import api from "../utils/api";
 import { queryKeys } from "../lib/queryKeys";
-import type { RDF, CATROOM, StatusRef } from "../types";
+import type { RDF } from "../types";
+import { coreApi, frontOfficeApi, housekeepingApi } from "../services/sigethApi";
 
 // ── Queries ──
 
 export function useRooms() {
     return useQuery({
         queryKey: queryKeys.rooms.list(),
-        queryFn: async () => {
-            const { data } = await api.get<RDF[]>("/rooms");
-            return data;
-        },
+        queryFn: () => frontOfficeApi.rooms(),
     });
 }
 
-export function useRoom(roomNum: string) {
+export function useRoom(roomId: string) {
     return useQuery({
-        queryKey: queryKeys.rooms.detail(roomNum),
-        queryFn: async () => {
-            const { data } = await api.get<RDF>(`/rooms/${roomNum}`);
-            return data;
-        },
-        enabled: !!roomNum,
+        queryKey: queryKeys.rooms.detail(roomId),
+        queryFn: () => frontOfficeApi.room(roomId),
+        enabled: !!roomId,
     });
 }
 
 export function useRoomStatuses() {
     return useQuery({
         queryKey: queryKeys.rooms.statuses(),
-        queryFn: async () => {
-            const { data } = await api.get<StatusRef[]>("/rooms/statuses");
-            return data;
-        },
+        queryFn: () => coreApi.statuses(),
         staleTime: Infinity, // reference data rarely changes
     });
 }
@@ -40,10 +31,7 @@ export function useRoomStatuses() {
 export function useRoomCategories() {
     return useQuery({
         queryKey: queryKeys.rooms.categories(),
-        queryFn: async () => {
-            const { data } = await api.get<CATROOM[]>("/rooms/categories");
-            return data;
-        },
+        queryFn: () => coreApi.catrooms(),
         staleTime: Infinity,
     });
 }
@@ -54,12 +42,16 @@ export function useUpdateRoom() {
     const qc = useQueryClient();
     return useMutation({
         mutationFn: async (room: RDF) => {
-            const { data } = await api.put<RDF>(`/rooms/${room.room_num}`, room);
-            return data;
+            if (!room.id) {
+                throw new Error("Room id is required to update a room.");
+            }
+            return frontOfficeApi.updateRoom(room.id, room);
         },
         onSuccess: (_data, variables) => {
             qc.invalidateQueries({ queryKey: queryKeys.rooms.list() });
-            qc.invalidateQueries({ queryKey: queryKeys.rooms.detail(variables.room_num) });
+            if (variables.id) {
+                qc.invalidateQueries({ queryKey: queryKeys.rooms.detail(variables.id) });
+            }
         },
     });
 }
@@ -68,8 +60,7 @@ export function useUpdateRoomStatus() {
     const qc = useQueryClient();
     return useMutation({
         mutationFn: async ({ roomNum, status }: { roomNum: string; status: string }) => {
-            const { data } = await api.patch<RDF>(`/rooms/${roomNum}/status`, { status });
-            return data;
+            return housekeepingApi.updateRoomStatus({ room_num: roomNum, status_code: status });
         },
         onSuccess: () => {
             qc.invalidateQueries({ queryKey: queryKeys.rooms.all });

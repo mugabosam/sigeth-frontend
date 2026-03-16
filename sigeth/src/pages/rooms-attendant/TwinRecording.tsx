@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Search, Save } from "lucide-react";
 import { useLang } from "../../hooks/useLang";
 import { useHotelData } from "../../context/HotelDataContext";
+import { frontOfficeApi } from "../../services/sigethApi";
 
 export default function TwinRecording() {
   const { t } = useLang();
@@ -56,13 +57,29 @@ export default function TwinRecording() {
     setSelectedRoom({ ...selectedRoom, [field]: value });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!selectedRoom) return;
-    setRooms((prev) =>
-      prev.map((r) =>
-        r.room_num === selectedRoom.room_num ? selectedRoom : r,
-      ),
-    );
+
+    try {
+      if (!selectedRoom.id) {
+        throw new Error("Room id is required for twin recording.");
+      }
+      const saved = await frontOfficeApi.twin(selectedRoom.id, {
+        twin_name: selectedRoom.twin_name,
+        twin_num: selectedRoom.twin_num,
+      });
+      setRooms((prev) =>
+        prev.map((r) => (r.id === saved.id ? saved : r)),
+      );
+    } catch (error) {
+      alert(
+        typeof error === "object" && error !== null && "message" in error
+          ? String((error as { message: string }).message)
+          : t("loginError"),
+      );
+      return;
+    }
+
     setSelectedRoom(null);
     setQuery("");
   };

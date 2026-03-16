@@ -8,6 +8,7 @@ import {
   type ValidationResult,
 } from "../../utils/housekeepingValidation";
 import type { REQUIS } from "../../types";
+import { coreApi } from "../../services/sigethApi";
 
 export default function RequestNote({
   posteDefault = "Housekeeping",
@@ -52,31 +53,67 @@ export default function RequestNote({
     setShowSaveConfirm(true);
   };
 
-  const confirmSave = () => {
+  const confirmSave = async () => {
     if (!selected) return;
 
     setErrors({ isValid: true, errors: [] });
 
-    if (isNew) setRequisitions((prev) => [...prev, selected]);
-    else
-      setRequisitions((prev) =>
-        prev.map((r) =>
-          r.code_p === selected.code_p && r.date_d === selected.date_d
-            ? selected
-            : r,
-        ),
+    try {
+      const payload = {
+        code_p: selected.code_p,
+        date_d: selected.date_d,
+        poste: selected.poste,
+        libelle: selected.libelle,
+        qte: selected.qty,
+        credit_1: selected.credit_1,
+        credit_2: selected.credit_2,
+        date_r: selected.date_r,
+        statut: selected.statut,
+      };
+
+      const saved = isNew
+        ? await coreApi.createRequis(payload)
+        : selected.id
+          ? await coreApi.updateRequis(selected.id, payload)
+          : await coreApi.createRequis(payload);
+
+      if (isNew || !selected.id) {
+        setRequisitions((prev) => [...prev, saved]);
+      } else {
+        setRequisitions((prev) =>
+          prev.map((r) => (r.id === saved.id ? saved : r)),
+        );
+      }
+    } catch (error) {
+      alert(
+        typeof error === "object" && error !== null && "message" in error
+          ? String((error as { message: string }).message)
+          : "Failed to save requisition",
       );
+      return;
+    }
+
     setSelected(null);
     setShowSaveConfirm(false);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!selected) return;
-    setRequisitions((prev) =>
-      prev.filter(
-        (r) => !(r.code_p === selected.code_p && r.date_d === selected.date_d),
-      ),
-    );
+
+    if (selected.id) {
+      try {
+        await coreApi.deleteRequis(selected.id);
+      } catch (error) {
+        alert(
+          typeof error === "object" && error !== null && "message" in error
+            ? String((error as { message: string }).message)
+            : "Failed to delete requisition",
+        );
+        return;
+      }
+    }
+
+    setRequisitions((prev) => prev.filter((r) => r.id !== selected.id));
     setSelected(null);
     setShowDeleteConfirm(false);
   };

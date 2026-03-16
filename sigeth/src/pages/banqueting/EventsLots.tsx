@@ -9,6 +9,7 @@ import {
 } from "../../utils/banquetingValidation";
 import { createErrorNotification } from "../../utils/errorFormatter";
 import type { EventRecord } from "../../types";
+import { banquetingApi } from "../../services/sigethApi";
 
 // Predefined event types per Banqueting specifications
 // "Un Lot repose sur le groupage de services rattachés à un événement
@@ -53,15 +54,26 @@ export default function EventsLots() {
     setConfirmAction(true);
   };
 
-  const confirmSave = () => {
+  const confirmSave = async () => {
     if (!selected) return;
     setErrors({ isValid: true, errors: [] });
 
-    if (isNew) setEvents((prev) => [...prev, selected]);
-    else
-      setEvents((prev) =>
-        prev.map((e) => (e.lot === selected.lot ? selected : e)),
-      );
+    try {
+      const saved = isNew
+        ? await banquetingApi.createEvent(selected)
+        : selected.id
+          ? await banquetingApi.updateEvent(selected.id, selected)
+          : await banquetingApi.createEvent(selected);
+
+      if (isNew || !selected.id) {
+        setEvents((prev) => [...prev, saved]);
+      } else {
+        setEvents((prev) => prev.map((e) => (e.id === saved.id ? saved : e)));
+      }
+    } catch {
+      return;
+    }
+
     setSelected(null);
     setConfirmAction(false);
   };
@@ -72,9 +84,16 @@ export default function EventsLots() {
     setConfirmAction(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!selected) return;
-    setEvents((prev) => prev.filter((e) => e.lot !== selected.lot));
+    if (selected.id) {
+      try {
+        await banquetingApi.deleteEvent(selected.id);
+      } catch {
+        return;
+      }
+    }
+    setEvents((prev) => prev.filter((e) => e.id !== selected.id));
     setSelected(null);
     setConfirmAction(false);
   };

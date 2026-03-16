@@ -8,6 +8,7 @@ import {
   type ValidationResult,
 } from "../../utils/housekeepingValidation";
 import type { CATROOM } from "../../types";
+import { coreApi } from "../../services/sigethApi";
 
 export default function RoomCategories() {
   const { t } = useLang();
@@ -43,23 +44,59 @@ export default function RoomCategories() {
     setShowSaveConfirm(true);
   };
 
-  const confirmSave = () => {
+  const confirmSave = async () => {
     if (!selected) return;
 
     setErrors({ isValid: true, errors: [] });
 
-    if (isNew) setCatrooms((prev: CATROOM[]) => [...prev, selected]);
-    else
-      setCatrooms((prev: CATROOM[]) =>
-        prev.map((c) => (c.code === selected.code ? selected : c)),
+    try {
+      const payload = {
+        code_cat: selected.code,
+        designation: selected.name,
+      };
+      const saved = isNew
+        ? await coreApi.createCatroom(payload)
+        : selected.id
+          ? await coreApi.updateCatroom(selected.id, payload)
+          : await coreApi.createCatroom(payload);
+
+      if (isNew || !selected.id) {
+        setCatrooms((prev: CATROOM[]) => [...prev, saved]);
+      } else {
+        setCatrooms((prev: CATROOM[]) =>
+          prev.map((c) => (c.id === saved.id ? saved : c)),
+        );
+      }
+    } catch (error) {
+      alert(
+        typeof error === "object" && error !== null && "message" in error
+          ? String((error as { message: string }).message)
+          : "Failed to save room category",
       );
+      return;
+    }
+
     setSelected(null);
     setShowSaveConfirm(false);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!selected) return;
-    setCatrooms((prev) => prev.filter((c) => c.code !== selected.code));
+
+    if (selected.id) {
+      try {
+        await coreApi.deleteCatroom(selected.id);
+      } catch (error) {
+        alert(
+          typeof error === "object" && error !== null && "message" in error
+            ? String((error as { message: string }).message)
+            : "Failed to delete room category",
+        );
+        return;
+      }
+    }
+
+    setCatrooms((prev) => prev.filter((c) => c.id !== selected.id));
     setSelected(null);
     setShowDeleteConfirm(false);
   };

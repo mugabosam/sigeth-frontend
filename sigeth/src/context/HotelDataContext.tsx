@@ -1,4 +1,11 @@
-﻿import { createContext, useContext, useState, type ReactNode } from "react";
+﻿import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
 import type {
   RDF,
   RCS,
@@ -24,29 +31,12 @@ import type {
   Currency,
 } from "../types";
 import {
-  mockRooms,
-  mockReservations,
-  mockReservationArchive,
-  mockGroupReservations,
-  mockGroupArchive,
-  mockStatuses,
-  mockInvoices,
-  mockTempo,
-  mockCatrooms,
-  mockStaff,
-  mockRstaff,
-  mockCatlaundry,
-  mockLaundryServices,
-  mockJlaundry,
-  mockRequisitions,
-  mockEvents,
-  mockBanquetServices,
-  mockJbanquet,
-  mockSales,
-  mockUsers,
-  mockPaymentModes,
-  mockCurrencies,
-} from "../utils/mockData";
+  banquetingApi,
+  coreApi,
+  frontOfficeApi,
+  housekeepingApi,
+} from "../services/sigethApi";
+import { useAuth } from "./AuthContext";
 
 interface HotelDataContextType {
   rooms: RDF[];
@@ -96,42 +86,136 @@ const HotelDataContext = createContext<HotelDataContextType | undefined>(
 );
 
 export function HotelDataProvider({ children }: { children: ReactNode }) {
-  const [rooms, setRooms] = useState<RDF[]>(() => [...mockRooms]);
-  const [reservations, setReservations] = useState<RCS[]>(() => [
-    ...mockReservations,
-  ]);
-  const [reservationArchive, setReservationArchive] = useState<RCSA[]>(() => [
-    ...mockReservationArchive,
-  ]);
-  const [groupReservations, setGroupReservations] = useState<GRC[]>(() => [
-    ...mockGroupReservations,
-  ]);
-  const [groupArchive, setGroupArchive] = useState<GRCA[]>(() => [
-    ...mockGroupArchive,
-  ]);
-  const [invoices, setInvoices] = useState<InvoiceRecord[]>(() => [
-    ...mockInvoices,
-  ]);
-  const [tempo, setTempo] = useState<TEMPO[]>(() => [...mockTempo]);
-  const [catrooms, setCatrooms] = useState<CATROOM[]>(() => [...mockCatrooms]);
-  const [staff, setStaff] = useState<HSTAFF[]>(() => [...mockStaff]);
-  const [rstaff, setRstaff] = useState<RSTAFF[]>(() => [...mockRstaff]);
-  const [catlaundry, setCatlaundry] = useState<CATLAUNDRY[]>(() => [
-    ...mockCatlaundry,
-  ]);
-  const [laundryServices, setLaundryServices] = useState<HSERVICE[]>(() => [
-    ...mockLaundryServices,
-  ]);
-  const [jlaundry, setJlaundry] = useState<JLAUNDRY[]>(() => [...mockJlaundry]);
-  const [requisitions, setRequisitions] = useState<REQUIS[]>(() => [
-    ...mockRequisitions,
-  ]);
-  const [events, setEvents] = useState<EventRecord[]>(() => [...mockEvents]);
-  const [banquetServices, setBanquetServices] = useState<BanquetService[]>(
-    () => [...mockBanquetServices],
-  );
-  const [jbanquet, setJbanquet] = useState<JBANQUET[]>(() => [...mockJbanquet]);
-  const [sales, setSales] = useState<SalesEntry[]>(() => [...mockSales]);
+  const { isAuthenticated, user } = useAuth();
+  const [rooms, setRooms] = useState<RDF[]>([]);
+  const [reservations, setReservations] = useState<RCS[]>([]);
+  const [reservationArchive, setReservationArchive] = useState<RCSA[]>([]);
+  const [groupReservations, setGroupReservations] = useState<GRC[]>([]);
+  const [groupArchive, setGroupArchive] = useState<GRCA[]>([]);
+  const [invoices, setInvoices] = useState<InvoiceRecord[]>([]);
+  const [tempo, setTempo] = useState<TEMPO[]>([]);
+  const [catrooms, setCatrooms] = useState<CATROOM[]>([]);
+  const [staff, setStaff] = useState<HSTAFF[]>([]);
+  const [rstaff, setRstaff] = useState<RSTAFF[]>([]);
+  const [catlaundry, setCatlaundry] = useState<CATLAUNDRY[]>([]);
+  const [laundryServices, setLaundryServices] = useState<HSERVICE[]>([]);
+  const [jlaundry, setJlaundry] = useState<JLAUNDRY[]>([]);
+  const [requisitions, setRequisitions] = useState<REQUIS[]>([]);
+  const [events, setEvents] = useState<EventRecord[]>([]);
+  const [banquetServices, setBanquetServices] = useState<BanquetService[]>([]);
+  const [jbanquet, setJbanquet] = useState<JBANQUET[]>([]);
+  const [sales, setSales] = useState<SalesEntry[]>([]);
+  const [statuses, setStatuses] = useState<StatusRef[]>([]);
+  const [paymentModes, setPaymentModes] = useState<PaymentMode[]>([]);
+  const [currencies, setCurrencies] = useState<Currency[]>([]);
+
+  const clearData = useCallback(() => {
+    setRooms([]);
+    setReservations([]);
+    setReservationArchive([]);
+    setGroupReservations([]);
+    setGroupArchive([]);
+    setInvoices([]);
+    setTempo([]);
+    setCatrooms([]);
+    setStaff([]);
+    setRstaff([]);
+    setCatlaundry([]);
+    setLaundryServices([]);
+    setJlaundry([]);
+    setRequisitions([]);
+    setEvents([]);
+    setBanquetServices([]);
+    setJbanquet([]);
+    setSales([]);
+    setStatuses([]);
+    setPaymentModes([]);
+    setCurrencies([]);
+  }, []);
+
+  const reloadData = useCallback(async () => {
+    if (!isAuthenticated || !user) {
+      clearData();
+      return;
+    }
+
+    const [statusData, paymentModeData, roomCategoryData, exchangeData, requisData] =
+      await Promise.all([
+        coreApi.statuses(),
+        coreApi.modep(),
+        coreApi.catrooms(),
+        coreApi.exchange(),
+        coreApi.requis(),
+      ]);
+
+    setStatuses(statusData);
+    setPaymentModes(paymentModeData);
+    setCatrooms(roomCategoryData);
+    setCurrencies(exchangeData);
+    setRequisitions(requisData);
+
+    if (user.level === "Manager_R") {
+      const [roomsData, reservationsData, archivesData, groupsData, groupArchivesData] =
+        await Promise.all([
+          frontOfficeApi.rooms(),
+          frontOfficeApi.reservations(),
+          frontOfficeApi.archives(),
+          frontOfficeApi.groups(),
+          frontOfficeApi.groupArchives(),
+        ]);
+
+      setRooms(roomsData);
+      setReservations(reservationsData);
+      setReservationArchive(archivesData);
+      setGroupReservations(groupsData);
+      setGroupArchive(groupArchivesData);
+      return;
+    }
+
+    if (user.level === "Manager_H") {
+      const [roomsData, staffData, dispatchingData, laundryCategoryData, laundryServiceData, laundryJournalData, laundryArchiveData] =
+        await Promise.all([
+          frontOfficeApi.rooms(),
+          housekeepingApi.staff(),
+          housekeepingApi.dispatching(),
+          housekeepingApi.laundryCategories(),
+          housekeepingApi.laundryServices(),
+          housekeepingApi.laundryJournal(),
+          housekeepingApi.laundryArchive(),
+        ]);
+
+      setRooms(roomsData);
+      setStaff(staffData);
+      setRstaff(dispatchingData);
+      setCatlaundry(laundryCategoryData);
+      setLaundryServices(laundryServiceData);
+      setJlaundry(laundryJournalData.concat(laundryArchiveData));
+      return;
+    }
+
+    if (user.level === "Manager_B") {
+      const [groupsData, eventData, banquetServiceData, banquetJournalData, banquetArchiveData] =
+        await Promise.all([
+          frontOfficeApi.groups(),
+          banquetingApi.events(),
+          banquetingApi.services(),
+          banquetingApi.journal(),
+          banquetingApi.archive(),
+        ]);
+
+      setGroupReservations(groupsData);
+      setEvents(eventData);
+      setBanquetServices(banquetServiceData);
+      setJbanquet(banquetJournalData.concat(banquetArchiveData));
+    }
+  }, [clearData, isAuthenticated, user]);
+
+  useEffect(() => {
+    void reloadData().catch((error) => {
+      console.error("Failed to load SIGETH data", error);
+      clearData();
+    });
+  }, [clearData, reloadData]);
 
   return (
     <HotelDataContext.Provider
@@ -146,7 +230,7 @@ export function HotelDataProvider({ children }: { children: ReactNode }) {
         setGroupReservations,
         groupArchive,
         setGroupArchive,
-        statuses: mockStatuses,
+        statuses,
         invoices,
         setInvoices,
         tempo,
@@ -173,9 +257,19 @@ export function HotelDataProvider({ children }: { children: ReactNode }) {
         setJbanquet,
         sales,
         setSales,
-        users: mockUsers,
-        paymentModes: mockPaymentModes,
-        currencies: mockCurrencies,
+        users: user
+          ? [
+              {
+                username: user.username,
+                password: "",
+                level: user.level,
+                name: user.name,
+                submodule: user.submodule,
+              },
+            ]
+          : [],
+        paymentModes,
+        currencies,
       }}
     >
       {children}

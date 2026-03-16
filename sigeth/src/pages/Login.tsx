@@ -15,13 +15,12 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { useLang } from "../hooks/useLang";
 import { useAuth } from "../context/AuthContext";
-import { mockUsers } from "../utils/mockData";
 import { getLoginDesign } from "../utils/LoginDesigns";
 import type { TranslationKey } from "../i18n/translations";
 
 export default function Login() {
   const { t, lang, dark, toggleDark, toggleLang } = useLang();
-  const { login } = useAuth();
+  const { login, logout } = useAuth();
   const navigate = useNavigate();
   const { submodule } = useParams<{ submodule: string }>();
 
@@ -55,26 +54,25 @@ export default function Login() {
     setLoading(true);
 
     try {
-      await login(username, password);
-      const found = mockUsers.find((u) => u.username === username);
-      if (found && found.level !== design.level) {
+      const authenticatedUser = await login(username, password);
+      if (authenticatedUser.level !== design.level) {
         setError(t("loginError"));
+        await logout();
         setLoading(false);
         return;
       }
       navigate(design.defaultRoute, { replace: true });
     } catch (err: unknown) {
+      const responseData =
+        typeof err === "object" && err !== null && "response" in err
+          ? (err as { response?: { data?: { detail?: string; message?: string } } }).response?.data
+          : undefined;
+
       if (
-        typeof err === "object" &&
-        err !== null &&
-        "response" in err &&
-        typeof (err as { response?: { data?: { message?: string } } }).response
-          ?.data?.message === "string"
+        responseData &&
+        typeof (responseData.detail ?? responseData.message) === "string"
       ) {
-        setError(
-          (err as { response: { data: { message: string } } }).response.data
-            .message,
-        );
+        setError((responseData.detail ?? responseData.message) as string);
       } else {
         setError(t("loginError"));
       }

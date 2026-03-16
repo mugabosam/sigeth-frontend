@@ -11,6 +11,7 @@ import {
 import { createErrorNotification } from "../../utils/errorFormatter";
 import { COUNTRIES, getPhoneCodeByNationality } from "../../utils/countries";
 import type { GRC } from "../../types";
+import { frontOfficeApi } from "../../services/sigethApi";
 
 export default function GroupReservation() {
   const { t } = useLang();
@@ -44,7 +45,7 @@ export default function GroupReservation() {
     current_mon: "RWF",
     exchange: 1,
     qty: 0,
-    payt_mode: "Cash",
+    payt_mode: paymentModes[0]?.code ?? "",
     discount: 0,
     stay_cost: 0,
     deposit: 0,
@@ -125,7 +126,7 @@ export default function GroupReservation() {
     setConfirmSaveOpen(true);
   };
 
-  const confirmSave = () => {
+  const confirmSave = async () => {
     if (!selected) return;
 
     // Validate before saving
@@ -141,11 +142,31 @@ export default function GroupReservation() {
       return;
     }
 
-    if (isNew) setGroupReservations((prev) => [...prev, selected]);
-    else
-      setGroupReservations((prev) =>
-        prev.map((g) => (g.code_g === selected.code_g ? selected : g)),
+    try {
+      const saved = isNew
+        ? await frontOfficeApi.createGroup(selected)
+        : selected.id
+          ? await frontOfficeApi.updateGroup(selected.id, selected)
+          : await frontOfficeApi.createGroup(selected);
+
+      if (isNew || !selected.id) {
+        setGroupReservations((prev) => [...prev, saved]);
+      } else {
+        setGroupReservations((prev) =>
+          prev.map((g) => (g.id === saved.id ? saved : g)),
+        );
+      }
+    } catch (error) {
+      addNotification(
+        typeof error === "object" && error !== null && "message" in error
+          ? String((error as { message: string }).message)
+          : t("loginError"),
+        "Rooms Attendant",
+        "error",
       );
+      return;
+    }
+
     addNotification(
       `Group reservation for ${selected.groupe_name} ${isNew ? "created" : "updated"}`,
       "Rooms Attendant",
@@ -160,11 +181,25 @@ export default function GroupReservation() {
     setConfirmDeleteOpen(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!selected) return;
-    setGroupReservations((prev) =>
-      prev.filter((g) => g.code_g !== selected.code_g),
-    );
+
+    if (selected.id) {
+      try {
+        await frontOfficeApi.deleteGroup(selected.id);
+      } catch (error) {
+        addNotification(
+          typeof error === "object" && error !== null && "message" in error
+            ? String((error as { message: string }).message)
+            : t("loginError"),
+          "Rooms Attendant",
+          "error",
+        );
+        return;
+      }
+    }
+
+    setGroupReservations((prev) => prev.filter((g) => g.id !== selected.id));
     addNotification(
       `Group reservation for ${selected.groupe_name} deleted`,
       "Rooms Attendant",
@@ -384,7 +419,7 @@ export default function GroupReservation() {
                 className="w-full border rounded-lg px-3 py-2 text-sm"
               >
                 {paymentModes.map((m) => (
-                  <option key={m.code} value={m.label}>
+                  <option key={m.code} value={m.code}>
                     {m.label}
                   </option>
                 ))}

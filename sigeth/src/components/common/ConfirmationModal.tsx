@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { AlertCircle, X } from "lucide-react";
 
 interface ConfirmationModalProps {
@@ -7,7 +8,7 @@ interface ConfirmationModalProps {
   confirmText?: string;
   cancelText?: string;
   isDangerous?: boolean;
-  onConfirm: () => void;
+  onConfirm: () => void | Promise<void>;
   onCancel: () => void;
 }
 
@@ -21,7 +22,24 @@ export default function ConfirmationModal({
   onConfirm,
   onCancel,
 }: ConfirmationModalProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   if (!isOpen) return null;
+
+  const handleConfirm = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      await onConfirm();
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCancel = () => {
+    if (isSubmitting) return;
+    onCancel();
+  };
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[9999]">
@@ -52,7 +70,8 @@ export default function ConfirmationModal({
             </h2>
           </div>
           <button
-            onClick={onCancel}
+            onClick={handleCancel}
+            disabled={isSubmitting}
             className="text-gray-400 hover:text-gray-600 transition-colors"
             title="Close"
             aria-label="Close confirmation"
@@ -69,14 +88,16 @@ export default function ConfirmationModal({
         {/* Footer */}
         <div className="px-6 py-4 bg-gray-50 flex gap-3 justify-end border-t border-gray-100">
           <button
-            onClick={onCancel}
+            onClick={handleCancel}
+            disabled={isSubmitting}
             className="px-4 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors font-medium text-sm"
             title="Cancel operation"
           >
             {cancelText}
           </button>
           <button
-            onClick={onConfirm}
+            onClick={handleConfirm}
+            disabled={isSubmitting}
             className={`px-4 py-2 rounded-lg text-white font-medium text-sm transition-colors ${
               isDangerous
                 ? "bg-red-600 hover:bg-red-700"
@@ -84,7 +105,7 @@ export default function ConfirmationModal({
             }`}
             title={`Confirm ${title}`}
           >
-            {confirmText}
+            {isSubmitting ? `${confirmText}...` : confirmText}
           </button>
         </div>
       </div>

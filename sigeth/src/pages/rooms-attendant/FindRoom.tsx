@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Search } from "lucide-react";
 import { useLang } from "../../hooks/useLang";
 import { useHotelData } from "../../context/HotelDataContext";
+import { frontOfficeApi } from "../../services/sigethApi";
 
 export default function FindRoom() {
   const { t } = useLang();
@@ -23,6 +24,7 @@ export default function FindRoom() {
       .filter(
         (r) =>
           r.room_num.toLowerCase().includes(q) ||
+          r.guest_name.toLowerCase().includes(q) ||
           r.designation.toLowerCase().includes(q),
       )
       .slice(0, 10);
@@ -37,12 +39,22 @@ export default function FindRoom() {
     setShowSuggestions(false);
   };
 
-  const handleSearch = () => {
-    const r = rooms.find((r) => r.room_num === query);
-    setFound(r ?? null);
+  const handleSearch = async () => {
+    let result: (typeof rooms)[0] | undefined | null = rooms.find(
+      (r) => r.room_num === query || r.guest_name.toLowerCase() === query.toLowerCase(),
+    );
+    if (!result) {
+      try {
+        const apiResult = await frontOfficeApi.findRoom({ room_num: query, guest_name: query });
+        result = apiResult[0];
+      } catch {
+        result = null;
+      }
+    }
+    setFound(result ?? null);
     setSuggestions([]);
     setShowSuggestions(false);
-    if (!r) alert(t("noRoomFound"));
+    if (!result) alert(t("noRoomFound"));
   };
 
   return (
@@ -62,8 +74,8 @@ export default function FindRoom() {
             <input
               value={query}
               onChange={(e) => handleQueryChange(e.target.value)}
-              placeholder={t("roomNumber")}
-              title={t("roomNumber")}
+              placeholder={`${t("roomNumber")} / ${t("guestName")}`}
+              title={`${t("roomNumber")} / ${t("guestName")}`}
               className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             />
@@ -76,7 +88,7 @@ export default function FindRoom() {
                     className="w-full text-left px-4 py-2 hover:bg-blue-50 transition-colors border-b last:border-b-0 text-sm"
                   >
                     <div className="font-medium text-gray-800">
-                      {t("roomText")} {r.room_num}
+                      {t("roomText")} {r.room_num} — {r.guest_name || "—"}
                     </div>
                     <div className="text-xs text-gray-500">{r.designation}</div>
                   </button>

@@ -11,6 +11,7 @@ import {
 import { createErrorNotification } from "../../utils/errorFormatter";
 import { COUNTRIES, getPhoneCodeByNationality } from "../../utils/countries";
 import type { RCS } from "../../types";
+import { frontOfficeApi } from "../../services/sigethApi";
 
 export default function GroupMemberReservation({
   mode = "1113",
@@ -67,7 +68,7 @@ export default function GroupMemberReservation({
     country: "",
     current_mon: "RWF",
     puv: 0,
-    payt_mode: "Cash",
+    payt_mode: paymentModes[0]?.code ?? "",
     airport_time: "",
     discount: 0,
     stay_cost: 0,
@@ -186,7 +187,7 @@ export default function GroupMemberReservation({
     setConfirmSaveOpen(true);
   };
 
-  const confirmSave = () => {
+  const confirmSave = async () => {
     if (!selected) return;
 
     // Validate before saving
@@ -202,53 +203,58 @@ export default function GroupMemberReservation({
       return;
     }
 
-    if (isNew) setReservations((prev) => [...prev, selected]);
-    else
-      setReservations((prev) =>
-        prev.map((r) =>
-          r.room_num === selected.room_num &&
-          r.guest_name === selected.guest_name
-            ? selected
-            : r,
-        ),
-      );
-    // For check-in mode (1117), also update RDF.dat
-    if (mode === "1117" && selected.room_num) {
-      const arr = selected.arrival_date
-        ? new Date(selected.arrival_date)
-        : null;
-      const dep = selected.depart_date ? new Date(selected.depart_date) : null;
-      const qty =
-        arr && dep
-          ? Math.max(Math.round((dep.getTime() - arr.getTime()) / 86400000), 0)
-          : 0;
+    try {
+      if (mode === "1117") {
+        const response = await frontOfficeApi.groupCheckin({
+          groupe_name: selected.groupe_name,
+          guest_name: selected.guest_name,
+          room_num: selected.room_num,
+          arrival_date: selected.arrival_date,
+          depart_date: selected.depart_date,
+          puv: selected.puv,
+          current_mon: selected.current_mon,
+        });
 
-      setRooms((prev) =>
-        prev.map((room) =>
-          room.room_num === selected.room_num
-            ? isNew
-              ? {
-                  ...room,
-                  guest_name: selected.guest_name,
-                  arrival_date: selected.arrival_date,
-                  depart_date: selected.depart_date,
-                  puv: selected.puv,
-                  status: "OCC" as const,
-                }
-              : {
-                  ...room,
-                  groupe_name: selected.groupe_name,
-                  guest_name: selected.guest_name,
-                  arrival_date: selected.arrival_date,
-                  depart_date: selected.depart_date,
-                  qty,
-                  puv: selected.puv,
-                  status: "CC" as const,
-                }
-            : room,
-        ),
+        setReservations((prev) => {
+          const exists = prev.some((r) => r.id === response.reservation.id);
+          if (exists) {
+            return prev.map((r) =>
+              r.id === response.reservation.id ? response.reservation : r,
+            );
+          }
+          return [...prev, response.reservation];
+        });
+        setRooms((prev) =>
+          prev.map((room) =>
+            room.id === response.room.id ? response.room : room,
+          ),
+        );
+      } else {
+        const saved = isNew
+          ? await frontOfficeApi.createReservation(selected)
+          : selected.id
+            ? await frontOfficeApi.updateReservation(selected.id, selected)
+            : await frontOfficeApi.createReservation(selected);
+
+        if (isNew || !selected.id) {
+          setReservations((prev) => [...prev, saved]);
+        } else {
+          setReservations((prev) =>
+            prev.map((r) => (r.id === saved.id ? saved : r)),
+          );
+        }
+      }
+    } catch (error) {
+      addNotification(
+        typeof error === "object" && error !== null && "message" in error
+          ? String((error as { message: string }).message)
+          : t("loginError"),
+        "Rooms Attendant",
+        "error",
       );
+      return;
     }
+
     addNotification(
       `Group member ${selected.guest_name} ${isNew ? "created" : "updated"}`,
       "Rooms Attendant",
@@ -262,17 +268,25 @@ export default function GroupMemberReservation({
     setConfirmDeleteOpen(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!selected) return;
-    setReservations((prev) =>
-      prev.filter(
-        (r) =>
-          !(
-            r.room_num === selected.room_num &&
-            r.guest_name === selected.guest_name
-          ),
-      ),
-    );
+
+    if (selected.id) {
+      try {
+        await frontOfficeApi.deleteReservation(selected.id);
+      } catch (error) {
+        addNotification(
+          typeof error === "object" && error !== null && "message" in error
+            ? String((error as { message: string }).message)
+            : t("loginError"),
+          "Rooms Attendant",
+          "error",
+        );
+        return;
+      }
+    }
+
+    setReservations((prev) => prev.filter((r) => r.id !== selected.id));
     addNotification(
       `Group member ${selected.guest_name} deleted`,
       "Rooms Attendant",
@@ -615,7 +629,7 @@ export default function GroupMemberReservation({
                 className="w-full border rounded-lg px-3 py-2 text-sm"
               >
                 {paymentModes.map((m) => (
-                  <option key={m.code} value={m.label}>
+                  <option key={m.code} value={m.code}>
                     {m.label}
                   </option>
                 ))}

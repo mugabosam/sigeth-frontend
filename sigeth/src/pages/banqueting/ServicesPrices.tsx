@@ -9,6 +9,7 @@ import {
 } from "../../utils/banquetingValidation";
 import { createErrorNotification } from "../../utils/errorFormatter";
 import type { BanquetService } from "../../types";
+import { banquetingApi } from "../../services/sigethApi";
 
 // Predefined event types per Banqueting specifications
 const EVENT_TYPES = [
@@ -55,18 +56,29 @@ export default function ServicesPrices() {
     setConfirmAction(true);
   };
 
-  const confirmSave = () => {
+  const confirmSave = async () => {
     if (!selected || !event) return;
     setErrors({ isValid: true, errors: [] });
 
     const record = { ...selected, lot: event.lot, nature: event.nature };
-    if (isNew) setBanquetServices((prev) => [...prev, record]);
-    else
-      setBanquetServices((prev) =>
-        prev.map((b) =>
-          b.item === selected.item && b.lot === selected.lot ? record : b,
-        ),
-      );
+    try {
+      const saved = isNew
+        ? await banquetingApi.createService(record)
+        : selected.id
+          ? await banquetingApi.updateService(selected.id, record)
+          : await banquetingApi.createService(record);
+
+      if (isNew || !selected.id) {
+        setBanquetServices((prev) => [...prev, saved]);
+      } else {
+        setBanquetServices((prev) =>
+          prev.map((b) => (b.id === saved.id ? saved : b)),
+        );
+      }
+    } catch {
+      return;
+    }
+
     setSelected(null);
     setConfirmAction(false);
   };
@@ -77,11 +89,16 @@ export default function ServicesPrices() {
     setConfirmAction(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!selected) return;
-    setBanquetServices((prev) =>
-      prev.filter((b) => !(b.item === selected.item && b.lot === selected.lot)),
-    );
+    if (selected.id) {
+      try {
+        await banquetingApi.deleteService(selected.id);
+      } catch {
+        return;
+      }
+    }
+    setBanquetServices((prev) => prev.filter((b) => b.id !== selected.id));
     setSelected(null);
     setConfirmAction(false);
   };

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLang } from "../../hooks/useLang";
 import { useHotelData } from "../../context/HotelDataContext";
 import type { RoomStatusCode } from "../../types";
+import { housekeepingApi } from "../../services/sigethApi";
 
 export default function RoomStatus() {
   const { t } = useLang();
@@ -13,12 +14,25 @@ export default function RoomStatus() {
       ? rooms.filter((r) => r.categorie === selectedCat)
       : [];
 
-  const handleStatusChange = (roomNum: string, newStatus: RoomStatusCode) => {
-    setRooms((prev) =>
-      prev.map((r) =>
-        r.room_num === roomNum ? { ...r, status: newStatus } : r,
-      ),
-    );
+  const handleStatusChange = async (
+    roomNum: string,
+    newStatus: RoomStatusCode,
+  ) => {
+    try {
+      const updated = await housekeepingApi.updateRoomStatus({
+        room_num: roomNum,
+        status_code: newStatus,
+      });
+      setRooms((prev) =>
+        prev.map((r) => (r.id === updated.id ? updated : r)),
+      );
+    } catch {
+      setRooms((prev) =>
+        prev.map((r) =>
+          r.room_num === roomNum ? { ...r, status: newStatus } : r,
+        ),
+      );
+    }
   };
 
   return (

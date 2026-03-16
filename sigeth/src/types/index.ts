@@ -11,6 +11,7 @@ export type RoomStatusCode =
     | "CO" | "OD" | "OCC" | "LC/O" | "DL" | "ARR" | "CC";
 
 export interface StatusRef {
+    id?: string;
     code: RoomStatusCode;
     label: string;
     meaning: string;
@@ -18,6 +19,7 @@ export interface StatusRef {
 
 // ── RDF.dat — Rooms Descriptive File ──
 export interface RDF {
+    id?: string;
     categorie: number;
     room_num: string;
     designation: string;
@@ -39,6 +41,7 @@ export interface RDF {
 
 // ── RCS.dat — Reservation-Confirmation Journal ──
 export interface RCS {
+    id?: string;
     code_p: string;
     groupe_name: string;
     room_num: string;
@@ -68,11 +71,13 @@ export interface RCS {
 
 // ── RCSA.dat — Reservation-Confirmation Archive ──
 export interface RCSA extends Omit<RCS, "depart_date"> {
+    id?: string;
     departure_date: string;
 }
 
 // ── GRC.dat — Group Reservation-Confirmation Journal ──
 export interface GRC {
+    id?: string;
     code_g: string;
     groupe_name: string;
     phone: string;
@@ -105,6 +110,7 @@ export interface InvoiceRecord {
 
 // ── TEMPO.dat — Temporary Guest Consumption File ──
 export interface TEMPO {
+    id?: string;
     date: string;
     room_num: string;
     guest_name: string;
@@ -123,12 +129,14 @@ export interface TEMPO {
 
 // ── CATROOM.dat — Room Category Reference ──
 export interface CATROOM {
+    id?: string;
     code: number;
     name: string;
 }
 
 // ── HSTAFF.dat — Housekeeping Staff ──
 export interface HSTAFF {
+    id?: string;
     number: number;
     first_name: string;
     last_name: string;
@@ -137,6 +145,7 @@ export interface HSTAFF {
 
 // ── RSTAFF.dat — Staff Dispatching ──
 export interface RSTAFF {
+    id?: string;
     date: string;
     room_num: string;
     guest_name: string;
@@ -145,16 +154,19 @@ export interface RSTAFF {
     status: RoomStatusCode;
     staff_number: number;
     staff_name: string;
+    category?: string;
 }
 
 // ── CATLAUNDRY.dat — Laundry Category Reference ──
 export interface CATLAUNDRY {
+    id?: string;
     code: string;
     name: string;
 }
 
 // ── HSERVICE.dat — Laundry Service Items ──
 export interface HSERVICE {
+    id?: string;
     designation: string;
     type: string;
     qty: number;
@@ -166,6 +178,7 @@ export interface HSERVICE {
 
 // ── JLAUNDRY.dat — Laundry Journal ──
 export interface JLAUNDRY {
+    id?: string;
     date: string;
     room_num: string;
     designation: string;
@@ -177,6 +190,7 @@ export interface JLAUNDRY {
 
 // ── REQUIS.dat — Requisition / Request Notes ──
 export interface REQUIS {
+    id?: string;
     code_p: string;
     date_d: string;
     poste: string;
@@ -190,12 +204,14 @@ export interface REQUIS {
 
 // ── EVENTS.dat — Event Types (Banqueting) ──
 export interface EventRecord {
+    id?: string;
     lot: number;
     nature: string;
 }
 
 // ── BANQUET.dat — Banqueting Services ──
 export interface BanquetService {
+    id?: string;
     date: string;
     lot: number;
     nature: string;
@@ -207,6 +223,7 @@ export interface BanquetService {
 
 // ── JBANQUET.dat — Banqueting Journal ──
 export interface JBANQUET {
+    id?: string;
     date: string;
     room_num: string;
     groupe_name: string;
@@ -221,6 +238,7 @@ export interface JBANQUET {
 
 // ── SALES.dat / JCASHIER.dat — Sales & Cashier ──
 export interface SalesEntry {
+    id?: string;
     date: string;
     order_num: string;
     code_art: string;
@@ -251,6 +269,7 @@ export interface UserRecord {
 
 // ── MONNAIES.dat — Currencies Reference ──
 export interface Currency {
+    id?: string;
     code: string;
     label: string;
     exchange_rate: number;
@@ -258,7 +277,9 @@ export interface Currency {
 
 // ── MODEP.dat — Payment Modes ──
 export interface PaymentMode {
+    id?: string;
     code: string;
     label: string;
     exchange_rate?: number;
+    current_mon?: string;
 }

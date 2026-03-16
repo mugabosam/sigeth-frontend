@@ -5,6 +5,7 @@ import { useHotelData } from "../../context/HotelDataContext";
 import ConfirmationModal from "../../components/common/ConfirmationModal";
 import { validateRoom } from "../../utils/housekeepingValidation";
 import type { RDF } from "../../types";
+import { frontOfficeApi } from "../../services/sigethApi";
 
 // Hotel information for printing
 const HOTEL_INFO = {
@@ -79,22 +80,52 @@ export default function RoomsRepertory() {
     setShowSaveConfirm(true);
   };
 
-  const confirmSave = () => {
+  const confirmSave = async () => {
     if (!selected) return;
 
-    if (isNew) setRooms((prev) => [...prev, selected]);
-    else
-      setRooms((prev) =>
-        prev.map((r) => (r.room_num === selected.room_num ? selected : r)),
+    try {
+      const saved = isNew
+        ? await frontOfficeApi.createRoom(selected)
+        : selected.id
+          ? await frontOfficeApi.updateRoom(selected.id, selected)
+          : await frontOfficeApi.createRoom(selected);
+
+      if (isNew || !selected.id) {
+        setRooms((prev) => [...prev, saved]);
+      } else {
+        setRooms((prev) => prev.map((r) => (r.id === saved.id ? saved : r)));
+      }
+    } catch (error) {
+      alert(
+        typeof error === "object" && error !== null && "message" in error
+          ? String((error as { message: string }).message)
+          : "Failed to save room",
       );
+      return;
+    }
+
     setSelected(null);
     setQuery("");
     setShowSaveConfirm(false);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!selected) return;
-    setRooms((prev) => prev.filter((r) => r.room_num !== selected.room_num));
+
+    if (selected.id) {
+      try {
+        await frontOfficeApi.deleteRoom(selected.id);
+      } catch (error) {
+        alert(
+          typeof error === "object" && error !== null && "message" in error
+            ? String((error as { message: string }).message)
+            : "Failed to delete room",
+        );
+        return;
+      }
+    }
+
+    setRooms((prev) => prev.filter((r) => r.id !== selected.id));
     setSelected(null);
     setShowDeleteConfirm(false);
   };

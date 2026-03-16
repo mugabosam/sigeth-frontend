@@ -17,6 +17,7 @@ import ConfirmationModal from "../../components/common/ConfirmationModal";
 import { validateCheckIn } from "../../utils/roomsAttendantValidation";
 import { createErrorNotification } from "../../utils/errorFormatter";
 import type { RCS } from "../../types";
+import { frontOfficeApi } from "../../services/sigethApi";
 
 /* ── helper: format today as YYYY-MM-DD ── */
 const today = () => {
@@ -84,7 +85,7 @@ export default function CheckInReservation() {
     setConfirmCheckInOpen(true);
   };
 
-  const confirmCheckIn = () => {
+  const confirmCheckIn = async () => {
     if (!processing) return;
 
     // Validate reservation data before check-in
@@ -102,45 +103,47 @@ export default function CheckInReservation() {
     const res = processing;
     const targetRoom = swapRoom ?? res.room_num;
 
-    // Update RCS: close reservation, set room_num if swapped
-    setReservations((prev) =>
-      prev.map((r) =>
-        r.room_num === res.room_num && r.guest_name === res.guest_name
-          ? { ...r, room_num: targetRoom, status: 1 }
-          : r,
-      ),
-    );
+    try {
+      if (swapRoom && swapRoom !== res.room_num) {
+        const moved = await frontOfficeApi.moveGuest({
+          old_room_num: res.room_num,
+          new_room_num: swapRoom,
+        });
+        setRooms((prev) =>
+          prev.map((room) => {
+            if (room.id === moved.old_room.id) return moved.old_room;
+            if (room.id === moved.new_room.id) return moved.new_room;
+            return room;
+          }),
+        );
+      }
 
-    // Update RDF: set target room to OCC
-    setRooms((prev) =>
-      prev.map((room) => {
-        if (room.room_num === targetRoom) {
-          return {
-            ...room,
-            guest_name: res.guest_name,
-            arrival_date: res.arrival_date,
-            depart_date: res.depart_date,
-            puv: res.puv,
-            status: "OCC" as const,
-          };
-        }
-        // If swapping, clear old room back to VC
-        if (swapRoom && room.room_num === res.room_num) {
-          return {
-            ...room,
-            guest_name: "",
-            arrival_date: "",
-            depart_date: "",
-            puv: room.price_1,
-            status: "VC" as const,
-          };
-        }
-        return room;
-      }),
-    );
+      const response = await frontOfficeApi.checkin({
+        room_num: targetRoom,
+        guest_name: res.guest_name,
+      });
 
-    const checkedInRes = { ...res, room_num: targetRoom, status: 1 as const };
-    setKeyCardGuest(checkedInRes);
+      setReservations((prev) =>
+        prev.map((r) => (r.id === response.reservation.id ? response.reservation : r)),
+      );
+      setRooms((prev) =>
+        prev.map((room) => (room.id === response.room.id ? response.room : room)),
+      );
+
+      const checkedInRes = { ...response.reservation };
+      setKeyCardGuest(checkedInRes);
+    } catch (error) {
+      addNotification(
+        typeof error === "object" && error !== null && "message" in error
+          ? String((error as { message: string }).message)
+          : t("loginError"),
+        "Rooms Attendant",
+        "error",
+      );
+      setConfirmCheckInOpen(false);
+      return;
+    }
+
     setProcessing(null);
     setIdVerified(false);
     setSwapRoom(null);

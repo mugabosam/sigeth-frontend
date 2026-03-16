@@ -5,6 +5,7 @@ import { useHotelData } from "../../context/HotelDataContext";
 import ConfirmationModal from "../../components/common/ConfirmationModal";
 import { validateLaundryService } from "../../utils/housekeepingValidation";
 import type { HSERVICE } from "../../types";
+import { housekeepingApi } from "../../services/sigethApi";
 
 export default function LaundryServices() {
   const { t } = useLang();
@@ -50,34 +51,41 @@ export default function LaundryServices() {
     setShowSaveConfirm(true);
   };
 
-  const confirmSave = () => {
+  const confirmSave = async () => {
     if (!selected) return;
 
-    if (isNew) setLaundryServices((prev) => [...prev, selected]);
-    else
-      setLaundryServices((prev) =>
-        prev.map((s) =>
-          s.designation === selected.designation &&
-          s.category === selected.category
-            ? selected
-            : s,
-        ),
-      );
+    try {
+      const saved = isNew
+        ? await housekeepingApi.createLaundryService(selected)
+        : selected.id
+          ? await housekeepingApi.updateLaundryService(selected.id, selected)
+          : await housekeepingApi.createLaundryService(selected);
+
+      if (isNew || !selected.id) {
+        setLaundryServices((prev) => [...prev, saved]);
+      } else {
+        setLaundryServices((prev) =>
+          prev.map((s) => (s.id === saved.id ? saved : s)),
+        );
+      }
+    } catch {
+      return;
+    }
+
     setSelected(null);
     setShowSaveConfirm(false);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!selected) return;
-    setLaundryServices((prev) =>
-      prev.filter(
-        (s) =>
-          !(
-            s.designation === selected.designation &&
-            s.category === selected.category
-          ),
-      ),
-    );
+    if (selected.id) {
+      try {
+        await housekeepingApi.deleteLaundryService(selected.id);
+      } catch {
+        return;
+      }
+    }
+    setLaundryServices((prev) => prev.filter((s) => s.id !== selected.id));
     setSelected(null);
     setShowDeleteConfirm(false);
   };

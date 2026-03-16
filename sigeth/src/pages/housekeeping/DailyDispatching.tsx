@@ -3,6 +3,7 @@ import { Save, Printer, FileSpreadsheet } from "lucide-react";
 import { useLang } from "../../hooks/useLang";
 import { useHotelData } from "../../context/HotelDataContext";
 import type { RSTAFF } from "../../types";
+import { housekeepingApi } from "../../services/sigethApi";
 
 export default function DailyDispatching() {
   const { t } = useLang();
@@ -35,8 +36,21 @@ export default function DailyDispatching() {
     });
   };
 
-  const handleSave = () => {
-    setRstaff(assignments);
+  const handleSave = async () => {
+    try {
+      const saved: RSTAFF[] = [];
+      for (const assignment of assignments) {
+        const item = await housekeepingApi.assignStaff({
+          staff_number: assignment.staff_number,
+          room_num: assignment.room_num,
+        });
+        saved.push(item);
+      }
+      setRstaff(saved);
+    } catch {
+      // keep existing in-memory assignments visible when API save fails
+      setRstaff(assignments);
+    }
   };
 
   const handleExport = () => {

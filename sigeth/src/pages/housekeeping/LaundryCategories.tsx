@@ -8,6 +8,7 @@ import {
   type ValidationResult,
 } from "../../utils/housekeepingValidation";
 import type { CATLAUNDRY } from "../../types";
+import { housekeepingApi } from "../../services/sigethApi";
 
 export default function LaundryCategories() {
   const { t } = useLang();
@@ -43,23 +44,44 @@ export default function LaundryCategories() {
     setShowSaveConfirm(true);
   };
 
-  const confirmSave = () => {
+  const confirmSave = async () => {
     if (!selected) return;
 
     setErrors({ isValid: true, errors: [] });
 
-    if (isNew) setCatlaundry((prev) => [...prev, selected]);
-    else
-      setCatlaundry((prev) =>
-        prev.map((c) => (c.code === selected.code ? selected : c)),
-      );
+    try {
+      const payload = { code: selected.code, libelle: selected.name };
+      const saved = isNew
+        ? await housekeepingApi.createLaundryCategory(payload)
+        : selected.id
+          ? await housekeepingApi.updateLaundryCategory(selected.id, payload)
+          : await housekeepingApi.createLaundryCategory(payload);
+
+      if (isNew || !selected.id) {
+        setCatlaundry((prev) => [...prev, saved]);
+      } else {
+        setCatlaundry((prev) =>
+          prev.map((c) => (c.id === saved.id ? saved : c)),
+        );
+      }
+    } catch {
+      return;
+    }
+
     setSelected(null);
     setShowSaveConfirm(false);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!selected) return;
-    setCatlaundry((prev) => prev.filter((c) => c.code !== selected.code));
+    if (selected.id) {
+      try {
+        await housekeepingApi.deleteLaundryCategory(selected.id);
+      } catch {
+        return;
+      }
+    }
+    setCatlaundry((prev) => prev.filter((c) => c.id !== selected.id));
     setSelected(null);
     setShowDeleteConfirm(false);
   };

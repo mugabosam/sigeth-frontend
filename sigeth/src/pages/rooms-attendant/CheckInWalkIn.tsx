@@ -11,6 +11,7 @@ import {
 import { createErrorNotification } from "../../utils/errorFormatter";
 import { COUNTRIES, getPhoneCodeByNationality } from "../../utils/countries";
 import type { RCS } from "../../types";
+import { frontOfficeApi } from "../../services/sigethApi";
 
 /* ── helper ── */
 const today = () => new Date().toISOString().slice(0, 10);
@@ -42,7 +43,7 @@ export default function CheckInWalkIn() {
     country: "",
     current_mon: "RWF",
     puv: 0,
-    payt_mode: paymentModes[0]?.label ?? "Cash",
+    payt_mode: paymentModes[0]?.code ?? "",
     airport_time: "",
     discount: 0,
     stay_cost: 0,
@@ -135,7 +136,7 @@ export default function CheckInWalkIn() {
     setConfirmSubmitOpen(true);
   };
 
-  const confirmSubmit = () => {
+  const confirmSubmit = async () => {
     if (!canSubmit) return;
 
     // Validate form data before submitting
@@ -151,25 +152,24 @@ export default function CheckInWalkIn() {
       return;
     }
 
-    // Create RCS with status=1 (already checked in)
-    const newRes: RCS = { ...form, status: 1 };
-    setReservations((prev) => [...prev, newRes]);
-
-    // Update RDF room to OCC
-    setRooms((prev) =>
-      prev.map((room) =>
-        room.room_num === form.room_num
-          ? {
-              ...room,
-              guest_name: form.guest_name,
-              arrival_date: form.arrival_date,
-              depart_date: form.depart_date,
-              puv: form.puv,
-              status: "OCC" as const,
-            }
-          : room,
-      ),
-    );
+    let newRes: RCS;
+    try {
+      const response = await frontOfficeApi.walkin(form);
+      newRes = response.reservation;
+      setReservations((prev) => [...prev, response.reservation]);
+      setRooms((prev) =>
+        prev.map((room) => (room.id === response.room.id ? response.room : room)),
+      );
+    } catch (error) {
+      addNotification(
+        typeof error === "object" && error !== null && "message" in error
+          ? String((error as { message: string }).message)
+          : t("loginError"),
+        "Rooms Attendant",
+        "error",
+      );
+      return;
+    }
 
     // Trigger notification
     addNotification(
@@ -446,7 +446,7 @@ export default function CheckInWalkIn() {
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
               >
                 {paymentModes.map((m) => (
-                  <option key={m.code} value={m.label}>
+                  <option key={m.code} value={m.code}>
                     {m.label}
                   </option>
                 ))}

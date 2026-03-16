@@ -3,8 +3,10 @@ import { Save, ShoppingCart, Clock } from "lucide-react";
 import { useLang } from "../../hooks/useLang";
 import { useHotelData } from "../../context/HotelDataContext";
 import type { JBANQUET } from "../../types";
+import { banquetingApi } from "../../services/sigethApi";
 
 interface BufferItem {
+  id?: string;
   item: string;
   unity: number;
   price: number;
@@ -26,8 +28,7 @@ const EVENT_TYPES = [
 
 export default function BanquetOrders() {
   const { t } = useLang();
-  const { groupReservations, events, banquetServices, jbanquet, setJbanquet } =
-    useHotelData();
+  const { groupReservations, events, jbanquet, setJbanquet } = useHotelData();
   const [selectedGroup, setSelectedGroup] = useState("");
   const [selectedLot, setSelectedLot] = useState<number | null>(null);
   const [buffer, setBuffer] = useState<BufferItem[]>([]);
@@ -38,18 +39,29 @@ export default function BanquetOrders() {
   const activeGroups = groupReservations.filter((g) => g.status === 0);
   const group = activeGroups.find((g) => g.code_g === selectedGroup);
 
-  const loadServices = (lot: number) => {
+  const loadServices = async (lot: number) => {
     setSelectedLot(lot);
-    const items = banquetServices.filter((b) => b.lot === lot);
-    setBuffer(
-      items.map((b) => ({
-        item: b.item,
-        unity: b.unity,
-        price: b.puv,
-        qty: 0,
-        total: 0,
-      })),
-    );
+    if (!group) return;
+
+    try {
+      await banquetingApi.verifyGroup({ groupe_name: group.groupe_name });
+      const items = await banquetingApi.loadBuffer({
+        lot,
+        groupe_name: group.groupe_name,
+      });
+      setBuffer(
+        items.map((b) => ({
+          id: b.id,
+          item: b.item,
+          unity: b.unity,
+          price: b.price,
+          qty: b.qty,
+          total: b.total,
+        })),
+      );
+    } catch {
+      setBuffer([]);
+    }
   };
 
   const updateQty = (idx: number, qty: number) => {
@@ -71,25 +83,20 @@ export default function BanquetOrders() {
     setConfirmTransfer(true);
   };
 
-  const confirmTransferAction = () => {
+  const confirmTransferAction = async () => {
     if (!group || selectedLot === null) return;
-    const event = events.find((e) => e.lot === selectedLot);
-    if (!event) return;
-    const orderItems = buffer.filter((b) => b.qty > 0);
-    const date = new Date().toISOString().split("T")[0];
-    const entries: JBANQUET[] = orderItems.map((b) => ({
-      date,
-      room_num: "",
-      groupe_name: group.groupe_name,
-      lot: event.lot,
-      nature: event.nature,
-      item: b.item,
-      unity: b.unity,
-      qty: b.qty,
-      price: b.price,
-      total: b.total,
-    }));
-    setJbanquet((prev) => [...prev, ...entries]);
+
+    try {
+      for (const item of buffer.filter((b) => b.qty > 0 && b.id)) {
+        await banquetingApi.updateOrderBuffer(item.id!, { qty: item.qty });
+      }
+      await banquetingApi.confirmOrder({ groupe_name: group.groupe_name });
+      const journal = await banquetingApi.journal();
+      setJbanquet(journal as JBANQUET[]);
+    } catch {
+      return;
+    }
+
     setBuffer([]);
     setSelectedLot(null);
     setError("");

@@ -1,67 +1,48 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import api from "../utils/api";
-import { queryKeys } from "../lib/queryKeys";
-import type { InvoiceRecord, SalesEntry, TEMPO } from "../types";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { frontOfficeApi } from "../services/sigethApi";
+import type { TEMPO } from "../types";
 
-// ── Queries ──
-
-export function useInvoices() {
+export function useGuestInvoicePreview(roomNum?: string, guestName?: string) {
     return useQuery({
-        queryKey: queryKeys.invoices.list(),
-        queryFn: async () => {
-            const { data } = await api.get<InvoiceRecord[]>("/invoices");
-            return data;
+        queryKey: ["invoice-preview", roomNum, guestName] as const,
+        queryFn: async (): Promise<TEMPO[]> => {
+            if (!roomNum || !guestName) {
+                return [];
+            }
+            const response = await frontOfficeApi.previewInvoice({
+                room_num: roomNum,
+                guest_name: guestName,
+            });
+            return response.items;
         },
+        enabled: Boolean(roomNum && guestName),
     });
 }
 
-export function useSales() {
+export function useGroupInvoicePreview(groupeName?: string) {
     return useQuery({
-        queryKey: queryKeys.invoices.sales(),
-        queryFn: async () => {
-            const { data } = await api.get<SalesEntry[]>("/sales");
-            return data;
+        queryKey: ["group-invoice-preview", groupeName] as const,
+        queryFn: async (): Promise<TEMPO[]> => {
+            if (!groupeName) {
+                return [];
+            }
+            const response = await frontOfficeApi.previewGroupInvoice({
+                groupe_name: groupeName,
+            });
+            return response.items;
         },
+        enabled: Boolean(groupeName),
     });
 }
 
-export function useConsumptions(roomNum?: string) {
-    return useQuery({
-        queryKey: [...queryKeys.invoices.consumptions(), roomNum] as const,
-        queryFn: async () => {
-            const url = roomNum ? `/consumptions?room=${roomNum}` : "/consumptions";
-            const { data } = await api.get<TEMPO[]>(url);
-            return data;
-        },
-    });
-}
-
-// ── Mutations ──
-
-export function useCreateInvoice() {
-    const qc = useQueryClient();
+export function useGenerateGuestInvoice() {
     return useMutation({
-        mutationFn: async (invoice: Omit<InvoiceRecord, "numero">) => {
-            const { data } = await api.post<InvoiceRecord>("/invoices", invoice);
-            return data;
-        },
-        onSuccess: () => {
-            qc.invalidateQueries({ queryKey: queryKeys.invoices.all });
-        },
+        mutationFn: frontOfficeApi.generateInvoice,
     });
 }
 
-export function useRecordSale() {
-    const qc = useQueryClient();
+export function useGenerateGroupInvoice() {
     return useMutation({
-        mutationFn: async (sale: SalesEntry) => {
-            const { data } = await api.post<SalesEntry>("/sales", sale);
-            return data;
-        },
-        onSuccess: () => {
-            qc.invalidateQueries({ queryKey: queryKeys.invoices.sales() });
-            qc.invalidateQueries({ queryKey: queryKeys.invoices.consumptions() });
-            qc.invalidateQueries({ queryKey: queryKeys.rooms.all });
-        },
+        mutationFn: frontOfficeApi.generateGroupInvoice,
     });
 }

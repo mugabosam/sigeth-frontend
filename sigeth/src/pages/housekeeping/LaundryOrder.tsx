@@ -3,27 +3,47 @@ import { Save } from "lucide-react";
 import { useLang } from "../../hooks/useLang";
 import { useHotelData } from "../../context/HotelDataContext";
 import type { JLAUNDRY } from "../../types";
+import { housekeepingApi } from "../../services/sigethApi";
+
+type BufferItem = {
+  id?: string;
+  designation: string;
+  type?: string;
+  unity: number;
+  puv: number;
+  qty: number;
+  orderQty: number;
+};
 
 export default function LaundryOrder() {
   const { t } = useLang();
-  const { laundryServices, catlaundry, setJlaundry } = useHotelData();
+  const { catlaundry, setJlaundry } = useHotelData();
   const [selectedCat, setSelectedCat] = useState("");
   const [roomNum, setRoomNum] = useState("");
   const [orderDate, setOrderDate] = useState(
     new Date().toISOString().split("T")[0],
   );
-  const [items, setItems] = useState<
-    ((typeof laundryServices)[0] & { orderQty: number })[]
-  >([]);
+  const [items, setItems] = useState<BufferItem[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleSelectCategory = (cat: string) => {
+  const handleSelectCategory = async (cat: string) => {
     setSelectedCat(cat);
-    setItems(
-      laundryServices
-        .filter((s) => s.category === cat)
-        .map((s) => ({ ...s, orderQty: 0 })),
-    );
+    try {
+      const loaded = await housekeepingApi.loadLaundryBuffer({ category: cat });
+      setItems(
+        loaded.map((s) => ({
+          id: s.id,
+          designation: s.designation,
+          type: "",
+          unity: s.unity,
+          puv: s.price,
+          qty: s.qty,
+          orderQty: 0,
+        })),
+      );
+    } catch {
+      setItems([]);
+    }
   };
 
   const handleQtyChange = (idx: number, qty: number) => {
@@ -53,21 +73,25 @@ export default function LaundryOrder() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!validateOrder()) return;
 
-    const entries: JLAUNDRY[] = items
-      .filter((i) => i.orderQty > 0)
-      .map((i) => ({
-        date: orderDate,
-        room_num: roomNum,
-        designation: i.designation,
-        unity: 1,
-        qty: i.orderQty,
-        price: i.puv,
-        total: i.orderQty * i.puv,
-      }));
-    setJlaundry((prev) => [...prev, ...entries]);
+    try {
+      for (const item of items.filter((i) => i.orderQty > 0 && i.id)) {
+        await housekeepingApi.updateLaundryBuffer(item.id!, {
+          qty: item.orderQty,
+          room_num: roomNum,
+          date: orderDate,
+        });
+      }
+
+      await housekeepingApi.confirmLaundry({ room_num: roomNum });
+      const journal = await housekeepingApi.laundryJournal();
+      setJlaundry(journal as JLAUNDRY[]);
+    } catch {
+      return;
+    }
+
     setItems([]);
     setSelectedCat("");
     setRoomNum("");

@@ -3,6 +3,7 @@ import { Search, ArrowRightLeft, AlertCircle, XCircle, X } from "lucide-react";
 import { useLang } from "../../hooks/useLang";
 import { useHotelData } from "../../context/HotelDataContext";
 import { useNotification } from "../../hooks/useNotification";
+import { frontOfficeApi } from "../../services/sigethApi";
 
 export default function MoveGuest() {
   const { t } = useLang();
@@ -104,40 +105,31 @@ export default function MoveGuest() {
     setShowConfirmation(true);
   };
 
-  const confirmMove = () => {
+  const confirmMove = async () => {
     if (!sourceRoom || !targetRoom) return;
 
-    // Transfer guest data to new room, clear old room
-    setRooms((prev) =>
-      prev.map((r) => {
-        if (r.room_num === sourceRoom.room_num)
-          return {
-            ...r,
-            guest_name: "",
-            twin_name: "",
-            twin_num: 0,
-            arrival_date: "",
-            depart_date: "",
-            qty: 0,
-            deposit: 0,
-            status: "VC" as const,
-          };
-        if (r.room_num === targetRoom.room_num)
-          return {
-            ...r,
-            guest_name: sourceRoom.guest_name,
-            twin_name: sourceRoom.twin_name,
-            twin_num: sourceRoom.twin_num,
-            arrival_date: sourceRoom.arrival_date,
-            depart_date: sourceRoom.depart_date,
-            qty: sourceRoom.qty,
-            puv: sourceRoom.puv,
-            deposit: sourceRoom.deposit,
-            status: "OCC" as const,
-          };
-        return r;
-      }),
-    );
+    try {
+      const moved = await frontOfficeApi.moveGuest({
+        old_room_num: sourceRoom.room_num,
+        new_room_num: targetRoom.room_num,
+      });
+
+      setRooms((prev) =>
+        prev.map((r) => {
+          if (r.id === moved.old_room.id) return moved.old_room;
+          if (r.id === moved.new_room.id) return moved.new_room;
+          return r;
+        }),
+      );
+    } catch (error) {
+      setError(
+        typeof error === "object" && error !== null && "message" in error
+          ? String((error as { message: string }).message)
+          : t("targetRoomNotVacant"),
+      );
+      setErrorType("move");
+      return;
+    }
     // Update RCS.dat room_num
     setReservations((prev) =>
       prev.map((r) =>

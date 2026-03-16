@@ -6,21 +6,24 @@
   useCallback,
   type ReactNode,
 } from "react";
-import { mockUsers } from "../utils/mockData";
+import { authApi } from "../services/sigethApi";
 
 interface User {
+  id: string;
   username: string;
   name: string;
   level: string;
   submodule: string;
 }
 
+export type AuthUser = User;
+
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (username: string, password: string) => Promise<void>;
-  logout: () => void;
+  login: (username: string, password: string) => Promise<User>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -30,33 +33,81 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const stored = localStorage.getItem("sigeth_user");
-    if (stored) {
-      try {
-        setUser(JSON.parse(stored));
-      } catch {
-        /* ignore */
+    const bootstrapSession = async () => {
+      const accessToken = localStorage.getItem("access_token");
+      const stored = localStorage.getItem("sigeth_user");
+
+      if (!accessToken) {
+        setIsLoading(false);
+        return;
       }
-    }
-    setIsLoading(false);
+
+      try {
+        const profile = await authApi.me();
+        const sessionUser: User = {
+          id: String(profile.id),
+          username: profile.username,
+          name: profile.full_name,
+          level: profile.level,
+          submodule:
+            profile.level === "Manager_R"
+              ? "rooms-attendant"
+              : profile.level === "Manager_H"
+                ? "housekeeping"
+                : profile.level === "Manager_B"
+                  ? "banqueting"
+                  : profile.module_access,
+        };
+        localStorage.setItem("sigeth_user", JSON.stringify(sessionUser));
+        setUser(sessionUser);
+      } catch {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        if (stored) {
+          localStorage.removeItem("sigeth_user");
+        }
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    void bootstrapSession();
   }, []);
 
   const login = async (username: string, password: string) => {
-    const found = mockUsers.find(
-      (u) => u.username === username && u.password === password,
-    );
-    if (!found) throw new Error("Invalid credentials");
-    const u: User = {
-      username: found.username,
-      name: found.name,
-      level: found.level,
-      submodule: found.submodule,
+    const tokens = await authApi.login(username, password);
+    localStorage.setItem("access_token", tokens.access);
+    localStorage.setItem("refresh_token", tokens.refresh);
+
+    const profile = await authApi.me();
+    const sessionUser: User = {
+      id: String(profile.id),
+      username: profile.username,
+      name: profile.full_name,
+      level: profile.level,
+      submodule:
+        profile.level === "Manager_R"
+          ? "rooms-attendant"
+          : profile.level === "Manager_H"
+            ? "housekeeping"
+            : profile.level === "Manager_B"
+              ? "banqueting"
+              : profile.module_access,
     };
-    localStorage.setItem("sigeth_user", JSON.stringify(u));
-    setUser(u);
+
+    localStorage.setItem("sigeth_user", JSON.stringify(sessionUser));
+    setUser(sessionUser);
+    return sessionUser;
   };
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    const refreshToken = localStorage.getItem("refresh_token");
+    if (refreshToken) {
+      await authApi.logout(refreshToken).catch(() => undefined);
+    }
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
     localStorage.removeItem("sigeth_user");
     setUser(null);
   }, []);

@@ -33,7 +33,7 @@ export const queryKeys = {
     staff: {
         all: ["staff"] as const,
         list: () => [...queryKeys.staff.all, "list"] as const,
-        detail: (id: number) => [...queryKeys.staff.all, id] as const,
+        detail: (id: string) => [...queryKeys.staff.all, id] as const,
         dispatching: () => [...queryKeys.staff.all, "dispatching"] as const,
     },
 } as const;

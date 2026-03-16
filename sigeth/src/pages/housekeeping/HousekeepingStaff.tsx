@@ -10,6 +10,7 @@ import {
 } from "../../utils/housekeepingValidation";
 import { createErrorNotification } from "../../utils/errorFormatter";
 import type { HSTAFF } from "../../types";
+import { housekeepingApi } from "../../services/sigethApi";
 
 export default function HousekeepingStaff() {
   const { t } = useLang();
@@ -61,23 +62,59 @@ export default function HousekeepingStaff() {
     setShowSaveConfirm(true);
   };
 
-  const confirmSave = () => {
+  const confirmSave = async () => {
     if (!selected) return;
 
     setErrors({ isValid: true, errors: [] });
 
-    if (isNew) setStaff((prev) => [...prev, selected]);
-    else
-      setStaff((prev) =>
-        prev.map((s) => (s.number === selected.number ? selected : s)),
+    try {
+      const saved = isNew
+        ? await housekeepingApi.createStaff(selected)
+        : selected.id
+          ? await housekeepingApi.updateStaff(selected.id, selected)
+          : await housekeepingApi.createStaff(selected);
+
+      if (isNew || !selected.id) {
+        setStaff((prev) => [...prev, saved]);
+      } else {
+        setStaff((prev) =>
+          prev.map((s) => (s.id === saved.id ? saved : s)),
+        );
+      }
+    } catch (error) {
+      addNotification(
+        typeof error === "object" && error !== null && "message" in error
+          ? String((error as { message: string }).message)
+          : t("loginError"),
+        "Housekeeping",
+        "error",
       );
+      return;
+    }
+
     setSelected(null);
     setShowSaveConfirm(false);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!selected) return;
-    setStaff((prev) => prev.filter((s) => s.number !== selected.number));
+
+    try {
+      if (selected.id) {
+        await housekeepingApi.deleteStaff(selected.id);
+      }
+      setStaff((prev) => prev.filter((s) => s.id !== selected.id));
+    } catch (error) {
+      addNotification(
+        typeof error === "object" && error !== null && "message" in error
+          ? String((error as { message: string }).message)
+          : t("loginError"),
+        "Housekeeping",
+        "error",
+      );
+      return;
+    }
+
     setSelected(null);
     setShowDeleteConfirm(false);
   };

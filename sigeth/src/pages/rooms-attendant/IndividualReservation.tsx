@@ -11,6 +11,7 @@ import {
 import { createErrorNotification } from "../../utils/errorFormatter";
 import { COUNTRIES, getPhoneCodeByNationality } from "../../utils/countries";
 import type { RCS } from "../../types";
+import { frontOfficeApi } from "../../services/sigethApi";
 
 type Mode = "1112" | "1114" | "1116";
 
@@ -59,7 +60,7 @@ export default function IndividualReservation({
     country: "",
     current_mon: "RWF",
     puv: 0,
-    payt_mode: "Cash",
+    payt_mode: "",
     airport_time: "",
     discount: 0,
     stay_cost: 0,
@@ -164,7 +165,7 @@ export default function IndividualReservation({
     setConfirmSaveOpen(true);
   };
 
-  const confirmSave = () => {
+  const confirmSave = async () => {
     if (!selected) return;
 
     // Validate before saving
@@ -180,33 +181,48 @@ export default function IndividualReservation({
       return;
     }
 
-    if (isNew) setReservations((prev) => [...prev, selected]);
-    else
-      setReservations((prev) =>
-        prev.map((r) =>
-          r.room_num === selected.room_num &&
-          r.guest_name === selected.guest_name
-            ? selected
-            : r,
-        ),
-      );
+    try {
+      if (mode === "1114") {
+        const response = await frontOfficeApi.checkin({
+          room_num: selected.room_num,
+          guest_name: selected.guest_name,
+        });
+        setReservations((prev) =>
+          prev.map((r) => (r.id === response.reservation.id ? response.reservation : r)),
+        );
+        setRooms((prev) =>
+          prev.map((room) => (room.id === response.room.id ? response.room : room)),
+        );
+      } else if (mode === "1116") {
+        const response = await frontOfficeApi.walkin(selected);
+        setReservations((prev) => [...prev, response.reservation]);
+        setRooms((prev) =>
+          prev.map((room) => (room.id === response.room.id ? response.room : room)),
+        );
+      } else {
+        const saved = isNew
+          ? await frontOfficeApi.createReservation(selected)
+          : selected.id
+            ? await frontOfficeApi.updateReservation(selected.id, selected)
+            : await frontOfficeApi.createReservation(selected);
 
-    // For check-in modes (1114/1116), also update RDF.dat
-    if (mode === "1114" || mode === "1116") {
-      setRooms((prev) =>
-        prev.map((room) =>
-          room.room_num === selected.room_num
-            ? {
-                ...room,
-                guest_name: selected.guest_name,
-                arrival_date: selected.arrival_date,
-                depart_date: selected.depart_date,
-                puv: selected.puv,
-                status: "OCC" as const,
-              }
-            : room,
-        ),
+        if (isNew || !selected.id) {
+          setReservations((prev) => [...prev, saved]);
+        } else {
+          setReservations((prev) =>
+            prev.map((r) => (r.id === saved.id ? saved : r)),
+          );
+        }
+      }
+    } catch (error) {
+      addNotification(
+        typeof error === "object" && error !== null && "message" in error
+          ? String((error as { message: string }).message)
+          : t("loginError"),
+        "Rooms Attendant",
+        "error",
       );
+      return;
     }
 
     // Trigger notification
@@ -227,17 +243,25 @@ export default function IndividualReservation({
     setConfirmDeleteOpen(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!selected) return;
-    setReservations((prev) =>
-      prev.filter(
-        (r) =>
-          !(
-            r.room_num === selected.room_num &&
-            r.guest_name === selected.guest_name
-          ),
-      ),
-    );
+
+    if (selected.id) {
+      try {
+        await frontOfficeApi.deleteReservation(selected.id);
+      } catch (error) {
+        addNotification(
+          typeof error === "object" && error !== null && "message" in error
+            ? String((error as { message: string }).message)
+            : t("loginError"),
+          "Rooms Attendant",
+          "error",
+        );
+        return;
+      }
+    }
+
+    setReservations((prev) => prev.filter((r) => r.id !== selected.id));
     addNotification(
       `Reservation for ${selected.guest_name} deleted`,
       "Rooms Attendant",
