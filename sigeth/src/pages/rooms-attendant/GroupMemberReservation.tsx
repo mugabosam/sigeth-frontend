@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { Search, Save, Trash2 } from "lucide-react";
+import { Search, Save, Trash2, AlertTriangle } from "lucide-react";
 import { useLang } from "../../hooks/useLang";
 import { useHotelData } from "../../context/HotelDataContext";
-import { useNotification } from "../../hooks/useNotification";
 import ConfirmationModal from "../../components/common/ConfirmationModal";
 import {
   validateGroupMemberReservation,
@@ -28,7 +27,7 @@ export default function GroupMemberReservation({
     paymentModes,
     currencies,
   } = useHotelData();
-  const { addNotification } = useNotification();
+  const [errorMsg, setErrorMsg] = useState("");
   const [queryCode, setQueryCode] = useState("");
   const [queryGroup, setQueryGroup] = useState("");
   const [groupFound, setGroupFound] = useState<
@@ -68,7 +67,7 @@ export default function GroupMemberReservation({
     country: "",
     current_mon: "RWF",
     puv: 0,
-    payt_mode: paymentModes[0]?.code ?? "",
+    payt_mode: paymentModes[0]?.id ?? "",
     airport_time: "",
     discount: 0,
     stay_cost: 0,
@@ -195,17 +194,15 @@ export default function GroupMemberReservation({
     setErrors(validationResult);
 
     if (!validationResult.isValid) {
-      addNotification(
-        createErrorNotification(validationResult.errors, t),
-        "Validation Error",
-        "error",
-      );
+      setErrorMsg(createErrorNotification(validationResult.errors, t));
+      setConfirmSaveOpen(false);
       return;
     }
 
     try {
       if (mode === "1117") {
         const response = await frontOfficeApi.groupCheckin({
+          code_p: selected.code_p,
           groupe_name: selected.groupe_name,
           guest_name: selected.guest_name,
           room_num: selected.room_num,
@@ -245,21 +242,15 @@ export default function GroupMemberReservation({
         }
       }
     } catch (error) {
-      addNotification(
+      setErrorMsg(
         typeof error === "object" && error !== null && "message" in error
           ? String((error as { message: string }).message)
           : t("loginError"),
-        "Rooms Attendant",
-        "error",
       );
+      setConfirmSaveOpen(false);
       return;
     }
 
-    addNotification(
-      `Group member ${selected.guest_name} ${isNew ? "created" : "updated"}`,
-      "Rooms Attendant",
-      "success",
-    );
     setSelected(null);
     setConfirmSaveOpen(false);
   };
@@ -275,23 +266,17 @@ export default function GroupMemberReservation({
       try {
         await frontOfficeApi.deleteReservation(selected.id);
       } catch (error) {
-        addNotification(
+        setErrorMsg(
           typeof error === "object" && error !== null && "message" in error
             ? String((error as { message: string }).message)
             : t("loginError"),
-          "Rooms Attendant",
-          "error",
         );
+        setConfirmDeleteOpen(false);
         return;
       }
     }
 
     setReservations((prev) => prev.filter((r) => r.id !== selected.id));
-    addNotification(
-      `Group member ${selected.guest_name} deleted`,
-      "Rooms Attendant",
-      "success",
-    );
     setSelected(null);
     setConfirmDeleteOpen(false);
   };
@@ -579,7 +564,7 @@ export default function GroupMemberReservation({
                   ) : (
                     <input
                       type={type}
-                      value={selected[field] ?? ""}
+                      value={type === "number" && selected[field] === 0 ? "" : (selected[field] ?? "")}
                       readOnly={field === "groupe_name"}
                       required={required}
                       onChange={(e) =>
@@ -629,7 +614,7 @@ export default function GroupMemberReservation({
                 className="w-full border rounded-lg px-3 py-2 text-sm"
               >
                 {paymentModes.map((m) => (
-                  <option key={m.code} value={m.code}>
+                  <option key={m.id} value={m.id}>
                     {m.label}
                   </option>
                 ))}
@@ -650,7 +635,7 @@ export default function GroupMemberReservation({
                   </label>
                   <input
                     type={type}
-                    value={selected[field] ?? ""}
+                    value={type === "number" && selected[field] === 0 ? "" : (selected[field] ?? "")}
                     readOnly={field === "stay_cost"}
                     onChange={(e) =>
                       handleChange(
@@ -674,8 +659,8 @@ export default function GroupMemberReservation({
               );
             })}
           </div>
-          {/* Available rooms for check-in mode */}
-          {mode === "1117" && (
+          {/* Available rooms browser */}
+          {(mode === "1113" || mode === "1117") && (
             <div className="border rounded-lg p-4 bg-gray-50">
               <h4 className="text-sm font-semibold text-gray-600 mb-2">
                 {t("availableRooms")}
@@ -688,6 +673,7 @@ export default function GroupMemberReservation({
                         t("roomNumber"),
                         t("designation"),
                         t("price1"),
+                        t("price2"),
                         t("status"),
                       ].map((h) => (
                         <th key={h} className="text-left py-1 px-2">
@@ -703,7 +689,16 @@ export default function GroupMemberReservation({
                         <tr
                           key={r.room_num}
                           className="border-b hover:bg-amber-50 cursor-pointer"
-                          onClick={() => handleChange("room_num", r.room_num)}
+                          onClick={() => {
+                            if (!selected) return;
+                            const updated = calc({
+                              ...selected,
+                              room_num: r.room_num,
+                              puv: r.price_1,
+                              current_mon: r.current_mon || "RWF",
+                            });
+                            setSelected(updated);
+                          }}
                         >
                           <td className="py-1 px-2 font-medium">
                             {r.room_num}
@@ -711,6 +706,9 @@ export default function GroupMemberReservation({
                           <td className="py-1 px-2">{r.designation}</td>
                           <td className="py-1 px-2">
                             {r.price_1.toLocaleString()}
+                          </td>
+                          <td className="py-1 px-2">
+                            {r.price_2.toLocaleString()}
                           </td>
                           <td className="py-1 px-2 text-green-600">VC</td>
                         </tr>
@@ -815,6 +813,23 @@ export default function GroupMemberReservation({
         onConfirm={confirmDelete}
         onCancel={() => setConfirmDeleteOpen(false)}
       />
+
+      {/* Error Dialog */}
+      {errorMsg && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md text-center space-y-4">
+            <AlertTriangle size={40} className="text-red-500 mx-auto" />
+            <h3 className="text-lg font-semibold text-gray-800">Error</h3>
+            <p className="text-sm text-gray-600 whitespace-pre-wrap">{errorMsg}</p>
+            <button
+              onClick={() => setErrorMsg("")}
+              className="bg-red-500 text-white px-6 py-2 rounded-lg text-sm hover:bg-red-600"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -11,6 +11,11 @@ const api = axios.create({
 // ── Request interceptor: attach access token ──
 api.interceptors.request.use(
     (config) => {
+        // Skip auth header for login/refresh — stale tokens cause 401
+        const url = config.url ?? "";
+        if (url.includes("/auth/login") || url.includes("/auth/refresh")) {
+            return config;
+        }
         const token = localStorage.getItem("access_token");
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
@@ -45,12 +50,17 @@ api.interceptors.response.use(
             return Promise.reject(error);
         }
 
-        // Don't try to refresh the refresh-token endpoint itself
-        if (original.url?.includes("/auth/refresh/")) {
-            localStorage.removeItem("access_token");
-            localStorage.removeItem("refresh_token");
-            localStorage.removeItem("sigeth_user");
-            window.location.href = "/";
+        // Don't try to refresh the refresh-token or login endpoints
+        if (
+            original.url?.includes("/auth/refresh/") ||
+            original.url?.includes("/auth/login/")
+        ) {
+            if (original.url?.includes("/auth/refresh/")) {
+                localStorage.removeItem("access_token");
+                localStorage.removeItem("refresh_token");
+                localStorage.removeItem("sigeth_user");
+                window.location.href = "/";
+            }
             return Promise.reject(error);
         }
 

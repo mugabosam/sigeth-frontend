@@ -1,125 +1,139 @@
-// ═══════════════════════════════════════════════════════════════════════════
-// InvoiceByGroup.tsx
-// Sub-Module 1.1  Rooms Attendant
-// Output 1128 — Definitive Invoice by Group  (Lpinvoice.prt)
-// ─────────────────────────────────────────────────────────────────────────
-// QUERY WINDOW (dossier p.3453-3455):
-//   Invoice_num  → key 1
-//   Group_name   → key 2   ← NOT guest_name
-//
-// PRINT FIELDS (dossier p.3460-3461):
-//   date · room_num · guest_name · designation · qty · unity · puv
-//   credit · debit
-//
-// SOURCE TABLE: SALES.dat
-// ═══════════════════════════════════════════════════════════════════════════
-
 import { useMemo, useState } from "react";
-import { Printer, FileSpreadsheet } from "lucide-react";
+import { Printer, Loader2, Receipt, AlertTriangle } from "lucide-react";
 import { useLang } from "../../hooks/useLang";
 import { useHotelData } from "../../context/HotelDataContext";
+import { frontOfficeApi } from "../../services/sigethApi";
+import type { GRC, TEMPO } from "../../types";
+
+interface GroupPreviewData {
+  groupe_name: string;
+  code_g: string;
+  number_pers: number;
+  arrival_date: string;
+  depart_date: string;
+  items: TEMPO[];
+  total_charges: number;
+  group_deposit: number;
+  total_paid: number;
+  balance_due: number;
+}
+
+interface GroupInvoiceData extends GroupPreviewData {
+  invoice_number: string;
+  date: string;
+  username: string;
+  tax: { total_ttc?: number; htva?: number; tva?: number; taux?: number };
+}
+
+const fmt = (n: number) => new Intl.NumberFormat("en-RW").format(Math.round(n));
 
 export default function InvoiceByGroup() {
   const { t } = useLang();
-  const { sales } = useHotelData();
+  const { groupReservations, paymentModes } = useHotelData();
 
-  // Query window — dossier p.3454-3455: Invoice_num + Group_name
-  const [queryInvoice, setQueryInvoice] = useState("");
-  const [queryGroup, setQueryGroup] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [preview, setPreview] = useState<GroupPreviewData | null>(null);
+  const [invoice, setInvoice] = useState<GroupInvoiceData | null>(null);
+  const [showGenerateModal, setShowGenerateModal] = useState(false);
+  const [genPaytMode, setGenPaytMode] = useState("");
+  const [genPhone, setGenPhone] = useState("");
+  const [genTin, setGenTin] = useState("");
+  const [generating, setGenerating] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
-  // ── Live candidates
-  // As the user types, searches SALES.dat and surfaces unique Group_name values.
-  // Dossier specifies Group_name (not guest_name) as the group query key.
-  const liveCandidates = useMemo(() => {
-    const invoiceQ = queryInvoice.trim().toLowerCase();
-    const groupQ = queryGroup.trim().toLowerCase();
-    if (!invoiceQ && !groupQ) return [];
-
-    const matches = sales.filter((s) => {
-      const invoiceMatch =
-        !invoiceQ || s.invoice_num.toLowerCase().includes(invoiceQ);
-      // groupe_name is the SALES.dat field that stores the group identifier
-      const groupMatch =
-        !groupQ || (s.groupe_name ?? "").toLowerCase().includes(groupQ);
-      return invoiceMatch && groupMatch;
-    });
-
-    // One suggestion per unique Group_name
-    const seen = new Map<
-      string,
-      { groupe_name: string; invoice_num: string; rows: number }
-    >();
-    matches.forEach((s) => {
-      const key = (s.groupe_name ?? "").toLowerCase();
-      if (!key) return;
-      if (!seen.has(key)) {
-        seen.set(key, {
-          groupe_name: s.groupe_name ?? "",
-          invoice_num: s.invoice_num,
-          rows: 1,
-        });
-      } else {
-        const cur = seen.get(key)!;
-        seen.set(key, { ...cur, rows: cur.rows + 1 });
-      }
-    });
-
-    return Array.from(seen.values()).slice(0, 12);
-  }, [sales, queryInvoice, queryGroup]);
-
-  // Clicking a candidate fills both fields at once
-  const selectCandidate = (groupe_name: string, invoice_num: string) => {
-    setQueryGroup(groupe_name);
-    setQueryInvoice(invoice_num);
-  };
-
-  // ── Filtered rows for invoice display
-  // Exact match on both keys once user has selected / typed a complete value.
-  // While still typing, partial match drives the suggestions above.
-  const filtered = useMemo(() => {
-    const invoiceQ = queryInvoice.trim().toLowerCase();
-    const groupQ = queryGroup.trim().toLowerCase();
-    if (!invoiceQ && !groupQ) return [];
-    return sales.filter((s) => {
-      const invoiceMatch =
-        !invoiceQ || s.invoice_num.toLowerCase() === invoiceQ;
-      const groupMatch =
-        !groupQ || (s.groupe_name ?? "").toLowerCase() === groupQ;
-      return invoiceMatch && groupMatch;
-    });
-  }, [sales, queryInvoice, queryGroup]);
-
-  // Financial totals — dossier p.3305-3307
-  const totalTTC = filtered.reduce((s, i) => s + i.montant, 0);
-  const tvaRate = 18;
-  const htva = (totalTTC * 100) / (100 + tvaRate);
-  const tva = (htva * tvaRate) / 100;
-
-  const exportCSV = () => {
-    const headers = [
-      "date",
-      "room_num",
-      "guest_name",
-      "item",
-      "qty_s",
-      "unity",
-      "price_s",
-      "montant",
-      "paid",
-    ];
-    const rows = filtered.map((r) =>
-      headers
-        .map((h) => String((r as unknown as Record<string, unknown>)[h] ?? ""))
-        .join(","),
+  const activeGroups = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    const groups = groupReservations.filter((g) => g.status === 0);
+    if (!q) return groups;
+    return groups.filter(
+      (g) =>
+        g.groupe_name.toLowerCase().includes(q) ||
+        g.code_g.toLowerCase().includes(q),
     );
-    const blob = new Blob([headers.join(",") + "\n" + rows.join("\n")], {
-      type: "text/csv",
-    });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "Lpinvoice.csv";
-    a.click();
+  }, [groupReservations, searchQuery]);
+
+  const handleSelectGroup = async (group: GRC) => {
+    setLoading(true);
+    setPreview(null);
+    setInvoice(null);
+    try {
+      const data = await frontOfficeApi.previewGroupInvoice({
+        groupe_name: group.groupe_name,
+      });
+      setPreview({
+        groupe_name: data.groupe_name ?? group.groupe_name,
+        code_g: data.code_g ?? group.code_g,
+        number_pers: data.number_pers ?? group.number_pers,
+        arrival_date: data.arrival_date ?? group.arrival_date,
+        depart_date: data.depart_date ?? group.depart_date,
+        items: data.items,
+        total_charges: data.total_charges,
+        group_deposit: data.group_deposit ?? 0,
+        total_paid: data.total_paid,
+        balance_due: data.balance_due,
+      });
+    } catch (err: unknown) {
+      const msg =
+        err && typeof err === "object" && "response" in err
+          ? String(
+              (
+                (err as { response?: { data?: { detail?: string } } }).response
+                  ?.data as Record<string, unknown>
+              )?.detail ?? "Failed to load group invoice preview",
+            )
+          : "Failed to load group invoice preview";
+      setErrorMsg(msg);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const handleGenerate = async () => {
+    if (!preview) return;
+    setGenerating(true);
+    try {
+      const data = await frontOfficeApi.generateGroupInvoice({
+        groupe_name: preview.groupe_name,
+        mode_payt: genPaytMode || undefined,
+        phone: genPhone || undefined,
+        country_code: "+250",
+        tin: genTin || undefined,
+      });
+      setInvoice({
+        groupe_name: data.groupe_name ?? preview.groupe_name,
+        code_g: data.code_g ?? preview.code_g,
+        number_pers: data.number_pers ?? preview.number_pers,
+        arrival_date: data.arrival_date ?? preview.arrival_date,
+        depart_date: data.depart_date ?? preview.depart_date,
+        items: data.items,
+        total_charges: data.total_charges,
+        group_deposit: data.group_deposit ?? preview.group_deposit,
+        total_paid: data.total_paid,
+        balance_due: data.balance_due,
+        invoice_number: data.invoice_number ?? "",
+        date: data.date ?? "",
+        username: data.username ?? "",
+        tax: (data.tax as GroupInvoiceData["tax"]) ?? {},
+      });
+      setShowGenerateModal(false);
+    } catch (err: unknown) {
+      const msg =
+        err && typeof err === "object" && "response" in err
+          ? String(
+              (
+                (err as { response?: { data?: { detail?: string } } }).response
+                  ?.data as Record<string, unknown>
+              )?.detail ?? "Failed to generate group invoice",
+            )
+          : "Failed to generate group invoice";
+      setErrorMsg(msg);
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const displayData = invoice ?? preview;
 
   return (
     <div className="space-y-6 p-6">
@@ -129,119 +143,110 @@ export default function InvoiceByGroup() {
           <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
             {t("invoiceByGroup")}
           </h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Select an active group to preview consolidated charges
+          </p>
         </div>
         <div className="flex gap-3">
-          <button
-            onClick={() => window.print()}
-            className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-3 rounded-xl flex items-center gap-2 text-sm font-medium hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-all duration-200 transform hover:scale-105"
-          >
-            <Printer size={18} />
-            {t("print")}
-          </button>
-          <button
-            onClick={exportCSV}
-            className="border-2 border-green-500 text-green-700 px-6 py-3 rounded-xl flex items-center gap-2 text-sm font-medium bg-green-50 hover:bg-green-100 hover:shadow-lg transition-all duration-200 transform hover:scale-105"
-          >
-            <FileSpreadsheet size={18} />
-            Excel
-          </button>
+          {displayData && !invoice && (
+            <button
+              onClick={() => setShowGenerateModal(true)}
+              className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl flex items-center gap-2 text-sm font-medium hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+            >
+              <Receipt size={18} />
+              Generate Invoice
+            </button>
+          )}
+          {displayData && (
+            <button
+              onClick={() => window.print()}
+              className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-3 rounded-xl flex items-center gap-2 text-sm font-medium hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-all duration-200 transform hover:scale-105"
+            >
+              <Printer size={18} />
+              {t("print")}
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Query window — dossier p.3453-3455 */}
+      {/* Group selection */}
       <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
         <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
           <span className="w-1 h-6 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full" />
-          {t("queryWindow")}
+          Active Groups
         </h3>
-
-        <div className="flex gap-4 flex-wrap mb-3">
-          {/* Invoice_num field */}
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              Invoice_num
-            </label>
-            <input
-              value={queryInvoice}
-              onChange={(e) => setQueryInvoice(e.target.value)}
-              placeholder="e.g. INV-2026-00320"
-              className="border-2 border-gray-200 rounded-xl px-4 py-3 text-sm w-52 focus:outline-none focus:border-blue-500 focus:shadow-md transition-all"
-            />
-          </div>
-
-          {/* Group_name field — dossier key, not guest_name */}
-          <div className="flex flex-col gap-1 flex-1">
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              Group_name
-            </label>
-            <input
-              value={queryGroup}
-              onChange={(e) => setQueryGroup(e.target.value)}
-              placeholder="e.g. AU Summit"
-              className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 focus:shadow-md transition-all"
-            />
-          </div>
-        </div>
-
-        {/* Live dropdown — unique Group_name matches */}
-        {liveCandidates.length > 0 && (
-          <div className="border-2 border-blue-200 rounded-xl bg-gradient-to-b from-blue-50 to-white max-h-64 overflow-y-auto">
-            {liveCandidates.map((c, i) => (
+        <input
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search by group name or code..."
+          className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm mb-4 focus:outline-none focus:border-blue-500 focus:shadow-md transition-all"
+        />
+        {activeGroups.length === 0 ? (
+          <p className="text-sm text-gray-500 py-4 text-center">
+            No active groups found.
+          </p>
+        ) : (
+          <div className="max-h-64 overflow-y-auto border-2 border-gray-200 rounded-xl">
+            {activeGroups.map((group) => (
               <button
-                key={i}
-                onClick={() => selectCandidate(c.groupe_name, c.invoice_num)}
-                className="w-full text-left px-4 py-3 text-sm border-b border-gray-100 last:border-b-0 hover:bg-blue-100 transition-colors duration-150 group"
+                key={group.id ?? group.code_g}
+                onClick={() => handleSelectGroup(group)}
+                className="w-full text-left px-4 py-4 text-sm border-b border-gray-200 last:border-b-0 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-colors duration-150"
               >
-                <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center justify-between">
                   <div>
-                    {/* Group_name — primary display */}
                     <p className="font-semibold text-gray-800">
-                      {c.groupe_name}
+                      {group.groupe_name}
                     </p>
-                    {/* Invoice_num — secondary hint */}
-                    <p className="text-xs text-gray-400 mt-0.5">
-                      {c.invoice_num}
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      Code: {group.code_g} — {group.number_pers} persons
                     </p>
                   </div>
-                  <span className="text-xs font-medium text-gray-500 bg-gray-200 px-2 py-1 rounded-full group-hover:bg-blue-200 shrink-0">
-                    {c.rows} line{c.rows !== 1 ? "s" : ""}
-                  </span>
+                  <div className="text-right text-xs text-gray-500">
+                    <p>{group.arrival_date}</p>
+                    <p>{group.depart_date}</p>
+                  </div>
                 </div>
               </button>
             ))}
           </div>
         )}
-
-        {/* No match feedback */}
-        {(queryInvoice || queryGroup) &&
-          liveCandidates.length === 0 &&
-          filtered.length === 0 && (
-            <p className="text-xs text-red-500 mt-2">
-              No Group_name / Invoice_num match found in SALES.dat.
-            </p>
-          )}
       </div>
 
-      {/* Invoice document — dossier p.3464-3470 */}
-      {filtered.length > 0 && (
+      {/* Loading */}
+      {loading && (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="animate-spin text-blue-500" size={32} />
+          <span className="ml-3 text-gray-600">
+            Loading group invoice data...
+          </span>
+        </div>
+      )}
+
+      {/* Invoice Document */}
+      {displayData && displayData.items.length > 0 && (
         <div
           id="report-output"
           className="bg-white text-[10px] leading-tight text-black max-w-[960px] mx-auto p-6 font-sans shadow-lg rounded-2xl border border-gray-200"
         >
           <div className="mb-4 pb-4 border-b-2 border-gray-300">
             <p className="text-lg font-bold text-gray-800">
-              Definitive Invoice by Group
+              {invoice ? "Definitive Group Invoice" : "Group Invoice Preview"}
             </p>
+            {invoice && (
+              <p className="text-sm font-mono font-bold text-blue-700 mt-1">
+                {invoice.invoice_number}
+              </p>
+            )}
             <p className="text-xs text-gray-500 mt-1">
-              Invoice #{filtered[0]?.invoice_num} • {filtered[0]?.groupe_name}
+              {displayData.groupe_name} ({displayData.code_g}) —{" "}
+              {displayData.number_pers} persons
             </p>
           </div>
 
-          {/* Outer frame with double border effect */}
           <div className="border-2 border-gray-800 rounded-lg overflow-hidden">
-            {/* Header: PME info (left) | Invoice title & fields (right) */}
+            {/* Header */}
             <div className="flex border-b-2 border-gray-800 bg-gradient-to-r from-gray-50 to-white">
-              {/* Left: PME Info Box */}
               <div className="p-4 w-44 shrink-0 space-y-1 text-xs border-r-2 border-gray-800 bg-gray-100">
                 <p className="font-bold text-sm text-gray-900">
                   Hotel de la Front Office
@@ -253,11 +258,9 @@ export default function InvoiceByGroup() {
                   TIN: 00000000
                 </p>
               </div>
-
-              {/* Right: Title + Fields */}
               <div className="flex-1 p-4 flex flex-col justify-center">
                 <h2 className="text-sm font-bold text-center mb-3 text-gray-900 border-b-2 border-gray-400 pb-2">
-                  GROUP INVOICE
+                  {invoice ? "GROUP INVOICE" : "GROUP INVOICE PREVIEW"}
                 </h2>
                 <div className="space-y-2 self-end w-full max-w-sm">
                   <div className="flex justify-between items-baseline gap-3 pb-1.5 border-b-2 border-gray-300">
@@ -265,46 +268,56 @@ export default function InvoiceByGroup() {
                       Group:
                     </span>
                     <span className="text-xs font-bold text-gray-900">
-                      {filtered[0]?.groupe_name ?? "-"}
+                      {displayData.groupe_name}
                     </span>
                   </div>
                   <div className="flex justify-between items-baseline gap-3 pb-1.5 border-b-2 border-gray-300">
                     <span className="text-xs font-semibold text-gray-700">
-                      Items:
+                      Code:
                     </span>
                     <span className="text-xs font-bold text-gray-900">
-                      {filtered.length}
+                      {displayData.code_g}
                     </span>
                   </div>
                   <div className="flex justify-between items-baseline gap-3 pb-1.5 border-b-2 border-gray-300">
                     <span className="text-xs font-semibold text-gray-700">
-                      Currency:
+                      Persons:
                     </span>
                     <span className="text-xs font-bold text-gray-900">
-                      {filtered[0]?.current_mon ?? "-"}
+                      {displayData.number_pers}
                     </span>
                   </div>
                   <div className="flex justify-between items-baseline gap-3 pb-1.5 border-b-2 border-gray-300">
                     <span className="text-xs font-semibold text-gray-700">
-                      Invoice:
-                    </span>
-                    <span className="text-xs font-mono font-bold text-blue-700">
-                      {filtered[0]?.invoice_num ?? "-"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-baseline gap-3 pb-1.5 border-b-2 border-gray-300">
-                    <span className="text-xs font-semibold text-gray-700">
-                      Payment Mode:
+                      Arrival:
                     </span>
                     <span className="text-xs text-gray-800">
-                      {filtered[0]?.mode_payt ?? "-"}
+                      {displayData.arrival_date}
                     </span>
                   </div>
+                  <div className="flex justify-between items-baseline gap-3 pb-1.5 border-b-2 border-gray-300">
+                    <span className="text-xs font-semibold text-gray-700">
+                      Departure:
+                    </span>
+                    <span className="text-xs text-gray-800">
+                      {displayData.depart_date}
+                    </span>
+                  </div>
+                  {invoice && (
+                    <div className="flex justify-between items-baseline gap-3 pb-1.5 border-b-2 border-gray-300">
+                      <span className="text-xs font-semibold text-gray-700">
+                        Invoice:
+                      </span>
+                      <span className="text-xs font-mono font-bold text-blue-700">
+                        {invoice.invoice_number}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* Table with improved styling */}
+            {/* Table — includes room_num and guest_name per item */}
             <div className="relative overflow-hidden bg-white">
               <table className="w-full border-collapse">
                 <thead>
@@ -330,37 +343,37 @@ export default function InvoiceByGroup() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((s, i) => (
+                  {displayData.items.map((item, i) => (
                     <tr
                       key={i}
                       className="hover:bg-blue-50 transition-colors border-b border-gray-300"
                     >
                       <td className="border border-gray-300 px-2 py-2 text-xs font-mono text-gray-700">
-                        {s.date}
+                        {item.date}
                       </td>
                       <td className="border border-gray-300 px-2 py-2 text-xs font-semibold text-gray-800">
-                        {s.room_num}
+                        {item.room_num}
                       </td>
                       <td className="border border-gray-300 px-2 py-2 text-xs text-gray-800 font-medium">
-                        {s.guest_name}
+                        {item.guest_name}
                       </td>
                       <td className="border border-gray-300 px-2 py-2 text-xs text-gray-800 font-medium">
-                        {s.item}
+                        {item.designation}
                       </td>
                       <td className="border border-gray-300 px-2 py-2 text-xs text-center font-semibold">
-                        {s.qty_s}
+                        {item.qty}
                       </td>
                       <td className="border border-gray-300 px-2 py-2 text-xs text-gray-700">
-                        {s.unity}
+                        {item.unity}
                       </td>
                       <td className="border border-gray-300 px-2 py-2 text-xs text-right font-semibold">
-                        {s.price_s.toLocaleString()}
+                        {fmt(item.puv)}
                       </td>
                       <td className="border border-gray-300 px-2 py-2 text-xs text-right font-bold text-green-700">
-                        {s.montant.toLocaleString()}
+                        {fmt(item.credit)}
                       </td>
                       <td className="border border-gray-300 px-2 py-2 text-xs text-right font-bold text-red-700">
-                        {s.paid.toLocaleString()}
+                        {fmt(item.debit)}
                       </td>
                     </tr>
                   ))}
@@ -368,52 +381,189 @@ export default function InvoiceByGroup() {
               </table>
             </div>
 
-            {/* Footer: Signatures (left) | Totals (right) */}
+            {/* Footer */}
             <div className="flex justify-between items-start px-4 py-4 border-t-2 border-gray-800 bg-gradient-to-r from-gray-50 to-white">
-              <div className="space-y-3 text-xs">
-                <div className="flex items-baseline gap-3">
-                  <span className="font-semibold text-gray-800">
-                    Company Signature
-                  </span>
-                  <span className="border-b-2 border-gray-400 w-24 inline-block" />
+              {invoice && (
+                <div className="space-y-3 text-xs">
+                  <div className="flex items-baseline gap-3">
+                    <span className="font-semibold text-gray-800">
+                      Company Signature
+                    </span>
+                    <span className="border-b-2 border-gray-400 w-24 inline-block" />
+                  </div>
+                  <div className="flex items-baseline gap-3">
+                    <span className="font-semibold text-gray-800">
+                      Username:
+                    </span>
+                    <span className="font-bold text-blue-700">
+                      {invoice.username}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-baseline gap-3">
-                  <span className="font-semibold text-gray-800">Username:</span>
-                  <span className="font-bold text-blue-700">
-                    {filtered[0]?.username ?? "-"}
-                  </span>
-                </div>
-              </div>
-
-              <div className="space-y-2 text-xs">
+              )}
+              <div className="space-y-2 text-xs ml-auto">
                 <div className="flex items-center justify-end gap-3">
                   <span className="font-semibold text-gray-700">
-                    Total (with tax)
+                    Total Charges
                   </span>
-                  <span className="border-2 border-gray-400 bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-1.5 w-24 text-right font-bold text-green-700">
-                    {Math.round(totalTTC).toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex items-center justify-end gap-3">
-                  <span className="font-semibold text-gray-700">HTVA</span>
-                  <span className="border-2 border-gray-400 bg-gradient-to-r from-blue-50 to-cyan-50 px-3 py-1.5 w-24 text-right font-bold text-blue-700">
-                    {Math.round(htva).toLocaleString()}
+                  <span className="border-2 border-gray-400 bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-1.5 w-28 text-right font-bold text-green-700">
+                    {fmt(displayData.total_charges)} RWF
                   </span>
                 </div>
                 <div className="flex items-center justify-end gap-3">
-                  <span className="font-semibold text-gray-700">TVA (18%)</span>
-                  <span className="border-2 border-gray-400 bg-gradient-to-r from-orange-50 to-red-50 px-3 py-1.5 w-24 text-right font-bold text-red-700">
-                    {Math.round(tva).toLocaleString()}
+                  <span className="font-semibold text-gray-700">
+                    Group Deposit
+                  </span>
+                  <span className="border-2 border-gray-400 bg-gradient-to-r from-purple-50 to-violet-50 px-3 py-1.5 w-28 text-right font-bold text-purple-700">
+                    {fmt(displayData.group_deposit)} RWF
                   </span>
                 </div>
+                <div className="flex items-center justify-end gap-3">
+                  <span className="font-semibold text-gray-700">
+                    Total Paid
+                  </span>
+                  <span className="border-2 border-gray-400 bg-gradient-to-r from-blue-50 to-cyan-50 px-3 py-1.5 w-28 text-right font-bold text-blue-700">
+                    {fmt(displayData.total_paid)} RWF
+                  </span>
+                </div>
+                <div className="flex items-center justify-end gap-3">
+                  <span className="font-semibold text-gray-700">
+                    Balance Due
+                  </span>
+                  <span className="border-2 border-gray-400 bg-gradient-to-r from-orange-50 to-red-50 px-3 py-1.5 w-28 text-right font-bold text-red-700">
+                    {fmt(displayData.balance_due)} RWF
+                  </span>
+                </div>
+                {invoice?.tax?.taux != null && (
+                  <>
+                    <div className="flex items-center justify-end gap-3 pt-2 border-t border-gray-300">
+                      <span className="font-semibold text-gray-700">HTVA</span>
+                      <span className="border-2 border-gray-400 px-3 py-1.5 w-28 text-right font-bold text-blue-700">
+                        {fmt(invoice.tax.htva ?? 0)} RWF
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-end gap-3">
+                      <span className="font-semibold text-gray-700">
+                        TVA ({invoice.tax.taux}%)
+                      </span>
+                      <span className="border-2 border-gray-400 px-3 py-1.5 w-28 text-right font-bold text-red-700">
+                        {fmt(invoice.tax.tva ?? 0)} RWF
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-end gap-3">
+                      <span className="font-semibold text-gray-700">
+                        Total TTC
+                      </span>
+                      <span className="border-2 border-gray-400 bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-1.5 w-28 text-right font-bold text-green-800">
+                        {fmt(invoice.tax.total_ttc ?? 0)} RWF
+                      </span>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Page marker */}
           <p className="text-center text-gray-400 mt-4 text-xs font-light tracking-widest">
             --
           </p>
+        </div>
+      )}
+
+      {/* Generate Group Invoice Modal */}
+      {showGenerateModal && preview && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+              Generate Group Invoice
+            </h3>
+            <p className="text-sm text-gray-600 mb-4">
+              {preview.groupe_name} ({preview.code_g}) —{" "}
+              {preview.number_pers} persons
+            </p>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">
+                  {t("paymentMode")}
+                </label>
+                <select
+                  value={genPaytMode}
+                  onChange={(e) => setGenPaytMode(e.target.value)}
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                >
+                  <option value="">-- Select --</option>
+                  {paymentModes.map((m) => (
+                    <option key={m.code} value={m.code}>
+                      {m.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">
+                  {t("phone")}
+                </label>
+                <input
+                  type="tel"
+                  value={genPhone}
+                  onChange={(e) => setGenPhone(e.target.value)}
+                  placeholder="+250..."
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">
+                  TIN
+                </label>
+                <input
+                  type="text"
+                  value={genTin}
+                  onChange={(e) => setGenTin(e.target.value)}
+                  placeholder="Tax ID"
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={handleGenerate}
+                disabled={generating}
+                className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {generating && (
+                  <Loader2 className="animate-spin" size={14} />
+                )}
+                Generate
+              </button>
+              <button
+                onClick={() => setShowGenerateModal(false)}
+                className="border px-4 py-2 rounded-lg text-sm"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Error Dialog */}
+      {errorMsg && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-sm">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-red-100 rounded-full">
+                <AlertTriangle className="text-red-600" size={20} />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-800">Error</h3>
+            </div>
+            <p className="text-sm text-gray-600 mb-6">{errorMsg}</p>
+            <button
+              onClick={() => setErrorMsg("")}
+              className="w-full bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700"
+            >
+              OK
+            </button>
+          </div>
         </div>
       )}
 

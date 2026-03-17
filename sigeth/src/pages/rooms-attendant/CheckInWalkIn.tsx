@@ -347,7 +347,7 @@ export default function CheckInWalkIn() {
                     <input
                       type={type}
                       title={label}
-                      value={String(form[field] ?? "")}
+                      value={type === "number" && form[field] === 0 ? "" : String(form[field] ?? "")}
                       required={required}
                       onChange={(e) => handleChange(field, e.target.value)}
                       {...attrs}
@@ -446,7 +446,7 @@ export default function CheckInWalkIn() {
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
               >
                 {paymentModes.map((m) => (
-                  <option key={m.code} value={m.code}>
+                  <option key={m.id} value={m.id}>
                     {m.label}
                   </option>
                 ))}

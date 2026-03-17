@@ -121,6 +121,7 @@ export default function CheckInGroup() {
     const room_num = targetRoom ?? member.room_num;
 
     const response = await frontOfficeApi.groupCheckin({
+      code_p: member.code_p,
       groupe_name: member.groupe_name,
       guest_name: member.guest_name,
       room_num,

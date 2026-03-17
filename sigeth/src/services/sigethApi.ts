@@ -178,7 +178,7 @@ const normalizeCategory = (raw: ApiRecord): CATROOM => ({
 
 const normalizePaymentMode = (raw: ApiRecord): PaymentMode => ({
   id: stringValue(raw.id),
-  code: stringValue(raw.id ?? raw.modep),
+  code: stringValue(raw.modep ?? raw.id),
   label: stringValue(raw.designa ?? raw.label ?? raw.modep),
   exchange_rate: numberValue(raw.rate_ex),
   current_mon: stringValue(raw.current_mon, "RWF"),
@@ -354,6 +354,10 @@ const toReservationPayload = (res: Partial<RCS>): ApiRecord => {
     delete payload.status;
   }
   delete payload.id;
+  // payt_mode is a FK (UUID) — empty string is invalid; send null instead
+  if (!payload.payt_mode) payload.payt_mode = null;
+  // airport_time is a TimeField — empty string is invalid; send null instead
+  if (!payload.airport_time) payload.airport_time = null;
   return payload;
 };
 
@@ -365,6 +369,13 @@ const toGroupPayload = (group: Partial<GRC>): ApiRecord => {
     delete payload.status;
   }
   delete payload.id;
+  // payt_mode is a FK (UUID) — empty string is invalid; send null instead
+  if (!payload.payt_mode) payload.payt_mode = null;
+  // code_g is required (max 3 chars, unique) — auto-generate if empty
+  if (!payload.code_g) {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    payload.code_g = Array.from({ length: 3 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+  }
   return payload;
 };
 

@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { Search, Plus, Save, Trash2 } from "lucide-react";
+import { Search, Plus, Save, Trash2, AlertTriangle } from "lucide-react";
 import { useLang } from "../../hooks/useLang";
 import { useHotelData } from "../../context/HotelDataContext";
-import { useNotification } from "../../hooks/useNotification";
 import ConfirmationModal from "../../components/common/ConfirmationModal";
 import {
   validateIndividualReservation,
@@ -21,9 +20,15 @@ export default function IndividualReservation({
   mode?: Mode;
 }) {
   const { t } = useLang();
-  const { reservations, setReservations, rooms, setRooms, currencies } =
-    useHotelData();
-  const { addNotification } = useNotification();
+  const {
+    reservations,
+    setReservations,
+    rooms,
+    setRooms,
+    currencies,
+    paymentModes,
+  } = useHotelData();
+  const [errorMsg, setErrorMsg] = useState("");
   const [queryRoom, setQueryRoom] = useState("");
   const [queryGuest, setQueryGuest] = useState("");
   const [selected, setSelected] = useState<RCS | null>(null);
@@ -149,7 +154,7 @@ export default function IndividualReservation({
         : 0;
     const base = qty * f.puv;
     const stay_cost = f.discount > 0 ? base * (1 - f.discount / 100) : base;
-    return { ...f, stay_cost };
+    return { ...f, stay_cost, qty } as RCS;
   };
 
   const handleChange = (field: keyof RCS, value: string | number) => {
@@ -173,11 +178,8 @@ export default function IndividualReservation({
     setErrors(validationResult);
 
     if (!validationResult.isValid) {
-      addNotification(
-        createErrorNotification(validationResult.errors, t),
-        "Validation Error",
-        "error",
-      );
+      setErrorMsg(createErrorNotification(validationResult.errors, t));
+      setConfirmSaveOpen(false);
       return;
     }
 
@@ -215,23 +217,14 @@ export default function IndividualReservation({
         }
       }
     } catch (error) {
-      addNotification(
+      setErrorMsg(
         typeof error === "object" && error !== null && "message" in error
           ? String((error as { message: string }).message)
           : t("loginError"),
-        "Rooms Attendant",
-        "error",
       );
+      setConfirmSaveOpen(false);
       return;
     }
-
-    // Trigger notification
-    const action = isNew ? "created" : "updated";
-    addNotification(
-      `Reservation for ${selected.guest_name} ${action}`,
-      "Rooms Attendant",
-      "success",
-    );
 
     setSelected(null);
     setQueryRoom("");
@@ -250,23 +243,17 @@ export default function IndividualReservation({
       try {
         await frontOfficeApi.deleteReservation(selected.id);
       } catch (error) {
-        addNotification(
+        setErrorMsg(
           typeof error === "object" && error !== null && "message" in error
             ? String((error as { message: string }).message)
             : t("loginError"),
-          "Rooms Attendant",
-          "error",
         );
+        setConfirmDeleteOpen(false);
         return;
       }
     }
 
     setReservations((prev) => prev.filter((r) => r.id !== selected.id));
-    addNotification(
-      `Reservation for ${selected.guest_name} deleted`,
-      "Rooms Attendant",
-      "success",
-    );
     setSelected(null);
     setConfirmDeleteOpen(false);
   };
@@ -412,6 +399,7 @@ export default function IndividualReservation({
                 ["children", t("children"), "number", false, { min: "0" }],
                 ["age", t("age"), "number", false, { min: "0" }],
                 ["puv", t("pricePerNight"), "number", false, { min: "0" }],
+                ["discount", t("discount"), "number", false, { min: "0", max: "100" }],
                 ["airport_time", t("airportTime"), "text", false, {}],
                 ["stay_cost", t("stayCost"), "number", false, {}],
                 ["deposit", t("deposit"), "number", true, { min: "0" }],
@@ -491,7 +479,7 @@ export default function IndividualReservation({
                   ) : (
                     <input
                       type={type}
-                      value={selected[field] ?? ""}
+                      value={type === "number" && selected[field] === 0 ? "" : (selected[field] ?? "")}
                       readOnly={field === "stay_cost"}
                       required={required}
                       onChange={(e) =>
@@ -530,6 +518,25 @@ export default function IndividualReservation({
                 {selected.current_mon || t("selectCurrency")}
               </button>
             </div>
+            {/* Payment mode — Modep.dat dropdown */}
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1">
+                {t("paymentMode")}
+              </label>
+              <select
+                value={selected.payt_mode}
+                onChange={(e) => handleChange("payt_mode", e.target.value)}
+                title={t("paymentMode")}
+                className="w-full border rounded-lg px-3 py-2 text-sm"
+              >
+                <option value="">-- {t("select")} --</option>
+                {paymentModes.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
           {/* Available rooms browser */}
           {(mode === "1112" || mode === "1114" || mode === "1116") && (
@@ -561,7 +568,16 @@ export default function IndividualReservation({
                         <tr
                           key={r.room_num}
                           className="border-b hover:bg-amber-50 cursor-pointer"
-                          onClick={() => handleChange("room_num", r.room_num)}
+                          onClick={() => {
+                            if (!selected) return;
+                            const updated = calc({
+                              ...selected,
+                              room_num: r.room_num,
+                              puv: r.price_1,
+                              current_mon: r.current_mon || "RWF",
+                            });
+                            setSelected(updated);
+                          }}
                         >
                           <td className="py-1 px-2 font-medium">
                             {r.room_num}
@@ -729,6 +745,23 @@ export default function IndividualReservation({
         onConfirm={confirmDelete}
         onCancel={() => setConfirmDeleteOpen(false)}
       />
+
+      {/* Error Dialog */}
+      {errorMsg && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md text-center space-y-4">
+            <AlertTriangle size={40} className="text-red-500 mx-auto" />
+            <h3 className="text-lg font-semibold text-gray-800">Error</h3>
+            <p className="text-sm text-gray-600 whitespace-pre-wrap">{errorMsg}</p>
+            <button
+              onClick={() => setErrorMsg("")}
+              className="bg-red-500 text-white px-6 py-2 rounded-lg text-sm hover:bg-red-600"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

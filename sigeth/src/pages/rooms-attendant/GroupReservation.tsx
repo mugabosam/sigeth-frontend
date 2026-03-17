@@ -293,6 +293,7 @@ export default function GroupReservation() {
                 ["number_pers", t("persons"), "number", true, { min: "1" }],
                 ["arrival_date", t("arrivalDate"), "date", true, {}],
                 ["puv", t("rateDay"), "number", true, { min: "0" }],
+                ["discount", t("discount"), "number", false, { min: "0", max: "100" }],
                 ["stay_cost", t("stayCost"), "number", false, {}],
                 ["depart_date", t("departDate"), "date", true, {}],
                 ["qty", t("nightNum"), "number", false, {}],
@@ -339,7 +340,7 @@ export default function GroupReservation() {
                   ) : (
                     <input
                       type={type}
-                      value={selected[field] ?? ""}
+                      value={type === "number" && selected[field] === 0 ? "" : (selected[field] ?? "")}
                       readOnly={
                         (field as string) === "qty" ||
                         (field as string) === "stay_cost"
@@ -419,7 +420,7 @@ export default function GroupReservation() {
                 className="w-full border rounded-lg px-3 py-2 text-sm"
               >
                 {paymentModes.map((m) => (
-                  <option key={m.code} value={m.code}>
+                  <option key={m.id} value={m.id}>
                     {m.label}
                   </option>
                 ))}

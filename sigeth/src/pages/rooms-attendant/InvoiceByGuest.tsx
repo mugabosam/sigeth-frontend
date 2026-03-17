@@ -1,103 +1,129 @@
-import { useMemo, useState } from "react";
-import { Printer, FileSpreadsheet } from "lucide-react";
+import { useState } from "react";
+import { Printer, Search, Loader2, Receipt, AlertTriangle } from "lucide-react";
 import { useLang } from "../../hooks/useLang";
 import { useHotelData } from "../../context/HotelDataContext";
+import { frontOfficeApi } from "../../services/sigethApi";
+import type { TEMPO } from "../../types";
+
+interface PreviewData {
+  room_num: string;
+  guest_name: string;
+  arrival_date: string;
+  depart_date: string;
+  items: TEMPO[];
+  total_charges: number;
+  total_paid: number;
+  balance_due: number;
+}
+
+interface InvoiceData extends PreviewData {
+  invoice_number: string;
+  date: string;
+  username: string;
+  tax: { total_ttc?: number; htva?: number; tva?: number; taux?: number };
+}
+
+const fmt = (n: number) => new Intl.NumberFormat("en-RW").format(Math.round(n));
 
 export default function InvoiceByGuest() {
   const { t } = useLang();
-  const { sales, tempo } = useHotelData();
-  const [queryInvoice, setQueryInvoice] = useState("");
+  const { paymentModes } = useHotelData();
+
+  const [queryRoom, setQueryRoom] = useState("");
   const [queryGuest, setQueryGuest] = useState("");
-  const [filtered, setFiltered] = useState<typeof sales>([]);
+  const [loading, setLoading] = useState(false);
+  const [preview, setPreview] = useState<PreviewData | null>(null);
+  const [invoice, setInvoice] = useState<InvoiceData | null>(null);
+  const [showGenerateModal, setShowGenerateModal] = useState(false);
+  const [genPaytMode, setGenPaytMode] = useState("");
+  const [genPhone, setGenPhone] = useState("");
+  const [genTin, setGenTin] = useState("");
+  const [generating, setGenerating] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
-  const liveCandidates = useMemo(() => {
-    const invoiceQuery = queryInvoice.trim().toLowerCase();
-    const guestQuery = queryGuest.trim().toLowerCase();
-    if (!invoiceQuery && !guestQuery) return [];
-    const matches = sales.filter((s) => {
-      const invoiceMatch =
-        !invoiceQuery || s.invoice_num.toLowerCase().includes(invoiceQuery);
-      const guestMatch =
-        !guestQuery || s.guest_name.toLowerCase().includes(guestQuery);
-      return invoiceMatch && guestMatch;
-    });
-    const byAccess = new Map<
-      string,
-      {
-        invoice_num: string;
-        guest_name: string;
-        room_num: string;
-        rows: number;
-      }
-    >();
-    matches.forEach((s) => {
-      const key = `${s.invoice_num}::${s.guest_name.toLowerCase()}`;
-      if (!byAccess.has(key)) {
-        byAccess.set(key, {
-          invoice_num: s.invoice_num,
-          guest_name: s.guest_name,
-          room_num: s.room_num,
-          rows: 1,
-        });
-      } else {
-        const current = byAccess.get(key);
-        if (current) byAccess.set(key, { ...current, rows: current.rows + 1 });
-      }
-    });
-    return Array.from(byAccess.values()).slice(0, 12);
-  }, [sales, queryInvoice, queryGuest]);
+  const handleSearch = async () => {
+    const room = queryRoom.trim();
+    const guest = queryGuest.trim();
+    if (!room && !guest) return;
 
-  const selectCandidate = (invoiceNum: string, guestName: string) => {
-    setQueryInvoice(invoiceNum);
-    setQueryGuest(guestName);
-    setFiltered(
-      sales.filter(
-        (s) =>
-          s.invoice_num === invoiceNum &&
-          s.guest_name.toLowerCase() === guestName.toLowerCase(),
-      ),
-    );
+    setLoading(true);
+    setPreview(null);
+    setInvoice(null);
+    try {
+      const data = await frontOfficeApi.previewInvoice({
+        room_num: room,
+        guest_name: guest,
+      });
+      setPreview({
+        room_num: data.room_num ?? room,
+        guest_name: data.guest_name ?? guest,
+        arrival_date: data.arrival_date ?? "",
+        depart_date: data.depart_date ?? "",
+        items: data.items,
+        total_charges: data.total_charges,
+        total_paid: data.total_paid,
+        balance_due: data.balance_due,
+      });
+    } catch (err: unknown) {
+      const msg =
+        err && typeof err === "object" && "response" in err
+          ? String(
+              (
+                (err as { response?: { data?: { detail?: string } } }).response
+                  ?.data as Record<string, unknown>
+              )?.detail ?? "Guest not found or no charges available",
+            )
+          : "Failed to load invoice data";
+      setErrorMsg(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const totalCredit = filtered.reduce((s, i) => s + i.montant, 0);
-  const ttc = totalCredit;
-  const htva = ttc / 1.18;
-  const tva = ttc - htva;
-
-  const tempoRecord = useMemo(
-    () =>
-      tempo.find(
-        (rec) =>
-          rec.room_num === filtered[0]?.room_num &&
-          rec.guest_name.toLowerCase() ===
-            filtered[0]?.guest_name.toLowerCase(),
-      ),
-    [tempo, filtered],
-  );
-
-  const exportCSV = () => {
-    const headers = [
-      "date",
-      "designation",
-      "qty",
-      "unity",
-      "puv",
-      "credit",
-      "debit",
-    ];
-    const rows = filtered.map((r) =>
-      [r.date, r.item, r.qty_s, r.unity, r.price_s, r.montant, r.paid].join(
-        ",",
-      ),
-    );
-    const blob = new Blob([headers.join(",") + "\n" + rows.join("\n")], {
-      type: "text/csv",
-    });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "Lgpinvoice.csv";
-    a.click();
+  const handleGenerate = async () => {
+    if (!preview) return;
+    setGenerating(true);
+    try {
+      const data = await frontOfficeApi.generateInvoice({
+        room_num: preview.room_num,
+        guest_name: preview.guest_name,
+        mode_payt: genPaytMode || undefined,
+        phone: genPhone || undefined,
+        country_code: "+250",
+        tin: genTin || undefined,
+      });
+      setInvoice({
+        room_num: data.room_num ?? preview.room_num,
+        guest_name: data.guest_name ?? preview.guest_name,
+        arrival_date: data.arrival_date ?? preview.arrival_date,
+        depart_date: data.depart_date ?? preview.depart_date,
+        items: data.items,
+        total_charges: data.total_charges,
+        total_paid: data.total_paid,
+        balance_due: data.balance_due,
+        invoice_number: data.invoice_number ?? "",
+        date: data.date ?? "",
+        username: data.username ?? "",
+        tax: (data.tax as InvoiceData["tax"]) ?? {},
+      });
+      setShowGenerateModal(false);
+    } catch (err: unknown) {
+      const msg =
+        err && typeof err === "object" && "response" in err
+          ? String(
+              (
+                (err as { response?: { data?: { detail?: string } } }).response
+                  ?.data as Record<string, unknown>
+              )?.detail ?? "Failed to generate invoice",
+            )
+          : "Failed to generate invoice";
+      setErrorMsg(msg);
+    } finally {
+      setGenerating(false);
+    }
   };
+
+  const displayData = invoice ?? preview;
 
   return (
     <div className="space-y-6 p-6">
@@ -108,114 +134,98 @@ export default function InvoiceByGuest() {
             {t("invoiceByGuest")}
           </h1>
           <p className="text-sm text-gray-500 mt-1">
-            Generate and manage definitive invoices
+            Search by room number and guest name
           </p>
         </div>
         <div className="flex gap-3">
-          <button
-            onClick={() => window.print()}
-            className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-3 rounded-xl flex items-center gap-2 text-sm font-medium hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-all duration-200 transform hover:scale-105"
-          >
-            <Printer size={18} />
-            {t("print")}
-          </button>
-          <button
-            onClick={exportCSV}
-            className="border-2 border-green-500 text-green-700 px-6 py-3 rounded-xl flex items-center gap-2 text-sm font-medium bg-green-50 hover:bg-green-100 hover:shadow-lg transition-all duration-200 transform hover:scale-105"
-          >
-            <FileSpreadsheet size={18} />
-            Excel
-          </button>
+          {displayData && !invoice && (
+            <button
+              onClick={() => setShowGenerateModal(true)}
+              className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl flex items-center gap-2 text-sm font-medium hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+            >
+              <Receipt size={18} />
+              Generate Invoice
+            </button>
+          )}
+          {displayData && (
+            <button
+              onClick={() => window.print()}
+              className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-3 rounded-xl flex items-center gap-2 text-sm font-medium hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-all duration-200 transform hover:scale-105"
+            >
+              <Printer size={18} />
+              {t("print")}
+            </button>
+          )}
         </div>
       </div>
 
       {/* Search panel */}
       <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
         <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-          <span className="w-1 h-6 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full"></span>
+          <span className="w-1 h-6 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full" />
           {t("queryWindow")}
         </h3>
         <div className="flex gap-4 flex-wrap">
           <input
-            value={queryInvoice}
-            onChange={(e) => {
-              setQueryInvoice(e.target.value);
-              setFiltered([]);
-            }}
-            placeholder={t("invoiceNumber")}
+            value={queryRoom}
+            onChange={(e) => setQueryRoom(e.target.value)}
+            placeholder={t("roomNumber")}
+            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             className="border-2 border-gray-200 rounded-xl px-4 py-3 text-sm w-48 focus:outline-none focus:border-blue-500 focus:shadow-md transition-all"
           />
           <input
             value={queryGuest}
-            onChange={(e) => {
-              setQueryGuest(e.target.value);
-              setFiltered([]);
-            }}
+            onChange={(e) => setQueryGuest(e.target.value)}
             placeholder={t("guestName")}
+            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             className="flex-1 border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 focus:shadow-md transition-all"
           />
-        </div>
-        {(queryInvoice.trim() || queryGuest.trim()) && (
-          <div className="mt-4 border-2 border-gray-200 rounded-xl max-h-56 overflow-y-auto shadow-md bg-gray-50">
-            {liveCandidates.length === 0 && (
-              <p className="text-sm text-gray-500 px-4 py-6 text-center font-medium">
-                No matching guest found.
-              </p>
+          <button
+            onClick={handleSearch}
+            disabled={loading}
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl flex items-center gap-2 text-sm font-medium hover:shadow-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50"
+          >
+            {loading ? (
+              <Loader2 className="animate-spin" size={16} />
+            ) : (
+              <Search size={16} />
             )}
-            {liveCandidates.map((c) => (
-              <button
-                key={`${c.invoice_num}-${c.guest_name}`}
-                type="button"
-                onClick={() => selectCandidate(c.invoice_num, c.guest_name)}
-                className="w-full text-left px-4 py-4 text-sm border-b border-gray-200 last:border-b-0 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-colors duration-150 group"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-gray-800 group-hover:text-blue-700">
-                    {c.guest_name}
-                  </span>
-                  <span className="text-xs font-medium text-gray-500 bg-gray-200 px-2 py-1 rounded-full group-hover:bg-blue-200 group-hover:text-blue-700 transition-colors">
-                    {c.rows} row{c.rows !== 1 ? "s" : ""}
-                  </span>
-                </div>
-                <div className="text-xs text-gray-600 mt-1 flex items-center gap-2">
-                  <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-mono">
-                    {c.invoice_num}
-                  </span>
-                  <span className="text-gray-400">•</span>
-                  <span>
-                    Room{" "}
-                    <span className="font-semibold text-gray-700">
-                      {c.room_num}
-                    </span>
-                  </span>
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
+            {t("search")}
+          </button>
+        </div>
       </div>
 
-      {/* ── INVOICE DOCUMENT ── */}
-      {filtered.length > 0 && (
+      {/* Loading */}
+      {loading && (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="animate-spin text-blue-500" size={32} />
+          <span className="ml-3 text-gray-600">Loading invoice data...</span>
+        </div>
+      )}
+
+      {/* Invoice Document */}
+      {displayData && displayData.items.length > 0 && (
         <div
           id="report-output"
           className="bg-white text-[10px] leading-tight text-black max-w-[960px] mx-auto p-6 font-sans shadow-lg rounded-2xl border border-gray-200"
         >
           <div className="mb-4 pb-4 border-b-2 border-gray-300">
             <p className="text-lg font-bold text-gray-800">
-              Definitive Invoice
+              {invoice ? "Definitive Invoice" : "Invoice Preview"}
             </p>
+            {invoice && (
+              <p className="text-sm font-mono font-bold text-blue-700 mt-1">
+                {invoice.invoice_number}
+              </p>
+            )}
             <p className="text-xs text-gray-500 mt-1">
-              {t("invoiceNum")}
-              {filtered[0]?.invoice_num} • {filtered[0]?.guest_name}
+              {displayData.guest_name} — Room {displayData.room_num}
             </p>
           </div>
 
-          {/* Outer frame with double border effect */}
           <div className="border-2 border-gray-800 rounded-lg overflow-hidden">
-            {/* Header: PME info (left) | Invoice title & fields (right) */}
+            {/* Header */}
             <div className="flex border-b-2 border-gray-800 bg-gradient-to-r from-gray-50 to-white">
-              {/* Left: PME Info Box */}
               <div className="p-4 w-44 shrink-0 space-y-1 text-xs border-r-2 border-gray-800 bg-gray-100">
                 <p className="font-bold text-sm text-gray-900">
                   Hotel de la Front Office
@@ -227,11 +237,9 @@ export default function InvoiceByGuest() {
                   TIN: 00000000
                 </p>
               </div>
-
-              {/* Right: Title + Fields */}
               <div className="flex-1 p-4 flex flex-col justify-center">
                 <h2 className="text-sm font-bold text-center mb-3 text-gray-900 border-b-2 border-gray-400 pb-2">
-                  DEFINITIVE INVOICE
+                  {invoice ? "DEFINITIVE INVOICE" : "INVOICE PREVIEW"}
                 </h2>
                 <div className="space-y-2 self-end w-full max-w-sm">
                   <div className="flex justify-between items-baseline gap-3 pb-1.5 border-b-2 border-gray-300">
@@ -239,7 +247,7 @@ export default function InvoiceByGuest() {
                       Room:
                     </span>
                     <span className="text-xs font-bold text-gray-900">
-                      {filtered[0]?.room_num ?? "-"}
+                      {displayData.room_num}
                     </span>
                   </div>
                   <div className="flex justify-between items-baseline gap-3 pb-1.5 border-b-2 border-gray-300">
@@ -247,46 +255,40 @@ export default function InvoiceByGuest() {
                       Guest:
                     </span>
                     <span className="text-xs font-bold text-gray-900">
-                      {filtered[0]?.guest_name ?? "-"}
+                      {displayData.guest_name}
                     </span>
                   </div>
                   <div className="flex justify-between items-baseline gap-3 pb-1.5 border-b-2 border-gray-300">
                     <span className="text-xs font-semibold text-gray-700">
-                      Phone:
+                      Arrival:
                     </span>
                     <span className="text-xs text-gray-800">
-                      {tempoRecord?.phone ?? "-"}
+                      {displayData.arrival_date || "-"}
                     </span>
                   </div>
                   <div className="flex justify-between items-baseline gap-3 pb-1.5 border-b-2 border-gray-300">
                     <span className="text-xs font-semibold text-gray-700">
-                      TIN:
+                      Departure:
                     </span>
                     <span className="text-xs text-gray-800">
-                      {tempoRecord?.tin ?? "-"}
+                      {displayData.depart_date || "-"}
                     </span>
                   </div>
-                  <div className="flex justify-between items-baseline gap-3 pb-1.5 border-b-2 border-gray-300">
-                    <span className="text-xs font-semibold text-gray-700">
-                      Invoice:
-                    </span>
-                    <span className="text-xs font-mono font-bold text-blue-700">
-                      {filtered[0]?.invoice_num ?? "-"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-baseline gap-3 pb-1.5 border-b-2 border-gray-300">
-                    <span className="text-xs font-semibold text-gray-700">
-                      Current_mon:
-                    </span>
-                    <span className="text-xs font-bold text-gray-900">
-                      {filtered[0]?.current_mon ?? "-"}
-                    </span>
-                  </div>
+                  {invoice && (
+                    <div className="flex justify-between items-baseline gap-3 pb-1.5 border-b-2 border-gray-300">
+                      <span className="text-xs font-semibold text-gray-700">
+                        Invoice:
+                      </span>
+                      <span className="text-xs font-mono font-bold text-blue-700">
+                        {invoice.invoice_number}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* Table with improved styling */}
+            {/* Table */}
             <div className="relative overflow-hidden bg-white">
               <table className="w-full border-collapse">
                 <thead>
@@ -310,31 +312,31 @@ export default function InvoiceByGuest() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((s, i) => (
+                  {displayData.items.map((item, i) => (
                     <tr
                       key={i}
                       className="hover:bg-blue-50 transition-colors border-b border-gray-300"
                     >
                       <td className="border border-gray-300 px-2 py-2 text-xs font-mono text-gray-700">
-                        {s.date}
+                        {item.date}
                       </td>
                       <td className="border border-gray-300 px-2 py-2 text-xs text-gray-800 font-medium">
-                        {s.item}
+                        {item.designation}
                       </td>
                       <td className="border border-gray-300 px-2 py-2 text-xs text-center font-semibold">
-                        {s.qty_s}
+                        {item.qty}
                       </td>
                       <td className="border border-gray-300 px-2 py-2 text-xs text-gray-700">
-                        {s.unity}
+                        {item.unity}
                       </td>
                       <td className="border border-gray-300 px-2 py-2 text-xs text-right font-semibold">
-                        {s.price_s.toLocaleString()}
+                        {fmt(item.puv)}
                       </td>
                       <td className="border border-gray-300 px-2 py-2 text-xs text-right font-bold text-green-700">
-                        {s.montant.toLocaleString()}
+                        {fmt(item.credit)}
                       </td>
                       <td className="border border-gray-300 px-2 py-2 text-xs text-right font-bold text-red-700">
-                        {s.paid.toLocaleString()}
+                        {fmt(item.debit)}
                       </td>
                     </tr>
                   ))}
@@ -342,56 +344,182 @@ export default function InvoiceByGuest() {
               </table>
             </div>
 
-            {/* Footer: Signatures (left) | Totals (right) */}
+            {/* Footer */}
             <div className="flex justify-between items-start px-4 py-4 border-t-2 border-gray-800 bg-gradient-to-r from-gray-50 to-white">
-              <div className="space-y-3 text-xs">
-                <div className="flex items-baseline gap-3">
-                  <span className="font-semibold text-gray-800">
-                    Company Signature
-                  </span>
-                  <span className="border-b-2 border-gray-400 w-24 inline-block" />
+              {invoice && (
+                <div className="space-y-3 text-xs">
+                  <div className="flex items-baseline gap-3">
+                    <span className="font-semibold text-gray-800">
+                      Company Signature
+                    </span>
+                    <span className="border-b-2 border-gray-400 w-24 inline-block" />
+                  </div>
+                  <div className="flex items-baseline gap-3">
+                    <span className="font-semibold text-gray-800">
+                      Username:
+                    </span>
+                    <span className="font-bold text-blue-700">
+                      {invoice.username}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-baseline gap-3">
-                  <span className="font-semibold text-gray-800">Username:</span>
-                  <span className="font-bold text-blue-700">
-                    {filtered[0]?.username ?? "-"}
-                  </span>
-                </div>
-              </div>
-
-              <div className="space-y-2 text-xs">
+              )}
+              <div className="space-y-2 text-xs ml-auto">
                 <div className="flex items-center justify-end gap-3">
                   <span className="font-semibold text-gray-700">
-                    Total (with tax)
+                    Total Charges
                   </span>
-                  <span className="border-2 border-gray-400 bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-1.5 w-24 text-right font-bold text-green-700">
-                    {Math.round(ttc).toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex items-center justify-end gap-3">
-                  <span className="font-semibold text-gray-700">
-                    {t("hTVALabel")}
-                  </span>
-                  <span className="border-2 border-gray-400 bg-gradient-to-r from-blue-50 to-cyan-50 px-3 py-1.5 w-24 text-right font-bold text-blue-700">
-                    {Math.round(htva).toLocaleString()}
+                  <span className="border-2 border-gray-400 bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-1.5 w-28 text-right font-bold text-green-700">
+                    {fmt(displayData.total_charges)} RWF
                   </span>
                 </div>
                 <div className="flex items-center justify-end gap-3">
                   <span className="font-semibold text-gray-700">
-                    {t("tVALabel")}
+                    Total Paid
                   </span>
-                  <span className="border-2 border-gray-400 bg-gradient-to-r from-orange-50 to-red-50 px-3 py-1.5 w-24 text-right font-bold text-red-700">
-                    {Math.round(tva).toLocaleString()}
+                  <span className="border-2 border-gray-400 bg-gradient-to-r from-blue-50 to-cyan-50 px-3 py-1.5 w-28 text-right font-bold text-blue-700">
+                    {fmt(displayData.total_paid)} RWF
                   </span>
                 </div>
+                <div className="flex items-center justify-end gap-3">
+                  <span className="font-semibold text-gray-700">
+                    Balance Due
+                  </span>
+                  <span className="border-2 border-gray-400 bg-gradient-to-r from-orange-50 to-red-50 px-3 py-1.5 w-28 text-right font-bold text-red-700">
+                    {fmt(displayData.balance_due)} RWF
+                  </span>
+                </div>
+                {invoice?.tax?.taux != null && (
+                  <>
+                    <div className="flex items-center justify-end gap-3 pt-2 border-t border-gray-300">
+                      <span className="font-semibold text-gray-700">
+                        {t("hTVALabel")}
+                      </span>
+                      <span className="border-2 border-gray-400 px-3 py-1.5 w-28 text-right font-bold text-blue-700">
+                        {fmt(invoice.tax.htva ?? 0)} RWF
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-end gap-3">
+                      <span className="font-semibold text-gray-700">
+                        {t("tVALabel")} ({invoice.tax.taux}%)
+                      </span>
+                      <span className="border-2 border-gray-400 px-3 py-1.5 w-28 text-right font-bold text-red-700">
+                        {fmt(invoice.tax.tva ?? 0)} RWF
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-end gap-3">
+                      <span className="font-semibold text-gray-700">
+                        Total TTC
+                      </span>
+                      <span className="border-2 border-gray-400 bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-1.5 w-28 text-right font-bold text-green-800">
+                        {fmt(invoice.tax.total_ttc ?? 0)} RWF
+                      </span>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Page marker */}
-          <p className="text-center text-gray-400 mt-4 text-xs font-light tracking-widest\">
+          <p className="text-center text-gray-400 mt-4 text-xs font-light tracking-widest">
             --
           </p>
+        </div>
+      )}
+
+      {/* Generate Invoice Modal */}
+      {showGenerateModal && preview && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+              Generate Definitive Invoice
+            </h3>
+            <p className="text-sm text-gray-600 mb-4">
+              {preview.guest_name} — Room {preview.room_num}
+            </p>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">
+                  {t("paymentMode")}
+                </label>
+                <select
+                  value={genPaytMode}
+                  onChange={(e) => setGenPaytMode(e.target.value)}
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                >
+                  <option value="">-- Select --</option>
+                  {paymentModes.map((m) => (
+                    <option key={m.code} value={m.code}>
+                      {m.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">
+                  {t("phone")}
+                </label>
+                <input
+                  type="tel"
+                  value={genPhone}
+                  onChange={(e) => setGenPhone(e.target.value)}
+                  placeholder="+250..."
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">
+                  TIN
+                </label>
+                <input
+                  type="text"
+                  value={genTin}
+                  onChange={(e) => setGenTin(e.target.value)}
+                  placeholder="Tax ID"
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={handleGenerate}
+                disabled={generating}
+                className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {generating && (
+                  <Loader2 className="animate-spin" size={14} />
+                )}
+                Generate
+              </button>
+              <button
+                onClick={() => setShowGenerateModal(false)}
+                className="border px-4 py-2 rounded-lg text-sm"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Error Dialog */}
+      {errorMsg && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-sm">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-red-100 rounded-full">
+                <AlertTriangle className="text-red-600" size={20} />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-800">Error</h3>
+            </div>
+            <p className="text-sm text-gray-600 mb-6">{errorMsg}</p>
+            <button
+              onClick={() => setErrorMsg("")}
+              className="w-full bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700"
+            >
+              OK
+            </button>
+          </div>
         </div>
       )}
 
