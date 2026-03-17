@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { Search, Plus, Save, Trash2 } from "lucide-react";
+import { Search, Plus, Save, Trash2, AlertTriangle } from "lucide-react";
 import { useLang } from "../../hooks/useLang";
 import { useHotelData } from "../../context/HotelDataContext";
-import { useNotification } from "../../hooks/useNotification";
 import ConfirmationModal from "../../components/common/ConfirmationModal";
 import {
   validateGroupReservation,
@@ -17,7 +16,7 @@ export default function GroupReservation() {
   const { t } = useLang();
   const { groupReservations, setGroupReservations, currencies, paymentModes } =
     useHotelData();
-  const { addNotification } = useNotification();
+  const [errorMsg, setErrorMsg] = useState("");
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<GRC | null>(null);
   const [isNew, setIsNew] = useState(false);
@@ -45,7 +44,7 @@ export default function GroupReservation() {
     current_mon: "RWF",
     exchange: 1,
     qty: 0,
-    payt_mode: paymentModes[0]?.code ?? "",
+    payt_mode: paymentModes[0]?.id ?? "",
     discount: 0,
     stay_cost: 0,
     deposit: 0,
@@ -134,11 +133,8 @@ export default function GroupReservation() {
     setErrors(validationResult);
 
     if (!validationResult.isValid) {
-      addNotification(
-        createErrorNotification(validationResult.errors, t),
-        "Validation Error",
-        "error",
-      );
+      setErrorMsg(createErrorNotification(validationResult.errors, t));
+      setConfirmSaveOpen(false);
       return;
     }
 
@@ -157,21 +153,15 @@ export default function GroupReservation() {
         );
       }
     } catch (error) {
-      addNotification(
+      setErrorMsg(
         typeof error === "object" && error !== null && "message" in error
           ? String((error as { message: string }).message)
           : t("loginError"),
-        "Rooms Attendant",
-        "error",
       );
+      setConfirmSaveOpen(false);
       return;
     }
 
-    addNotification(
-      `Group reservation for ${selected.groupe_name} ${isNew ? "created" : "updated"}`,
-      "Rooms Attendant",
-      "success",
-    );
     setSelected(null);
     setQuery("");
     setConfirmSaveOpen(false);
@@ -188,23 +178,17 @@ export default function GroupReservation() {
       try {
         await frontOfficeApi.deleteGroup(selected.id);
       } catch (error) {
-        addNotification(
+        setErrorMsg(
           typeof error === "object" && error !== null && "message" in error
             ? String((error as { message: string }).message)
             : t("loginError"),
-          "Rooms Attendant",
-          "error",
         );
+        setConfirmDeleteOpen(false);
         return;
       }
     }
 
     setGroupReservations((prev) => prev.filter((g) => g.id !== selected.id));
-    addNotification(
-      `Group reservation for ${selected.groupe_name} deleted`,
-      "Rooms Attendant",
-      "success",
-    );
     setSelected(null);
     setQuery("");
     setConfirmDeleteOpen(false);
@@ -574,7 +558,24 @@ export default function GroupReservation() {
         isDangerous={true}
         onConfirm={confirmDelete}
         onCancel={() => setConfirmDeleteOpen(false)}
-      />{" "}
+      />
+
+      {/* Error Dialog */}
+      {errorMsg && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md text-center space-y-4">
+            <AlertTriangle size={40} className="text-red-500 mx-auto" />
+            <h3 className="text-lg font-semibold text-gray-800">Error</h3>
+            <p className="text-sm text-gray-600 whitespace-pre-wrap">{errorMsg}</p>
+            <button
+              onClick={() => setErrorMsg("")}
+              className="bg-red-500 text-white px-6 py-2 rounded-lg text-sm hover:bg-red-600"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

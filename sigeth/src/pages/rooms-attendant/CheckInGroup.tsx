@@ -1,13 +1,10 @@
 /* eslint-disable -- Inline styles necessary for dynamic width and progress calculations */
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo } from "react";
 import {
   Search,
   Users,
   UserCheck,
-  CreditCard,
-  Printer,
   X,
-  Wifi,
   CheckCircle2,
   ArrowRightLeft,
 } from "lucide-react";
@@ -26,14 +23,12 @@ export default function CheckInGroup() {
     setRooms,
     catrooms,
   } = useHotelData();
-  const printRef = useRef<HTMLDivElement>(null);
 
   const [queryCode, setQueryCode] = useState("");
   const [queryGroup, setQueryGroup] = useState("");
   const [groupFound, setGroupFound] = useState<GRC | null>(null);
   const [processingMember, setProcessingMember] = useState<RCS | null>(null);
   const [swapRoom, setSwapRoom] = useState<string | null>(null);
-  const [keyCardGuest, setKeyCardGuest] = useState<RCS | null>(null);
   const [groupSuggestions, setGroupSuggestions] = useState<GRC[]>([]);
   const [showGroupSuggestions, setShowGroupSuggestions] = useState(false);
 
@@ -156,8 +151,7 @@ export default function CheckInGroup() {
   /* ── Single member check-in from modal ── */
   const handleConfirmMemberCheckIn = async () => {
     if (!processingMember) return;
-    const res = await checkInMember(processingMember, swapRoom ?? undefined);
-    setKeyCardGuest(res);
+    await checkInMember(processingMember, swapRoom ?? undefined);
     setProcessingMember(null);
     setSwapRoom(null);
   };
@@ -171,28 +165,6 @@ export default function CheckInGroup() {
       ),
       0,
     );
-  };
-
-  /* ── Print ── */
-  const handlePrint = () => {
-    if (!printRef.current) return;
-    const w = window.open("", "_blank", "width=400,height=600");
-    if (!w) return;
-    w.document.write(`
-      <html><head><title>${t("keyCardSlip")}</title>
-      <style>
-        body{font-family:Arial,sans-serif;padding:20px;max-width:350px;margin:0 auto}
-        .header{text-align:center;border-bottom:2px solid #333;padding-bottom:12px;margin-bottom:16px}
-        .header h1{font-size:18px;margin:0} .header p{color:#666;margin:4px 0;font-size:12px}
-        .row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dotted #ccc;font-size:13px}
-        .label{color:#666} .value{font-weight:bold}
-        .footer{text-align:center;margin-top:20px;padding-top:12px;border-top:2px solid #333;font-size:11px;color:#666}
-        .wifi{background:#f5f5f5;padding:10px;border-radius:6px;text-align:center;margin-top:12px}
-        .wifi .code{font-size:20px;font-weight:bold;letter-spacing:2px;color:#333}
-      </style></head><body>${printRef.current.innerHTML}</body></html>
-    `);
-    w.document.close();
-    w.print();
   };
 
   return (
@@ -561,95 +533,6 @@ export default function CheckInGroup() {
         </div>
       )}
 
-      {/* ════════════════════════════════════════════
-          KEY CARD SLIP MODAL
-         ════════════════════════════════════════════ */}
-      {keyCardGuest && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
-            <div className="flex items-center justify-between px-6 py-4 border-b">
-              <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                <CreditCard size={20} className="text-amber-600" />
-                {t("keyCardSlip")}
-              </h2>
-              <button
-                onClick={() => setKeyCardGuest(null)}
-                title="Close key card slip"
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            <div ref={printRef} className="p-6">
-              <div className="text-center border-b-2 border-gray-800 pb-3 mb-4">
-                <h1 className="text-xl font-bold">{t("hotelFullName")}</h1>
-                <p className="text-xs text-gray-500">
-                  {t("keyCardSlip")} — {groupFound?.groupe_name}
-                </p>
-              </div>
-              <div className="space-y-2 text-sm">
-                {[
-                  [t("guestName"), keyCardGuest.guest_name],
-                  [t("roomNumber"), keyCardGuest.room_num],
-                  [t("groupCode"), keyCardGuest.code_p],
-                  [t("checkInDate"), keyCardGuest.arrival_date],
-                  [t("checkOutDate"), keyCardGuest.depart_date],
-                  [
-                    t("nights"),
-                    String(
-                      calcNights(
-                        keyCardGuest.arrival_date,
-                        keyCardGuest.depart_date,
-                      ),
-                    ),
-                  ],
-                  [t("paymentMode"), keyCardGuest.payt_mode],
-                ].map(([label, val]) => (
-                  <div
-                    key={label}
-                    className="flex justify-between py-1.5 border-b border-dotted border-gray-300"
-                  >
-                    <span className="text-gray-500">{label}</span>
-                    <strong>{val}</strong>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-4 bg-gray-50 rounded-lg p-3 text-center">
-                <Wifi size={18} className="mx-auto text-gray-600 mb-1" />
-                <p className="text-xs text-gray-500">{t("wifiCode")}</p>
-                <p className="text-xl font-bold tracking-widest text-gray-800">
-                  SIGETH2026
-                </p>
-              </div>
-              <div className="text-center mt-4 pt-3 border-t-2 border-gray-800">
-                <p className="text-xs text-gray-500">
-                  {t("keyCardInstructions")}
-                </p>
-                <p className="text-xs text-gray-400 mt-1">
-                  {t("welcomeMessage")}
-                </p>
-              </div>
-            </div>
-
-            <div className="px-6 pb-6 flex gap-3">
-              <button
-                onClick={handlePrint}
-                className="flex-1 bg-amber-500 text-white py-2.5 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 hover:bg-amber-600"
-              >
-                <Printer size={16} />
-                {t("printKeyCard")}
-              </button>
-              <button
-                onClick={() => setKeyCardGuest(null)}
-                className="px-6 py-2.5 border rounded-lg text-sm"
-              >
-                {t("close")}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
