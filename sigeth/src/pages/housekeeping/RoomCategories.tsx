@@ -107,12 +107,12 @@ export default function RoomCategories() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50 p-6 space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50 p-4 space-y-4">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
           {t("roomCategories")}
         </h1>
-        <p className="text-sm text-gray-600">{t("manageCategoriesDesc")}</p>
+        <p className="text-sm text-hotel-text-secondary">{t("manageCategoriesDesc")}</p>
       </div>
       <div className="flex gap-3">
         <button
@@ -121,20 +121,20 @@ export default function RoomCategories() {
             setIsNew(true);
             setErrors({ isValid: true, errors: [] });
           }}
-          className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-all duration-200"
+          className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-colors duration-200"
         >
           <Plus size={16} />
           {t("newRecord")}
         </button>
       </div>
       {selected && (
-        <div className="bg-white rounded-xl shadow-md border border-emerald-100 p-7 space-y-4">
-          <h3 className="text-lg font-bold text-emerald-700">
+        <div className="bg-white rounded border border-emerald-100 p-7 space-y-4">
+          <h3 className="text-base font-bold text-emerald-700">
             {isNew ? t("newCategory") : t("editCategory")}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-hotel-text-primary mb-2">
                 {t("code")}
               </label>
               <input
@@ -144,10 +144,10 @@ export default function RoomCategories() {
                   setSelected({ ...selected, code: Number(e.target.value) })
                 }
                 title={t("code")}
-                className={`w-full border-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all focus:outline-none ${
+                className={`w-full border-2 rounded px-4 py-2.5 text-sm font-medium transition-colors focus:outline-none ${
                   getErrorMessage("code")
                     ? "border-red-400 bg-red-50 focus:border-red-500"
-                    : "border-gray-200 hover:border-gray-300 focus:border-emerald-500"
+                    : "border-hotel-border hover:border-hotel-border focus:border-emerald-500"
                 }`}
               />
               {getErrorMessage("code") && (
@@ -157,7 +157,7 @@ export default function RoomCategories() {
               )}
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-hotel-text-primary mb-2">
                 {t("categoryName")}
               </label>
               <input
@@ -167,10 +167,10 @@ export default function RoomCategories() {
                   setSelected({ ...selected, name: e.target.value })
                 }
                 title={t("categoryName")}
-                className={`w-full border-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all focus:outline-none ${
+                className={`w-full border-2 rounded px-4 py-2.5 text-sm font-medium transition-colors focus:outline-none ${
                   getErrorMessage("name")
                     ? "border-red-400 bg-red-50 focus:border-red-500"
-                    : "border-gray-200 hover:border-gray-300 focus:border-emerald-500"
+                    : "border-hotel-border hover:border-hotel-border focus:border-emerald-500"
                 }`}
               />
               {getErrorMessage("name") && (
@@ -180,10 +180,10 @@ export default function RoomCategories() {
               )}
             </div>
           </div>
-          <div className="flex gap-3 pt-5 border-t border-gray-200">
+          <div className="flex gap-3 pt-5 border-t border-hotel-border">
             <button
               onClick={handleSave}
-              className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-6 py-2.5 rounded-lg flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-all duration-200"
+              className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-6 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-colors duration-200"
             >
               <Save size={16} />
               {t("save")}
@@ -191,7 +191,7 @@ export default function RoomCategories() {
             {!isNew && (
               <button
                 onClick={() => setShowDeleteConfirm(true)}
-                className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-2.5 rounded-lg flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-red-600 hover:to-red-700 transition-all duration-200"
+                className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-red-600 hover:to-red-700 transition-colors duration-200"
               >
                 <Trash2 size={16} />
                 {t("delete")}
@@ -202,7 +202,7 @@ export default function RoomCategories() {
                 setSelected(null);
                 setErrors({ isValid: true, errors: [] });
               }}
-              className="border-2 border-gray-300 px-6 py-2.5 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+              className="border-2 border-hotel-border px-6 py-2.5 rounded text-sm font-semibold text-hotel-text-primary hover:bg-hotel-cream transition-colors"
             >
               {t("cancel")}
             </button>
@@ -234,19 +234,19 @@ export default function RoomCategories() {
         onCancel={() => setShowDeleteConfirm(false)}
       />
 
-      <div className="bg-white rounded-xl shadow-md border border-emerald-100 overflow-hidden">
+      <div className="bg-white rounded border border-emerald-100 overflow-hidden">
         <div className="bg-gradient-to-r from-emerald-50 to-green-50 px-6 py-4 border-b border-emerald-100">
-          <h2 className="text-lg font-bold text-gray-800">
+          <h2 className="text-base font-bold text-hotel-text-primary">
             Room Categories Directory
           </h2>
         </div>
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b-2 border-emerald-200">
+          <thead className="bg-white border-b-2 border-emerald-200">
             <tr>
-              <th className="text-left px-6 py-3 font-bold text-gray-700">
+              <th className="text-left px-6 py-3 font-bold text-hotel-text-primary">
                 {t("code")}
               </th>
-              <th className="text-left px-6 py-3 font-bold text-gray-700">
+              <th className="text-left px-6 py-3 font-bold text-hotel-text-primary">
                 {t("categoryName")}
               </th>
             </tr>
@@ -265,13 +265,13 @@ export default function RoomCategories() {
                 <td className="px-6 py-3 font-semibold text-emerald-600">
                   {c.code}
                 </td>
-                <td className="px-6 py-3 text-gray-700">{c.name}</td>
+                <td className="px-6 py-3 text-hotel-text-primary">{c.name}</td>
               </tr>
             ))}
           </tbody>
         </table>
         {catrooms.length === 0 && (
-          <div className="px-6 py-12 text-center text-gray-500">
+          <div className="px-6 py-12 text-center text-hotel-text-secondary">
             <p className="text-sm">
               No categories found. Click "New Record" to add one.
             </p>

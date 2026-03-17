@@ -37,7 +37,6 @@ export default function CheckInReservation() {
   const [confirmCheckInOpen, setConfirmCheckInOpen] = useState(false);
   const [checkedInMap, setCheckedInMap] = useState<Map<string, RCS>>(new Map());
   const [localPuv, setLocalPuv] = useState(0);
-  const [showCurrencyModal, setShowCurrencyModal] = useState(false);
 
   const currencyOptions = useMemo(() => [
     { code: "RWF", label: "Rwandan Franc", exchange_rate: 1 },
@@ -188,11 +187,11 @@ export default function CheckInReservation() {
     const isCheckedIn = checkedInMap.has(res.id!) || room?.status === "OCC";
 
     return (
-      <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-5 hover:shadow-lg transition-all duration-200">
-        <div className="flex items-start justify-between">
+      <div className="bg-white border border-hotel-border rounded p-4 hover:bg-hotel-cream transition-colors">
+        <div className="flex items-start justify-between gap-3">
           <div className="flex-1">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-bold text-sm">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-10 h-10 rounded-full bg-hotel-navy flex items-center justify-center text-hotel-cream font-bold text-xs">
                 {res.guest_name
                   .split(" ")
                   .map((n) => n[0])
@@ -200,53 +199,53 @@ export default function CheckInReservation() {
                   .slice(0, 2)}
               </div>
               <div>
-                <h3 className="font-semibold text-gray-800 text-lg">
+                <h3 className="font-semibold text-hotel-text-primary text-sm">
                   {res.guest_name}
                 </h3>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-hotel-text-secondary">
                   {res.nationality} — {res.id_card}
                 </p>
               </div>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm mt-4 p-3 bg-gray-50 rounded-lg">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs mt-3 p-2 bg-hotel-cream rounded">
               <div>
-                <span className="text-gray-500 text-xs">{t("roomNumber")}</span>
-                <p className="font-semibold text-gray-900">{res.room_num}</p>
+                <span className="text-hotel-text-secondary">{t("roomNumber")}</span>
+                <p className="font-semibold text-hotel-text-primary">{res.room_num}</p>
                 {room && (
-                  <span className="text-gray-500 text-xs">
+                  <span className="text-hotel-text-secondary text-xs">
                     {getCatName(room.categorie)}
                   </span>
                 )}
               </div>
               <div>
-                <span className="text-gray-500 text-xs">
+                <span className="text-hotel-text-secondary">
                   {t("arrivalDate")}
                 </span>
-                <p className="font-semibold text-gray-900">
+                <p className="font-semibold text-hotel-text-primary">
                   {res.arrival_date}
                 </p>
               </div>
               <div>
-                <span className="text-gray-500 text-xs">{t("departDate")}</span>
-                <p className="font-semibold text-gray-900">{res.depart_date}</p>
+                <span className="text-hotel-text-secondary">{t("departDate")}</span>
+                <p className="font-semibold text-hotel-text-primary">{res.depart_date}</p>
               </div>
               <div>
-                <span className="text-gray-500 text-xs">{t("nights")}</span>
-                <p className="font-semibold text-gray-900">{nights}</p>
+                <span className="text-hotel-text-secondary">{t("nights")}</span>
+                <p className="font-semibold text-hotel-text-primary">{nights}</p>
               </div>
             </div>
-            <div className="mt-3 p-3 bg-blue-50 rounded-lg">
-              <p className="text-sm font-semibold text-gray-800">
+            <div className="mt-2 p-2 bg-hotel-gold bg-opacity-10 rounded">
+              <p className="text-xs font-semibold text-hotel-text-primary">
                 {res.stay_cost.toLocaleString()}{" "}
-                <span className="text-gray-600 font-normal">
+                <span className="text-hotel-text-secondary font-normal">
                   {res.current_mon}
                 </span>
               </p>
             </div>
           </div>
           {isCheckedIn ? (
-            <div className="ml-4 px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium bg-green-100 text-green-700 shrink-0">
-              <CheckCircle2 size={16} />
+            <div className="px-3 py-1 rounded flex items-center gap-1 text-xs font-medium bg-green-100 text-hotel-success shrink-0 whitespace-nowrap">
+              <CheckCircle2 size={14} />
               Checked In
             </div>
           ) : (
@@ -257,13 +256,13 @@ export default function CheckInReservation() {
                 setIdVerified(false);
                 setSwapRoom(null);
               }}
-              className={`ml-4 px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-all transform hover:scale-105 shrink-0 ${
+              className={`px-3 py-1 rounded flex items-center gap-1 text-xs font-medium transition-colors shrink-0 whitespace-nowrap ${
                 isUpcoming
-                  ? "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                  : "bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:shadow-lg"
+                  ? "bg-gray-100 text-hotel-text-secondary hover:bg-gray-200"
+                  : "bg-hotel-gold text-white hover:bg-hotel-gold-dark"
               }`}
             >
-              <UserCheck size={16} />
+              <UserCheck size={14} />
               {t("checkIn")}
             </button>
           )}
@@ -273,53 +272,52 @@ export default function CheckInReservation() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-2xl shadow-sm border border-blue-100">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+    <div className="space-y-4">
+      <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4">
+        <h1 className="text-2xl font-display font-bold text-hotel-text-primary">
           {t("checkInWithReservation")}
         </h1>
       </div>
 
       {/* ── Search bar ── */}
-      <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
-        <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-          <span className="w-1 h-6 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full" />
+      <div className="bg-white border border-hotel-border rounded p-4">
+        <h3 className="text-sm font-semibold text-hotel-text-primary mb-3 uppercase tracking-wide">
           {t("search")}
         </h3>
         <div className="relative">
           <Search
-            size={20}
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500"
+            size={18}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-hotel-text-secondary"
           />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={`${t("search")} ${t("guestName")}, ${t("roomNumber")}, ${t("idCard")}...`}
             title={`${t("search")} ${t("guestName")}, ${t("roomNumber")}, ${t("idCard")}...`}
-            className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-3 py-2 border border-hotel-border rounded text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
           />
         </div>
       </div>
 
       {/* ── Today's arrivals ── */}
       <div>
-        <div className="flex items-center gap-3 mb-4 bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border border-green-100">
-          <CalendarDays size={20} className="text-green-600" />
+        <div className="flex items-center gap-3 mb-3 bg-hotel-cream p-3 rounded border border-hotel-border">
+          <CalendarDays size={18} className="text-hotel-text-primary" />
           <div className="flex-1">
-            <h2 className="text-lg font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+            <h2 className="text-base font-display font-semibold text-hotel-text-primary">
               {t("todaysArrivals")}
             </h2>
           </div>
-          <span className="bg-green-100 text-green-700 text-sm font-bold px-3 py-1 rounded-full">
+          <span className="bg-hotel-navy text-white text-xs font-semibold px-2 py-1 rounded">
             {filtered.arrivals.length}
           </span>
         </div>
         {filtered.arrivals.length === 0 ? (
-          <div className="bg-gray-50 rounded-2xl border border-dashed border-gray-300 p-8 text-center text-gray-400 text-sm">
+          <div className="bg-hotel-cream rounded border border-dashed border-hotel-border p-6 text-center text-hotel-text-secondary text-xs">
             {t("noArrivalsToday")}
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {filtered.arrivals.map((r, i) => (
               <ArrivalRow key={`arr-${i}`} res={r} />
             ))}
@@ -330,18 +328,18 @@ export default function CheckInReservation() {
       {/* ── Upcoming arrivals ── */}
       {filtered.upcoming.length > 0 && (
         <div>
-          <div className="flex items-center gap-3 mb-4 bg-gradient-to-r from-amber-50 to-orange-50 p-4 rounded-xl border border-amber-100">
-            <CalendarDays size={20} className="text-amber-600" />
+          <div className="flex items-center gap-3 mb-3 bg-hotel-cream p-3 rounded border border-hotel-border">
+            <CalendarDays size={18} className="text-hotel-text-primary" />
             <div className="flex-1">
-              <h2 className="text-lg font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+              <h2 className="text-base font-display font-semibold text-hotel-text-primary">
                 {t("expectedArrivals")}
               </h2>
             </div>
-            <span className="bg-amber-100 text-amber-700 text-sm font-bold px-3 py-1 rounded-full">
+            <span className="bg-hotel-navy text-white text-xs font-semibold px-2 py-1 rounded">
               {filtered.upcoming.length}
             </span>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-2">
             {filtered.upcoming.map((r, i) => (
               <ArrivalRow key={`up-${i}`} res={r} isUpcoming />
             ))}
@@ -354,11 +352,11 @@ export default function CheckInReservation() {
          ════════════════════════════════════════════ */}
       {processing && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-white border border-hotel-border rounded w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b bg-gradient-to-r from-amber-50 to-white">
-              <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                <UserCheck size={20} className="text-amber-600" />
+            <div className="flex items-center justify-between px-4 py-3 border-b border-hotel-border">
+              <h2 className="text-base font-display font-bold text-hotel-text-primary flex items-center gap-2">
+                <UserCheck size={18} className="text-hotel-gold" />
                 {t("processCheckIn")}
               </h2>
               <button
@@ -368,20 +366,20 @@ export default function CheckInReservation() {
                   setSwapRoom(null);
                 }}
                 title="Close check-in modal"
-                className="text-gray-400 hover:text-gray-600"
+                className="text-hotel-text-secondary hover:text-hotel-text-primary"
               >
-                <X size={20} />
+                <X size={18} />
               </button>
             </div>
 
-            <div className="p-6 space-y-5">
+            <div className="p-4 space-y-4">
               {/* Guest details */}
               <div>
-                <h3 className="text-sm font-semibold text-gray-500 mb-3 flex items-center gap-2">
+                <h3 className="text-xs font-semibold text-hotel-text-secondary mb-2 flex items-center gap-2 uppercase tracking-wide">
                   <ShieldCheck size={14} />
                   {t("guestDetails")}
                 </h3>
-                <div className="grid grid-cols-2 gap-3 bg-gray-50 rounded-lg p-4">
+                <div className="grid grid-cols-2 gap-2 bg-hotel-cream rounded p-3">
                   {[
                     [t("guestName"), processing.guest_name],
                     [t("idDocument"), processing.id_card],
@@ -395,50 +393,50 @@ export default function CheckInReservation() {
                       `${processing.children}${processing.children > 0 ? ` (${t("age")}: ${processing.age})` : ""}`,
                     ],
                   ].map(([label, val]) => (
-                    <div key={label} className="text-sm">
-                      <span className="text-gray-400 text-xs">{label}</span>
-                      <p className="font-medium text-gray-700">{val}</p>
+                    <div key={label} className="text-xs">
+                      <span className="text-hotel-text-secondary">{label}</span>
+                      <p className="font-medium text-hotel-text-primary">{val}</p>
                     </div>
                   ))}
                 </div>
               </div>
 
               {/* ID Verification */}
-              <label className="flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 cursor-pointer select-none">
+              <label className="flex items-center gap-2 bg-hotel-cream border border-hotel-border rounded px-3 py-2 cursor-pointer select-none">
                 <input
                   type="checkbox"
                   checked={idVerified}
                   onChange={(e) => setIdVerified(e.target.checked)}
-                  className="w-5 h-5 rounded accent-blue-600"
+                  className="w-4 h-4 rounded accent-hotel-gold"
                 />
-                <div>
-                  <span className="font-semibold text-blue-800 text-sm">
+                <div className="flex-1">
+                  <span className="font-semibold text-hotel-text-primary text-xs">
                     {t("verifyIdentity")}
                   </span>
-                  <p className="text-xs text-blue-600">
+                  <p className="text-xs text-hotel-text-secondary">
                     {t("idDocument")}: {processing.id_card}
                   </p>
                 </div>
                 {idVerified && (
-                  <ShieldCheck size={20} className="ml-auto text-green-600" />
+                  <ShieldCheck size={16} className="text-hotel-success" />
                 )}
               </label>
 
               {/* Room assignment */}
               <div>
-                <h3 className="text-sm font-semibold text-gray-500 mb-3 flex items-center gap-2">
+                <h3 className="text-xs font-semibold text-hotel-text-secondary mb-2 flex items-center gap-2 uppercase tracking-wide">
                   <ArrowRightLeft size={14} />
                   {t("roomAssignment")}
                 </h3>
-                <div className="flex items-center gap-4">
-                  <div className="flex-1 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
-                    <span className="text-xs text-amber-600">
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 bg-hotel-cream border border-hotel-border rounded px-3 py-2">
+                    <span className="text-xs text-hotel-text-secondary">
                       {t("assignedRoom")}
                     </span>
-                    <p className="font-bold text-lg text-amber-800">
+                    <p className="font-bold text-sm text-hotel-text-primary">
                       {processing.room_num}
                     </p>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-hotel-text-secondary">
                       {getCatName(
                         rooms.find((r) => r.room_num === processing.room_num)
                           ?.categorie ?? 0,
@@ -448,17 +446,17 @@ export default function CheckInReservation() {
                   {swapRoom && (
                     <>
                       <ArrowRightLeft
-                        size={20}
-                        className="text-amber-500 shrink-0"
+                        size={16}
+                        className="text-hotel-gold shrink-0"
                       />
-                      <div className="flex-1 bg-green-50 border border-green-200 rounded-lg px-4 py-3">
-                        <span className="text-xs text-green-600">
+                      <div className="flex-1 bg-green-50 border border-hotel-border rounded px-3 py-2">
+                        <span className="text-xs text-hotel-success">
                           {t("swapRoomTo")}
                         </span>
-                        <p className="font-bold text-lg text-green-800">
+                        <p className="font-bold text-sm text-hotel-text-primary">
                           {swapRoom}
                         </p>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-hotel-text-secondary">
                           {getCatName(
                             rooms.find((r) => r.room_num === swapRoom)
                               ?.categorie ?? 0,
@@ -470,12 +468,12 @@ export default function CheckInReservation() {
                 </div>
                 {/* Swap room picker */}
                 {vacantRooms.length > 0 && (
-                  <div className="mt-3">
+                  <div className="mt-2">
                     <select
                       title="Select a room to swap"
                       value={swapRoom ?? ""}
                       onChange={(e) => setSwapRoom(e.target.value || null)}
-                      className="border rounded-lg px-3 py-2 text-sm w-full"
+                      className="border border-hotel-border rounded px-3 py-2 text-xs w-full focus:outline-none focus:ring-1 focus:ring-hotel-gold"
                     >
                       <option value="">
                         — {t("swapRoom")} ({t("availableRooms")}) —
@@ -492,12 +490,12 @@ export default function CheckInReservation() {
               </div>
 
               {/* Stay summary */}
-              <div className="bg-gray-50 rounded-lg p-4 grid grid-cols-3 gap-3 text-sm text-center">
+              <div className="bg-hotel-cream rounded p-3 grid grid-cols-3 gap-2 text-xs text-center">
                 <div>
-                  <span className="text-gray-400 text-xs block">
+                  <span className="text-hotel-text-secondary text-xs block">
                     {t("nights")}
                   </span>
-                  <strong className="text-lg text-gray-800">
+                  <strong className="text-base text-hotel-text-primary">
                     {calcNights(
                       processing.arrival_date,
                       processing.depart_date,
@@ -505,45 +503,77 @@ export default function CheckInReservation() {
                   </strong>
                 </div>
                 <div>
-                  <span className="text-gray-400 text-xs block">
+                  <span className="text-hotel-text-secondary text-xs block">
                     {t("stayCost")}
                   </span>
-                  <strong className="text-lg text-gray-800">
+                  <strong className="text-base text-hotel-text-primary">
                     {processing.stay_cost.toLocaleString()}{" "}
                     {processing.current_mon}
                   </strong>
                 </div>
                 <div>
-                  <span className="text-gray-400 text-xs block">
+                  <span className="text-hotel-text-secondary text-xs block">
                     {t("deposit")}
                   </span>
-                  <strong className="text-lg text-gray-800">
+                  <strong className="text-base text-hotel-text-primary">
                     {processing.deposit.toLocaleString()}{" "}
                     {processing.current_mon}
                   </strong>
                 </div>
               </div>
 
-              {/* Currency selector */}
-              <button
-                type="button"
-                onClick={() => setShowCurrencyModal(true)}
-                className="w-full border rounded-lg px-3 py-2 text-sm text-left bg-white hover:bg-gray-50"
-              >
-                {t("currency")}: <strong>{processing.current_mon}</strong>
-              </button>
+              {/* Currency dropdown */}
+              <div>
+                <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
+                  {t("currency")}
+                </label>
+                <select
+                  value={processing.current_mon || "RWF"}
+                  onChange={(e) => {
+                    const code = e.target.value;
+                    let puv = processing.puv;
+                    let mon = processing.current_mon;
+                    if (code === "RWF") {
+                      if (localPuv > 0) puv = localPuv;
+                      mon = "RWF";
+                    } else if (currencyOptions.find(c => c.code === code)?.exchange_rate) {
+                      const rate = currencyOptions.find(c => c.code === code)!.exchange_rate;
+                      if (localPuv > 0) {
+                        puv = Math.round(localPuv / rate);
+                      }
+                      mon = code;
+                    } else {
+                      mon = code;
+                    }
+                    const updated = { ...processing, puv, current_mon: mon };
+                    const arr = updated.arrival_date ? new Date(updated.arrival_date) : null;
+                    const dep = updated.depart_date ? new Date(updated.depart_date) : null;
+                    const qty = arr && dep ? Math.max(Math.round((dep.getTime() - arr.getTime()) / 86400000), 0) : 0;
+                    const base = qty * updated.puv;
+                    updated.stay_cost = updated.discount > 0 ? base * (1 - updated.discount / 100) : base;
+                    setProcessing(updated);
+                  }}
+                  className="w-full border border-hotel-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
+                >
+                  {currencyOptions.map(c => (
+                    <option key={c.code} value={c.code}>
+                      {c.code} — {c.label} {c.code !== "RWF" ? `(1 = ${c.exchange_rate.toLocaleString()} RWF)` : "(local)"}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
               {/* Action */}
               <button
                 disabled={!idVerified}
                 onClick={() => handleCheckIn(processing)}
-                className={`w-full py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-colors ${
+                className={`w-full py-2 rounded font-medium text-sm flex items-center justify-center gap-2 transition-colors ${
                   idVerified
-                    ? "bg-emerald-500 text-white hover:bg-emerald-600"
+                    ? "bg-hotel-gold text-white hover:bg-hotel-gold-dark"
                     : "bg-gray-200 text-gray-400 cursor-not-allowed"
                 }`}
               >
-                <UserCheck size={18} />
+                <UserCheck size={16} />
                 {t("confirmAndCheckIn")}
               </button>
             </div>
@@ -551,72 +581,6 @@ export default function CheckInReservation() {
         </div>
       )}
 
-      {/* Currency lookup modal */}
-      {showCurrencyModal && processing && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[60]">
-          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
-              {t("selectCurrency")}
-            </h3>
-            <table className="w-full text-sm mb-4">
-              <thead className="bg-gray-50 border-b">
-                <tr>
-                  <th className="text-left px-3 py-2">{t("currency")}</th>
-                  <th className="text-left px-3 py-2">{t("localRate")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currencyOptions.map((c) => (
-                  <tr
-                    key={c.code}
-                    className={`border-b hover:bg-amber-50 cursor-pointer ${processing.current_mon === c.code ? "bg-amber-100" : ""}`}
-                    onClick={() => {
-                      let puv = processing.puv;
-                      let mon = processing.current_mon;
-                      if (c.code === "RWF") {
-                        if (localPuv > 0) puv = localPuv;
-                        mon = "RWF";
-                      } else if (c.exchange_rate > 0 && localPuv > 0) {
-                        puv = Math.round(localPuv / c.exchange_rate);
-                        mon = c.code;
-                      } else {
-                        mon = c.code;
-                      }
-                      const updated = { ...processing, puv, current_mon: mon };
-                      const arr = updated.arrival_date ? new Date(updated.arrival_date) : null;
-                      const dep = updated.depart_date ? new Date(updated.depart_date) : null;
-                      const qty = arr && dep ? Math.max(Math.round((dep.getTime() - arr.getTime()) / 86400000), 0) : 0;
-                      const base = qty * updated.puv;
-                      updated.stay_cost = updated.discount > 0 ? base * (1 - updated.discount / 100) : base;
-                      setProcessing(updated);
-                      setShowCurrencyModal(false);
-                    }}
-                  >
-                    <td className="px-3 py-2 font-medium">
-                      {c.code} — {c.label}
-                      {c.code === "RWF" && <span className="text-xs text-gray-400 ml-1">(default)</span>}
-                    </td>
-                    <td className="px-3 py-2">
-                      {c.code === "RWF" ? "—" : `${c.exchange_rate.toLocaleString()} RWF`}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {processing.current_mon !== "RWF" && localPuv > 0 && (
-              <p className="text-xs text-gray-500 mb-3">
-                Original: {localPuv.toLocaleString()} RWF
-              </p>
-            )}
-            <button
-              onClick={() => setShowCurrencyModal(false)}
-              className="border px-4 py-2 rounded-lg text-sm w-full"
-            >
-              {t("cancel")}
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Confirmation Modal */}
       <ConfirmationModal
@@ -633,13 +597,13 @@ export default function CheckInReservation() {
       {/* Success Confirmation Dialog */}
       {successMsg && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md text-center space-y-4">
-            <CheckCircle2 size={40} className="text-green-500 mx-auto" />
-            <h3 className="text-lg font-semibold text-gray-800">Check-In Complete</h3>
-            <p className="text-sm text-gray-600">{successMsg}</p>
+          <div className="bg-white border border-hotel-border rounded p-4 w-full max-w-md text-center space-y-3">
+            <CheckCircle2 size={40} className="text-hotel-success mx-auto" />
+            <h3 className="text-base font-display font-semibold text-hotel-text-primary">Check-In Complete</h3>
+            <p className="text-xs text-hotel-text-secondary">{successMsg}</p>
             <button
               onClick={() => setSuccessMsg("")}
-              className="bg-green-500 text-white px-6 py-2 rounded-lg text-sm hover:bg-green-600"
+              className="bg-hotel-success text-white px-4 py-2 rounded text-sm font-medium hover:opacity-90 transition-opacity"
             >
               OK
             </button>
@@ -650,13 +614,13 @@ export default function CheckInReservation() {
       {/* Error Dialog */}
       {errorMsg && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md text-center space-y-4">
-            <AlertTriangle size={40} className="text-red-500 mx-auto" />
-            <h3 className="text-lg font-semibold text-gray-800">Error</h3>
-            <p className="text-sm text-gray-600 whitespace-pre-wrap">{errorMsg}</p>
+          <div className="bg-white border border-hotel-border rounded p-4 w-full max-w-md text-center space-y-3">
+            <AlertTriangle size={40} className="text-hotel-danger mx-auto" />
+            <h3 className="text-base font-display font-semibold text-hotel-text-primary">Error</h3>
+            <p className="text-xs text-hotel-text-secondary whitespace-pre-wrap">{errorMsg}</p>
             <button
               onClick={() => setErrorMsg("")}
-              className="bg-red-500 text-white px-6 py-2 rounded-lg text-sm hover:bg-red-600"
+              className="bg-hotel-danger text-white px-4 py-2 rounded text-sm font-medium hover:bg-red-700 transition-colors"
             >
               OK
             </button>

@@ -124,12 +124,12 @@ export default function RequestNote({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50 p-6 space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50 p-4 space-y-4">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
           {t("requestNote")}
         </h1>
-        <p className="text-sm text-gray-600">{t("requisitionRequestsDesc")}</p>
+        <p className="text-sm text-hotel-text-secondary">{t("requisitionRequestsDesc")}</p>
       </div>
       <div className="flex gap-3">
         <button
@@ -137,20 +137,20 @@ export default function RequestNote({
             setSelected({ ...blank });
             setIsNew(true);
           }}
-          className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-all duration-200"
+          className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-colors duration-200"
         >
           <Plus size={16} />
           {t("newRecord")}
         </button>
       </div>
       {selected && (
-        <div className="bg-white rounded-xl shadow-md border border-emerald-100 p-7 space-y-4">
-          <h3 className="text-lg font-bold text-emerald-700">
+        <div className="bg-white rounded border border-emerald-100 p-7 space-y-4">
+          <h3 className="text-base font-bold text-emerald-700">
             {isNew ? t("newRequest") : t("editRequest")}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-hotel-text-primary mb-2">
                 {t("codeP")}
               </label>
               <input
@@ -161,10 +161,10 @@ export default function RequestNote({
                   setErrors({ isValid: true, errors: [] });
                 }}
                 title={t("codeP")}
-                className={`w-full border-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all focus:outline-none ${
+                className={`w-full border-2 rounded px-4 py-2.5 text-sm font-medium transition-colors focus:outline-none ${
                   getErrorMessage("code_p")
                     ? "border-red-400 bg-red-50 focus:border-red-500"
-                    : "border-gray-200 hover:border-gray-300 focus:border-emerald-500"
+                    : "border-hotel-border hover:border-hotel-border focus:border-emerald-500"
                 }`}
               />
               {getErrorMessage("code_p") && (
@@ -174,7 +174,7 @@ export default function RequestNote({
               )}
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-hotel-text-primary mb-2">
                 {t("dateD")}
               </label>
               <input
@@ -185,10 +185,10 @@ export default function RequestNote({
                   setErrors({ isValid: true, errors: [] });
                 }}
                 title={t("dateD")}
-                className={`w-full border-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all focus:outline-none ${
+                className={`w-full border-2 rounded px-4 py-2.5 text-sm font-medium transition-colors focus:outline-none ${
                   getErrorMessage("date_d")
                     ? "border-red-400 bg-red-50 focus:border-red-500"
-                    : "border-gray-200 hover:border-gray-300 focus:border-emerald-500"
+                    : "border-hotel-border hover:border-hotel-border focus:border-emerald-500"
                 }`}
               />
               {getErrorMessage("date_d") && (
@@ -198,7 +198,7 @@ export default function RequestNote({
               )}
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-hotel-text-primary mb-2">
                 {t("poste")}
               </label>
               <input
@@ -206,11 +206,11 @@ export default function RequestNote({
                 value={selected.poste}
                 readOnly
                 title={t("poste")}
-                className="w-full border-2 border-gray-200 rounded-lg px-4 py-2.5 text-sm font-medium bg-gray-50 text-gray-600 cursor-not-allowed"
+                className="w-full border-2 border-hotel-border rounded px-4 py-2.5 text-sm font-medium bg-white text-hotel-text-secondary cursor-not-allowed"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-hotel-text-primary mb-2">
                 {t("libelle")}
               </label>
               <input
@@ -221,10 +221,10 @@ export default function RequestNote({
                   setErrors({ isValid: true, errors: [] });
                 }}
                 title={t("libelle")}
-                className={`w-full border-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all focus:outline-none ${
+                className={`w-full border-2 rounded px-4 py-2.5 text-sm font-medium transition-colors focus:outline-none ${
                   getErrorMessage("libelle")
                     ? "border-red-400 bg-red-50 focus:border-red-500"
-                    : "border-gray-200 hover:border-gray-300 focus:border-emerald-500"
+                    : "border-hotel-border hover:border-hotel-border focus:border-emerald-500"
                 }`}
               />
               {getErrorMessage("libelle") && (
@@ -234,7 +234,7 @@ export default function RequestNote({
               )}
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-hotel-text-primary mb-2">
                 {t("qty")}
               </label>
               <input
@@ -246,10 +246,10 @@ export default function RequestNote({
                   setErrors({ isValid: true, errors: [] });
                 }}
                 title={t("qty")}
-                className={`w-full border-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all focus:outline-none ${
+                className={`w-full border-2 rounded px-4 py-2.5 text-sm font-medium transition-colors focus:outline-none ${
                   getErrorMessage("qty")
                     ? "border-red-400 bg-red-50 focus:border-red-500"
-                    : "border-gray-200 hover:border-gray-300 focus:border-emerald-500"
+                    : "border-hotel-border hover:border-hotel-border focus:border-emerald-500"
                 }`}
               />
               {getErrorMessage("qty") && (
@@ -259,7 +259,7 @@ export default function RequestNote({
               )}
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-hotel-text-primary mb-2">
                 {t("credit1")}
               </label>
               <input
@@ -269,11 +269,11 @@ export default function RequestNote({
                   setSelected({ ...selected, credit_1: Number(e.target.value) })
                 }
                 title={t("credit1")}
-                className="w-full border-2 border-gray-200 hover:border-gray-300 focus:border-emerald-500 focus:outline-none rounded-lg px-4 py-2.5 text-sm font-medium transition-all"
+                className="w-full border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-hotel-text-primary mb-2">
                 {t("credit2")}
               </label>
               <input
@@ -283,11 +283,11 @@ export default function RequestNote({
                   setSelected({ ...selected, credit_2: Number(e.target.value) })
                 }
                 title={t("credit2")}
-                className="w-full border-2 border-gray-200 hover:border-gray-300 focus:border-emerald-500 focus:outline-none rounded-lg px-4 py-2.5 text-sm font-medium transition-all"
+                className="w-full border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-hotel-text-primary mb-2">
                 {t("dateR")}
               </label>
               <input
@@ -297,11 +297,11 @@ export default function RequestNote({
                   setSelected({ ...selected, date_r: e.target.value })
                 }
                 title={t("dateR")}
-                className="w-full border-2 border-gray-200 hover:border-gray-300 focus:border-emerald-500 focus:outline-none rounded-lg px-4 py-2.5 text-sm font-medium transition-all"
+                className="w-full border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-hotel-text-primary mb-2">
                 {t("statut")}
               </label>
               <select
@@ -310,7 +310,7 @@ export default function RequestNote({
                   setSelected({ ...selected, statut: e.target.value })
                 }
                 title={t("statut")}
-                className="w-full border-2 border-gray-200 hover:border-gray-300 focus:border-emerald-500 focus:outline-none rounded-lg px-4 py-2.5 text-sm font-medium transition-all"
+                className="w-full border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
               >
                 <option value="Pending">{t("pending")}</option>
                 <option value="Approved">{t("approved")}</option>
@@ -318,10 +318,10 @@ export default function RequestNote({
               </select>
             </div>
           </div>
-          <div className="flex gap-3 pt-5 border-t border-gray-200">
+          <div className="flex gap-3 pt-5 border-t border-hotel-border">
             <button
               onClick={handleSave}
-              className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-6 py-2.5 rounded-lg flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-all duration-200"
+              className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-6 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-colors duration-200"
             >
               <Save size={16} />
               {t("save")}
@@ -329,7 +329,7 @@ export default function RequestNote({
             {!isNew && (
               <button
                 onClick={() => setShowDeleteConfirm(true)}
-                className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-2.5 rounded-lg flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-red-600 hover:to-red-700 transition-all duration-200"
+                className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-red-600 hover:to-red-700 transition-colors duration-200"
               >
                 <Trash2 size={16} />
                 {t("delete")}
@@ -340,19 +340,19 @@ export default function RequestNote({
                 setSelected(null);
                 setErrors({ isValid: true, errors: [] });
               }}
-              className="border-2 border-gray-300 px-6 py-2.5 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+              className="border-2 border-hotel-border px-6 py-2.5 rounded text-sm font-semibold text-hotel-text-primary hover:bg-hotel-cream transition-colors"
             >
               {t("cancel")}
             </button>
           </div>
         </div>
       )}
-      <div className="bg-white rounded-xl shadow-md border border-emerald-100 overflow-hidden">
+      <div className="bg-white rounded border border-emerald-100 overflow-hidden">
         <div className="bg-gradient-to-r from-emerald-50 to-green-50 px-6 py-4 border-b border-emerald-100">
-          <h2 className="text-lg font-bold text-gray-800">Request Records</h2>
+          <h2 className="text-base font-bold text-hotel-text-primary">Request Records</h2>
         </div>
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b-2 border-emerald-200">
+          <thead className="bg-white border-b-2 border-emerald-200">
             <tr>
               {[
                 t("codeP"),
@@ -366,7 +366,7 @@ export default function RequestNote({
               ].map((h) => (
                 <th
                   key={h}
-                  className="text-left px-6 py-3 font-bold text-gray-700"
+                  className="text-left px-6 py-3 font-bold text-hotel-text-primary"
                 >
                   {h}
                 </th>
@@ -386,16 +386,16 @@ export default function RequestNote({
                 <td className="px-6 py-3 font-semibold text-emerald-600">
                   {r.code_p}
                 </td>
-                <td className="px-6 py-3 text-gray-700">{r.date_d}</td>
-                <td className="px-6 py-3 text-gray-700">{r.libelle}</td>
-                <td className="px-6 py-3 text-gray-700">{r.qty}</td>
-                <td className="px-6 py-3 text-gray-700">
+                <td className="px-6 py-3 text-hotel-text-primary">{r.date_d}</td>
+                <td className="px-6 py-3 text-hotel-text-primary">{r.libelle}</td>
+                <td className="px-6 py-3 text-hotel-text-primary">{r.qty}</td>
+                <td className="px-6 py-3 text-hotel-text-primary">
                   {r.credit_1.toLocaleString()}
                 </td>
-                <td className="px-6 py-3 text-gray-700">
+                <td className="px-6 py-3 text-hotel-text-primary">
                   {r.credit_2.toLocaleString()}
                 </td>
-                <td className="px-6 py-3 text-gray-700">{r.date_r || "—"}</td>
+                <td className="px-6 py-3 text-hotel-text-primary">{r.date_r || "—"}</td>
                 <td className="px-6 py-3">
                   <span
                     className={`px-3 py-1.5 rounded-full text-xs font-semibold ${
@@ -414,7 +414,7 @@ export default function RequestNote({
           </tbody>
         </table>
         {filtered.length === 0 && (
-          <div className="px-6 py-12 text-center text-gray-500">
+          <div className="px-6 py-12 text-center text-hotel-text-secondary">
             <p className="text-sm">
               No requests found. Click "New Record" to add one.
             </p>

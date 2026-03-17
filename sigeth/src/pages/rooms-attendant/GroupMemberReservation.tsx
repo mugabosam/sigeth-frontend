@@ -35,7 +35,6 @@ export default function GroupMemberReservation({
   >(null);
   const [selected, setSelected] = useState<RCS | null>(null);
   const [isNew, setIsNew] = useState(false);
-  const [showCurrencyModal, setShowCurrencyModal] = useState(false);
   const [groupSuggestions, setGroupSuggestions] = useState<
     typeof groupReservations
   >([]);
@@ -299,21 +298,20 @@ export default function GroupMemberReservation({
     : [];
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-2xl shadow-sm border border-blue-100">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+    <div className="space-y-4">
+      <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4">
+        <h1 className="text-2xl font-display font-bold text-hotel-text-primary">
           {titles[mode]}
         </h1>
       </div>
       {/* Group query */}
-      <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
-        <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-          <span className="w-1 h-6 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full" />
+      <div className="bg-white border border-hotel-border rounded p-4">
+        <h3 className="text-sm font-semibold text-hotel-text-primary mb-3 uppercase tracking-wide">
           {t("searchGroup")}
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className="relative">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
               {t("groupCode")}
             </label>
             <input
@@ -321,11 +319,11 @@ export default function GroupMemberReservation({
               onChange={(e) => handleGroupInputChange(e.target.value, true)}
               placeholder={t("groupCode")}
               title={t("groupCode")}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full border border-hotel-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
             />
           </div>
           <div className="relative">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
               {t("groupName")}
             </label>
             <input
@@ -333,21 +331,21 @@ export default function GroupMemberReservation({
               onChange={(e) => handleGroupInputChange(e.target.value, false)}
               placeholder={t("groupName")}
               title={t("groupName")}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full border border-hotel-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
               onKeyDown={(e) => e.key === "Enter" && handleSearchGroup()}
             />
             {showGroupSuggestions && groupSuggestions.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-hotel-border rounded z-50 max-h-48 overflow-y-auto">
                 {groupSuggestions.map((g) => (
                   <button
                     key={g.code_g}
                     onClick={() => handleSelectGroupFromSuggestions(g)}
-                    className="w-full text-left px-4 py-2 hover:bg-blue-50 transition-colors border-b last:border-b-0 text-sm"
+                    className="w-full text-left px-3 py-2 hover:bg-hotel-cream transition-colors border-b last:border-b-0 text-sm"
                   >
-                    <div className="font-medium text-gray-800">
+                    <div className="font-medium text-hotel-text-primary">
                       {g.groupe_name}
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-hotel-text-secondary">
                       {g.code_g} • {g.number_pers} persons
                     </div>
                   </button>
@@ -358,7 +356,7 @@ export default function GroupMemberReservation({
           <div className="flex items-end">
             <button
               onClick={handleSearchGroup}
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2 rounded-lg flex items-center justify-center gap-2 text-sm font-medium hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+              className="w-full bg-hotel-gold text-white px-4 py-2 rounded flex items-center justify-center gap-2 text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
             >
               <Search size={16} />
               {t("search")}
@@ -369,23 +367,23 @@ export default function GroupMemberReservation({
       {/* Group info + members browser */}
       {groupFound && (
         <>
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+          <div className="bg-hotel-cream border border-hotel-border rounded p-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
               <div>
-                <span className="text-gray-500">{t("groupCode")}:</span>{" "}
-                <strong>{groupFound.code_g}</strong>
+                <span className="text-hotel-text-secondary">{t("groupCode")}:</span>{" "}
+                <strong className="text-hotel-text-primary">{groupFound.code_g}</strong>
               </div>
               <div>
-                <span className="text-gray-500">{t("groupName")}:</span>{" "}
-                <strong>{groupFound.groupe_name}</strong>
+                <span className="text-hotel-text-secondary">{t("groupName")}:</span>{" "}
+                <strong className="text-hotel-text-primary">{groupFound.groupe_name}</strong>
               </div>
               <div>
-                <span className="text-gray-500">{t("persons")}:</span>{" "}
-                <strong>{groupFound.number_pers}</strong>
+                <span className="text-hotel-text-secondary">{t("persons")}:</span>{" "}
+                <strong className="text-hotel-text-primary">{groupFound.number_pers}</strong>
               </div>
               <div>
-                <span className="text-gray-500">{t("status")}:</span>{" "}
-                <strong>
+                <span className="text-hotel-text-secondary">{t("status")}:</span>{" "}
+                <strong className="text-hotel-text-primary">
                   {groupFound.status === 0
                     ? t("statusOpen")
                     : t("statusClosed")}
@@ -394,20 +392,20 @@ export default function GroupMemberReservation({
             </div>
           </div>
           {/* Members list */}
-          <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
-            <div className="flex justify-between items-center px-4 py-3 border-b">
-              <h3 className="font-semibold text-gray-700">
+          <div className="bg-white border border-hotel-border rounded overflow-hidden">
+            <div className="flex justify-between items-center px-4 py-2 border-b border-hotel-border">
+              <h3 className="text-sm font-semibold text-hotel-text-primary">
                 {t("groupMembers")} ({groupMembers.length})
               </h3>
               <button
                 onClick={handleNewMember}
-                className="bg-amber-500 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-amber-600"
+                className="bg-hotel-gold text-white px-3 py-1 rounded text-xs font-medium hover:bg-hotel-gold-dark transition-colors"
               >
                 + {t("newMember")}
               </button>
             </div>
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b">
+            <table className="w-full text-xs">
+              <thead className="bg-hotel-navy text-white">
                 <tr>
                   {[
                     t("roomNumber"),
@@ -419,7 +417,7 @@ export default function GroupMemberReservation({
                   ].map((h) => (
                     <th
                       key={h}
-                      className="text-left px-4 py-2 font-medium text-gray-600"
+                      className="text-left py-2 px-2 font-medium"
                     >
                       {h}
                     </th>
@@ -430,15 +428,15 @@ export default function GroupMemberReservation({
                 {groupMembers.map((r, i) => (
                   <tr
                     key={i}
-                    className="border-b hover:bg-gray-50 cursor-pointer"
+                    className="border-b border-hotel-border hover:bg-hotel-cream cursor-pointer"
                     onClick={() => handleSelectMember(r)}
                   >
-                    <td className="px-4 py-2">{r.room_num}</td>
-                    <td className="px-4 py-2">{r.guest_name}</td>
-                    <td className="px-4 py-2">{r.phone}</td>
-                    <td className="px-4 py-2">{r.arrival_date}</td>
-                    <td className="px-4 py-2">{r.depart_date}</td>
-                    <td className="px-4 py-2">
+                    <td className="py-2 px-2 text-hotel-text-primary">{r.room_num}</td>
+                    <td className="py-2 px-2 text-hotel-text-primary">{r.guest_name}</td>
+                    <td className="py-2 px-2 text-hotel-text-primary">{r.phone}</td>
+                    <td className="py-2 px-2 text-hotel-text-primary">{r.arrival_date}</td>
+                    <td className="py-2 px-2 text-hotel-text-primary">{r.depart_date}</td>
+                    <td className="py-2 px-2 text-hotel-text-primary">
                       {r.stay_cost.toLocaleString()} {r.current_mon}
                     </td>
                   </tr>
@@ -450,11 +448,11 @@ export default function GroupMemberReservation({
       )}
       {/* Gindiv_form */}
       {selected && (
-        <div className="bg-white rounded-xl shadow-sm border p-6 space-y-4">
-          <h3 className="text-lg font-semibold text-gray-800">
+        <div className="bg-white border border-hotel-border rounded p-4 space-y-3">
+          <h3 className="text-base font-display font-semibold text-hotel-text-primary">
             {isNew ? t("newMember") : t("editMember")} — Gindiv_form
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
             {(
               [
                 ["groupe_name", t("groupName"), "text", false, {}],
@@ -504,19 +502,19 @@ export default function GroupMemberReservation({
               if (field === "nationality" || field === "country") {
                 return (
                   <div key={field}>
-                    <label className="block text-xs font-medium text-gray-500 mb-1">
+                    <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                       {label}{" "}
-                      {required && <span className="text-red-500">*</span>}
+                      {required && <span className="text-hotel-danger">*</span>}
                     </label>
                     <select
                       value={selected[field] ?? ""}
                       onChange={(e) => handleChange(field, e.target.value)}
                       required={required}
                       title={label}
-                      className={`w-full border rounded-lg px-3 py-2 text-sm ${
+                      className={`w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold ${
                         errorMsg
-                          ? "border-red-500 focus:ring-red-500"
-                          : "border-gray-300"
+                          ? "border-hotel-danger"
+                          : "border-hotel-border"
                       }`}
                     >
                       <option value="">Select</option>
@@ -534,7 +532,7 @@ export default function GroupMemberReservation({
                         ))}
                     </select>
                     {errorMsg && (
-                      <p className="text-xs text-red-600 mt-1">{errorMsg}</p>
+                      <p className="text-xs text-hotel-danger mt-1">{errorMsg}</p>
                     )}
                   </div>
                 );
@@ -547,13 +545,13 @@ export default function GroupMemberReservation({
 
               return (
                 <div key={field}>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">
+                  <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                     {label}{" "}
-                    {required && <span className="text-red-500">*</span>}
+                    {required && <span className="text-hotel-danger">*</span>}
                   </label>
                   {field === "phone" && phoneCode ? (
                     <div className="flex items-center gap-1">
-                      <span className="bg-gray-100 border border-gray-300 rounded-l-lg px-3 py-2 text-xs font-semibold text-gray-600">
+                      <span className="bg-hotel-cream border border-hotel-border rounded px-3 py-2 text-xs font-semibold text-hotel-text-primary">
                         {phoneCode}
                       </span>
                       <input
@@ -563,10 +561,10 @@ export default function GroupMemberReservation({
                         required={required}
                         onChange={(e) => handleChange(field, e.target.value)}
                         title={label}
-                        className={`flex-1 border rounded-r-lg px-3 py-2 text-sm ${
+                        className={`flex-1 border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold ${
                           errorMsg
-                            ? "border-red-500 focus:ring-red-500"
-                            : "border-gray-300"
+                            ? "border-hotel-danger"
+                            : "border-hotel-border"
                         }`}
                       />
                     </div>
@@ -586,41 +584,58 @@ export default function GroupMemberReservation({
                       }
                       {...attrs}
                       title={label}
-                      className={`w-full border rounded-lg px-3 py-2 text-sm ${field === "groupe_name" ? "bg-gray-50" : ""} ${
+                      className={`w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold ${field === "groupe_name" ? "bg-hotel-cream" : ""} ${
                         errorMsg
-                          ? "border-red-500 focus:ring-red-500"
-                          : "border-gray-300"
+                          ? "border-hotel-danger"
+                          : "border-hotel-border"
                       }`}
                     />
                   )}
                   {errorMsg && (
-                    <p className="text-xs text-red-600 mt-1">{errorMsg}</p>
+                    <p className="text-xs text-hotel-danger mt-1">{errorMsg}</p>
                   )}
                 </div>
               );
             })}
-            {/* Currency field — opens Monnaies.dat lookup */}
+            {/* Currency dropdown */}
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                 {t("currency")}
               </label>
-              <button
-                type="button"
-                onClick={() => setShowCurrencyModal(true)}
-                className="w-full border rounded-lg px-3 py-2 text-sm text-left bg-white hover:bg-gray-50"
+              <select
+                value={selected.current_mon || "RWF"}
+                onChange={(e) => {
+                  const code = e.target.value;
+                  if (code === "RWF") {
+                    if (localPuv > 0) handleChange("puv", localPuv);
+                    handleChange("current_mon", "RWF");
+                  } else {
+                    const rate = currencyOptions.find(c => c.code === code)?.exchange_rate || 1;
+                    if (localPuv > 0) {
+                      const converted = Math.round(localPuv / rate);
+                      handleChange("puv", converted);
+                    }
+                    handleChange("current_mon", code);
+                  }
+                }}
+                className="w-full border border-hotel-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
               >
-                {selected.current_mon || t("selectCurrency")}
-              </button>
+                {currencyOptions.map(c => (
+                  <option key={c.code} value={c.code}>
+                    {c.code} — {c.label} {c.code !== "RWF" ? `(1 = ${c.exchange_rate.toLocaleString()} RWF)` : "(local)"}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                 {t("paymentMode")}
               </label>
               <select
                 value={selected.payt_mode}
                 onChange={(e) => handleChange("payt_mode", e.target.value)}
                 title={t("paymentMode")}
-                className="w-full border rounded-lg px-3 py-2 text-sm"
+                className="w-full border border-hotel-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
               >
                 {paymentModes.map((m) => (
                   <option key={m.id} value={m.id}>
@@ -639,7 +654,7 @@ export default function GroupMemberReservation({
               const errorMsg = getErrorMessage(field as string);
               return (
                 <div key={field}>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">
+                  <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                     {label}
                   </label>
                   <input
@@ -655,14 +670,14 @@ export default function GroupMemberReservation({
                       )
                     }
                     title={label}
-                    className={`w-full border rounded-lg px-3 py-2 text-sm ${field === "stay_cost" ? "bg-gray-50" : ""} ${
+                    className={`w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold ${field === "stay_cost" ? "bg-hotel-cream" : ""} ${
                       errorMsg
-                        ? "border-red-500 focus:ring-red-500"
-                        : "border-gray-300"
+                        ? "border-hotel-danger"
+                        : "border-hotel-border"
                     }`}
                   />
                   {errorMsg && (
-                    <p className="text-xs text-red-600 mt-1">{errorMsg}</p>
+                    <p className="text-xs text-hotel-danger mt-1">{errorMsg}</p>
                   )}
                 </div>
               );
@@ -670,14 +685,14 @@ export default function GroupMemberReservation({
           </div>
           {/* Available rooms browser */}
           {(mode === "1113" || mode === "1117") && (
-            <div className="border rounded-lg p-4 bg-gray-50">
-              <h4 className="text-sm font-semibold text-gray-600 mb-2">
+            <div className="border border-hotel-border rounded p-4 bg-hotel-cream">
+              <h4 className="text-xs font-semibold text-hotel-text-primary mb-2 uppercase tracking-wide">
                 {t("availableRooms")}
               </h4>
               <div className="max-h-32 overflow-y-auto">
                 <table className="w-full text-xs">
-                  <thead>
-                    <tr className="border-b">
+                  <thead className="bg-hotel-navy text-white">
+                    <tr>
                       {[
                         t("roomNumber"),
                         t("designation"),
@@ -685,7 +700,7 @@ export default function GroupMemberReservation({
                         t("price2"),
                         t("status"),
                       ].map((h) => (
-                        <th key={h} className="text-left py-1 px-2">
+                        <th key={h} className="text-left py-1 px-2 font-medium">
                           {h}
                         </th>
                       ))}
@@ -697,7 +712,7 @@ export default function GroupMemberReservation({
                       .map((r) => (
                         <tr
                           key={r.room_num}
-                          className="border-b hover:bg-amber-50 cursor-pointer"
+                          className="border-b border-hotel-border hover:bg-white cursor-pointer"
                           onClick={() => {
                             if (!selected) return;
                             setLocalPuv(r.price_1);
@@ -710,17 +725,17 @@ export default function GroupMemberReservation({
                             setSelected(updated);
                           }}
                         >
-                          <td className="py-1 px-2 font-medium">
+                          <td className="py-1 px-2 font-medium text-hotel-text-primary">
                             {r.room_num}
                           </td>
-                          <td className="py-1 px-2">{r.designation}</td>
-                          <td className="py-1 px-2">
+                          <td className="py-1 px-2 text-hotel-text-primary">{r.designation}</td>
+                          <td className="py-1 px-2 text-hotel-text-primary">
                             {r.price_1.toLocaleString()}
                           </td>
-                          <td className="py-1 px-2">
+                          <td className="py-1 px-2 text-hotel-text-primary">
                             {r.price_2.toLocaleString()}
                           </td>
-                          <td className="py-1 px-2 text-green-600">VC</td>
+                          <td className="py-1 px-2 text-hotel-success">VC</td>
                         </tr>
                       ))}
                   </tbody>
@@ -728,10 +743,10 @@ export default function GroupMemberReservation({
               </div>
             </div>
           )}
-          <div className="flex gap-3 pt-4 border-t">
+          <div className="flex gap-2 pt-2 border-t border-hotel-border">
             <button
               onClick={handleSave}
-              className="bg-amber-500 text-white px-6 py-2 rounded-lg flex items-center gap-2 text-sm hover:bg-amber-600"
+              className="bg-hotel-gold text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
             >
               <Save size={16} />
               {t("save")}
@@ -739,7 +754,7 @@ export default function GroupMemberReservation({
             {!isNew && (
               <button
                 onClick={handleDelete}
-                className="bg-red-500 text-white px-6 py-2 rounded-lg flex items-center gap-2 text-sm hover:bg-red-600"
+                className="bg-hotel-danger text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium hover:bg-red-700 transition-colors"
               >
                 <Trash2 size={16} />
                 {t("delete")}
@@ -747,65 +762,7 @@ export default function GroupMemberReservation({
             )}
             <button
               onClick={() => setSelected(null)}
-              className="border px-6 py-2 rounded-lg text-sm"
-            >
-              {t("cancel")}
-            </button>
-          </div>
-        </div>
-      )}
-      {/* Currency lookup modal */}
-      {showCurrencyModal && selected && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
-              {t("selectCurrency")}
-            </h3>
-            <table className="w-full text-sm mb-4">
-              <thead className="bg-gray-50 border-b">
-                <tr>
-                  <th className="text-left px-3 py-2">{t("currency")}</th>
-                  <th className="text-left px-3 py-2">{t("localRate")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currencyOptions.map((c) => (
-                  <tr
-                    key={c.code}
-                    className={`border-b hover:bg-amber-50 cursor-pointer ${selected.current_mon === c.code ? "bg-amber-100" : ""}`}
-                    onClick={() => {
-                      if (c.code === "RWF") {
-                        if (localPuv > 0) handleChange("puv", localPuv);
-                        handleChange("current_mon", "RWF");
-                      } else if (c.exchange_rate > 0 && localPuv > 0) {
-                        const converted = Math.round(localPuv / c.exchange_rate);
-                        handleChange("current_mon", c.code);
-                        handleChange("puv", converted);
-                      } else {
-                        handleChange("current_mon", c.code);
-                      }
-                      setShowCurrencyModal(false);
-                    }}
-                  >
-                    <td className="px-3 py-2 font-medium">
-                      {c.code} — {c.label}
-                      {c.code === "RWF" && <span className="text-xs text-gray-400 ml-1">(default)</span>}
-                    </td>
-                    <td className="px-3 py-2">
-                      {c.code === "RWF" ? "—" : `${c.exchange_rate.toLocaleString()} RWF`}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {selected.current_mon !== "RWF" && localPuv > 0 && (
-              <p className="text-xs text-gray-500 mb-3">
-                Original: {localPuv.toLocaleString()} RWF
-              </p>
-            )}
-            <button
-              onClick={() => setShowCurrencyModal(false)}
-              className="border px-4 py-2 rounded-lg text-sm w-full"
+              className="border border-hotel-border text-hotel-text-primary px-4 py-2 rounded text-sm font-medium hover:bg-hotel-cream transition-colors"
             >
               {t("cancel")}
             </button>
@@ -839,13 +796,13 @@ export default function GroupMemberReservation({
       {/* Error Dialog */}
       {errorMsg && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md text-center space-y-4">
-            <AlertTriangle size={40} className="text-red-500 mx-auto" />
-            <h3 className="text-lg font-semibold text-gray-800">Error</h3>
-            <p className="text-sm text-gray-600 whitespace-pre-wrap">{errorMsg}</p>
+          <div className="bg-white border border-hotel-border rounded p-4 w-full max-w-md text-center space-y-3">
+            <AlertTriangle size={40} className="text-hotel-danger mx-auto" />
+            <h3 className="text-base font-display font-semibold text-hotel-text-primary">Error</h3>
+            <p className="text-xs text-hotel-text-secondary whitespace-pre-wrap">{errorMsg}</p>
             <button
               onClick={() => setErrorMsg("")}
-              className="bg-red-500 text-white px-6 py-2 rounded-lg text-sm hover:bg-red-600"
+              className="bg-hotel-danger text-white px-4 py-2 rounded text-sm font-medium hover:bg-red-700 transition-colors"
             >
               OK
             </button>

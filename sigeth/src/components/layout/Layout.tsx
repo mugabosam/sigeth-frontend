@@ -11,16 +11,16 @@ export default function Layout() {
   const title = usePageTitle();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ backgroundColor: '#F5F3EF' }}>
       <Sidebar
         collapsed={collapsed}
         onToggle={() => setCollapsed(!collapsed)}
       />
       <div
-        className={`transition-all duration-300 ${collapsed ? "ml-20" : "ml-64"}`}
+        className={`transition-all duration-300 ${collapsed ? "ml-20" : "ml-56"}`}
       >
         <Header title={t(title)} onMenuClick={() => setCollapsed(!collapsed)} />
-        <main className="p-6">
+        <main className="p-4">
           <Outlet />
         </main>
       </div>

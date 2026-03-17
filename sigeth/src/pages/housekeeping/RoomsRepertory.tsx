@@ -135,28 +135,28 @@ export default function RoomsRepertory() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50 p-6 space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50 p-4 space-y-4">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
           {t("roomsRepertory")}
         </h1>
-        <p className="text-sm text-gray-600">{t("manageRoomsDesc")}</p>
+        <p className="text-sm text-hotel-text-secondary">{t("manageRoomsDesc")}</p>
       </div>
       <div className="flex gap-3 flex-wrap print:hidden">
         <button
           onClick={handlePrint}
-          className="bg-gradient-to-r from-slate-600 to-slate-700 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-slate-700 hover:to-slate-800 transition-all duration-200"
+          className="bg-gradient-to-r from-slate-600 to-slate-700 text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-slate-700 hover:to-slate-800 transition-colors duration-200"
         >
           <Printer size={16} />
           {t("print")}
         </button>
       </div>
       {/* Print Header Section */}
-      <div className="hidden print:block bg-white p-8 mb-6 border-b-2 border-gray-800">
+      <div className="hidden print:block bg-white p-4 mb-6 border-b-2 border-gray-800">
         <div className="text-center space-y-1 mb-6">
-          <h2 className="text-xl font-bold">{HOTEL_INFO.name}</h2>
-          <p className="text-sm text-gray-700">{HOTEL_INFO.address}</p>
-          <div className="flex justify-center gap-6 text-sm text-gray-600">
+          <h2 className="text-base font-bold">{HOTEL_INFO.name}</h2>
+          <p className="text-sm text-hotel-text-primary">{HOTEL_INFO.address}</p>
+          <div className="flex justify-center gap-4 text-sm text-hotel-text-secondary">
             <span>
               {t("phone")}: {HOTEL_INFO.phone}
             </span>
@@ -164,16 +164,16 @@ export default function RoomsRepertory() {
               {t("email")}: {HOTEL_INFO.email}
             </span>
           </div>
-          <p className="text-sm text-gray-700">TM: {HOTEL_INFO.tm}</p>
+          <p className="text-sm text-hotel-text-primary">TM: {HOTEL_INFO.tm}</p>
         </div>
-        <div className="text-center border-t border-gray-300 pt-3">
-          <h3 className="text-lg font-bold mb-2">LIST OF ROOMS</h3>
-          <p className="text-sm text-gray-600">
+        <div className="text-center border-t border-hotel-border pt-3">
+          <h3 className="text-base font-bold mb-2">LIST OF ROOMS</h3>
+          <p className="text-sm text-hotel-text-secondary">
             {t("date")}: {new Date().toLocaleDateString()}
           </p>
         </div>
       </div>
-      <div className="bg-white rounded-xl shadow-md border border-emerald-100 p-6 print:border-none print:shadow-none print:p-0">
+      <div className="bg-white rounded border border-emerald-100 p-4 print:border-none print:shadow-none print:p-0">
         <h3 className="text-sm font-semibold text-emerald-700 mb-4 flex items-center gap-2 print:hidden">
           <Search size={16} />
           {t("queryWindow")}
@@ -183,12 +183,12 @@ export default function RoomsRepertory() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t("roomNumber")}
-            className="border-2 border-gray-200 hover:border-gray-300 focus:border-emerald-500 focus:outline-none rounded-lg px-4 py-2.5 text-sm font-medium w-40 transition-all"
+            className="border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded px-4 py-2.5 text-sm font-medium w-40 transition-colors"
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
           />
           <button
             onClick={handleSearch}
-            className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-all duration-200"
+            className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-colors duration-200"
           >
             <Search size={16} />
             {t("search")}
@@ -198,7 +198,7 @@ export default function RoomsRepertory() {
               setSelected({ ...blank });
               setIsNew(true);
             }}
-            className="border-2 border-emerald-300 text-emerald-700 px-5 py-2.5 rounded-lg flex items-center gap-2 text-sm font-semibold hover:bg-emerald-50 transition-colors"
+            className="border-2 border-emerald-300 text-emerald-700 px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:bg-emerald-50 transition-colors"
           >
             <Plus size={16} />
             {t("newRecord")}
@@ -206,13 +206,13 @@ export default function RoomsRepertory() {
         </div>
       </div>
       {selected && (
-        <div className="bg-white rounded-xl shadow-md border border-emerald-100 p-7 space-y-4 print:hidden">
-          <h3 className="text-lg font-bold text-emerald-700">
+        <div className="bg-white rounded border border-emerald-100 p-7 space-y-4 print:hidden">
+          <h3 className="text-base font-bold text-emerald-700">
             {isNew ? t("newRoom") : t("editRoom")}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-hotel-text-primary mb-2">
                 {t("category")}
               </label>
               <select
@@ -221,7 +221,7 @@ export default function RoomsRepertory() {
                   handleChange("categorie", Number(e.target.value))
                 }
                 title={t("category")}
-                className="w-full border-2 border-gray-200 hover:border-gray-300 focus:border-emerald-500 focus:outline-none rounded-lg px-4 py-2.5 text-sm font-medium transition-all"
+                className="w-full border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
               >
                 {catrooms.map((c) => (
                   <option key={c.code} value={c.code}>
@@ -241,7 +241,7 @@ export default function RoomsRepertory() {
               ] as [keyof RDF, string, string][]
             ).map(([field, label, type]) => (
               <div key={field}>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-hotel-text-primary mb-2">
                   {label}
                 </label>
                 <input
@@ -256,15 +256,15 @@ export default function RoomsRepertory() {
                     )
                   }
                   title={label}
-                  className="w-full border-2 border-gray-200 hover:border-gray-300 focus:border-emerald-500 focus:outline-none rounded-lg px-4 py-2.5 text-sm font-medium transition-all"
+                  className="w-full border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
                 />
               </div>
             ))}
           </div>
-          <div className="flex gap-3 pt-5 border-t border-gray-200">
+          <div className="flex gap-3 pt-5 border-t border-hotel-border">
             <button
               onClick={handleSave}
-              className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-6 py-2.5 rounded-lg flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-all duration-200"
+              className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-6 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-colors duration-200"
             >
               <Save size={16} />
               {t("save")}
@@ -272,7 +272,7 @@ export default function RoomsRepertory() {
             {!isNew && (
               <button
                 onClick={() => setShowDeleteConfirm(true)}
-                className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-2.5 rounded-lg flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-red-600 hover:to-red-700 transition-all duration-200"
+                className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-red-600 hover:to-red-700 transition-colors duration-200"
               >
                 <Trash2 size={16} />
                 {t("delete")}
@@ -280,21 +280,21 @@ export default function RoomsRepertory() {
             )}
             <button
               onClick={() => setSelected(null)}
-              className="border-2 border-gray-300 px-6 py-2.5 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+              className="border-2 border-hotel-border px-6 py-2.5 rounded text-sm font-semibold text-hotel-text-primary hover:bg-hotel-cream transition-colors"
             >
               {t("cancel")}
             </button>
           </div>
         </div>
       )}
-      <div className="bg-white rounded-xl shadow-md border border-emerald-100 overflow-hidden print:border-0 print:shadow-none print:rounded-none">
+      <div className="bg-white rounded border border-emerald-100 overflow-hidden print:border-0 print:shadow-none print:rounded-none">
         <div className="bg-gradient-to-r from-emerald-50 to-green-50 px-6 py-4 border-b border-emerald-100 print:hidden">
-          <h2 className="text-lg font-bold text-gray-800">
+          <h2 className="text-base font-bold text-hotel-text-primary">
             {t("roomsDirectory")}
           </h2>
         </div>
         <table className="w-full text-sm print:text-xs">
-          <thead className="bg-gray-50 border-b-2 border-emerald-200 print:border-b-4 print:border-black">
+          <thead className="bg-white border-b-2 border-emerald-200 print:border-b-4 print:border-black">
             <tr>
               {[
                 t("roomNumber"),
@@ -307,7 +307,7 @@ export default function RoomsRepertory() {
               ].map((h) => (
                 <th
                   key={h}
-                  className="text-left px-6 py-3 font-bold text-gray-700 print:text-black print:font-bold"
+                  className="text-left px-6 py-3 font-bold text-hotel-text-primary print:text-black print:font-bold"
                 >
                   {h}
                 </th>
@@ -327,20 +327,20 @@ export default function RoomsRepertory() {
                 <td className="px-6 py-3 font-semibold text-emerald-600 print:text-black">
                   {r.room_num}
                 </td>
-                <td className="px-6 py-3 text-gray-700">{r.designation}</td>
-                <td className="px-6 py-3 text-gray-700">
+                <td className="px-6 py-3 text-hotel-text-primary">{r.designation}</td>
+                <td className="px-6 py-3 text-hotel-text-primary">
                   {catrooms.find((c) => c.code === r.categorie)?.name ??
                     r.categorie}
                 </td>
-                <td className="px-6 py-3 text-gray-700">
+                <td className="px-6 py-3 text-hotel-text-primary">
                   {r.price_1.toLocaleString()}
                 </td>
-                <td className="px-6 py-3 text-gray-700">
+                <td className="px-6 py-3 text-hotel-text-primary">
                   {r.price_2.toLocaleString()}
                 </td>
-                <td className="px-6 py-3 text-gray-700">{r.current_mon}</td>
+                <td className="px-6 py-3 text-hotel-text-primary">{r.current_mon}</td>
                 <td className="px-6 py-3 print:text-black">
-                  <span className="px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 print:bg-transparent print:border print:border-gray-300">
+                  <span className="px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 print:bg-transparent print:border print:border-hotel-border">
                     {r.status}
                   </span>
                 </td>
@@ -349,7 +349,7 @@ export default function RoomsRepertory() {
           </tbody>
         </table>
         {rooms.length === 0 && (
-          <div className="px-6 py-12 text-center text-gray-500 print:hidden">
+          <div className="px-6 py-12 text-center text-hotel-text-secondary print:hidden">
             <p className="text-sm">{t("noRoomsFound")}</p>
           </div>
         )}

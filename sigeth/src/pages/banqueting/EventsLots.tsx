@@ -117,10 +117,10 @@ export default function EventsLots() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50 p-8">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50 p-4">
+      <div className="max-w-4xl mx-auto space-y-4">
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
             {t("eventsLots")}
           </h1>
           <button
@@ -129,15 +129,15 @@ export default function EventsLots() {
               setIsNew(true);
               setErrors({ isValid: true, errors: [] });
             }}
-            className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-all"
+            className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-4 py-2 rounded flex items-center gap-2 text-sm hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-colors"
           >
             <Plus size={16} />
             {t("newRecord")}
           </button>
         </div>
         {selected && (
-          <div className="bg-white rounded-xl shadow-sm border-2 border-emerald-200 p-6 space-y-4">
-            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg flex gap-2">
+          <div className="bg-white rounded border-2 border-emerald-200 p-4 space-y-4">
+            <div className="p-3 bg-hotel-cream border border-blue-200 rounded flex gap-2">
               <Info size={16} className="text-blue-600 flex-shrink-0 mt-0.5" />
               <p className="text-xs text-blue-700">
                 <span className="font-semibold">Lot (Event):</span> A Lot groups
@@ -146,12 +146,12 @@ export default function EventsLots() {
                 or services are defined, quantified, and priced.
               </p>
             </div>
-            <h3 className="text-lg font-semibold text-gray-800">
+            <h3 className="text-base font-semibold text-hotel-text-primary">
               {isNew ? t("newEvent") : t("editEvent")}
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">
+                <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                   {t("lot")} <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -161,10 +161,10 @@ export default function EventsLots() {
                     handleFieldChange("lot", Number(e.target.value))
                   }
                   title={t("lot")}
-                  className={`w-full border-2 hover:border-gray-300 focus:outline-none rounded-lg px-4 py-2.5 text-sm font-medium transition-all ${
+                  className={`w-full border-2 hover:border-hotel-border focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors ${
                     getErrorMessage("lot")
                       ? "border-red-500 focus:border-red-500"
-                      : "border-gray-200 focus:border-emerald-500"
+                      : "border-hotel-border focus:border-emerald-500"
                   }`}
                 />
                 {getErrorMessage("lot") && (
@@ -174,17 +174,17 @@ export default function EventsLots() {
                 )}
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">
+                <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                   Event Type <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={selected.nature}
                   onChange={(e) => handleFieldChange("nature", e.target.value)}
                   title="Event Type"
-                  className={`w-full border-2 hover:border-gray-300 focus:outline-none rounded-lg px-4 py-2.5 text-sm font-medium transition-all ${
+                  className={`w-full border-2 hover:border-hotel-border focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors ${
                     getErrorMessage("nature")
                       ? "border-red-500 focus:border-red-500"
-                      : "border-gray-200 focus:border-emerald-500"
+                      : "border-hotel-border focus:border-emerald-500"
                   }`}
                 >
                   <option value="">Select event type...</option>
@@ -201,10 +201,10 @@ export default function EventsLots() {
                 )}
               </div>
             </div>
-            <div className="flex gap-3 pt-4 border-t-2 border-gray-100">
+            <div className="flex gap-3 pt-4 border-t-2 border-hotel-border">
               <button
                 onClick={handleSave}
-                className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 text-sm hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-all"
+                className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-6 py-2 rounded flex items-center gap-2 text-sm hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-colors"
               >
                 <Save size={16} />
                 {t("save")}
@@ -212,7 +212,7 @@ export default function EventsLots() {
               {!isNew && (
                 <button
                   onClick={handleDelete}
-                  className="bg-red-500 text-white px-6 py-2 rounded-lg flex items-center gap-2 text-sm hover:bg-red-600 transition-all"
+                  className="bg-red-500 text-white px-6 py-2 rounded flex items-center gap-2 text-sm hover:bg-red-600 transition-colors"
                 >
                   <Trash2 size={16} />
                   {t("delete")}
@@ -220,21 +220,21 @@ export default function EventsLots() {
               )}
               <button
                 onClick={() => setSelected(null)}
-                className="border-2 border-gray-200 hover:border-gray-300 px-6 py-2 rounded-lg text-sm font-medium transition-all"
+                className="border-2 border-hotel-border hover:border-hotel-border px-6 py-2 rounded text-sm font-medium transition-colors"
               >
                 {t("cancel")}
               </button>
             </div>
           </div>
         )}
-        <div className="bg-white rounded-xl shadow-sm border-2 border-emerald-200 overflow-hidden">
+        <div className="bg-white rounded border-2 border-emerald-200 overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b-2 border-emerald-200">
+            <thead className="bg-white border-b-2 border-emerald-200">
               <tr>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">
+                <th className="text-left px-4 py-3 font-medium text-hotel-text-secondary">
                   {t("lot")}
                 </th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">
+                <th className="text-left px-4 py-3 font-medium text-hotel-text-secondary">
                   Event Type
                 </th>
               </tr>
@@ -262,14 +262,14 @@ export default function EventsLots() {
 
         {confirmAction && confirmType === "save" && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-white rounded-2xl p-8 max-w-md mx-4 shadow-2xl animate-in fade-in zoom-in-95">
+            <div className="bg-white rounded p-4 max-w-md mx-4 animate-in fade-in zoom-in-95">
               <div className="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-100 mb-4">
                 <Save size={24} className="text-emerald-600" />
               </div>
-              <h3 className="text-lg font-bold text-gray-800 mb-2">
+              <h3 className="text-base font-bold text-hotel-text-primary mb-2">
                 Confirm Event
               </h3>
-              <p className="text-gray-600 mb-6 text-sm leading-relaxed">
+              <p className="text-hotel-text-secondary mb-6 text-sm leading-relaxed">
                 {isNew ? "Add" : "Update"} event lot{" "}
                 <span className="font-semibold text-emerald-700">
                   {selected?.lot}
@@ -283,13 +283,13 @@ export default function EventsLots() {
               <div className="flex gap-3 justify-end">
                 <button
                   onClick={() => setConfirmAction(false)}
-                  className="border-2 border-gray-200 hover:border-gray-300 px-6 py-2.5 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-all"
+                  className="border-2 border-hotel-border hover:border-hotel-border px-6 py-2.5 rounded text-sm font-semibold text-hotel-text-primary hover:bg-hotel-cream transition-colors"
                 >
                   {t("cancel")}
                 </button>
                 <button
                   onClick={confirmSave}
-                  className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-6 py-2.5 rounded-lg text-sm font-semibold hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-all"
+                  className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-6 py-2.5 rounded text-sm font-semibold hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-colors"
                 >
                   Confirm
                 </button>
@@ -300,14 +300,14 @@ export default function EventsLots() {
 
         {confirmAction && confirmType === "delete" && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-white rounded-2xl p-8 max-w-md mx-4 shadow-2xl animate-in fade-in zoom-in-95">
+            <div className="bg-white rounded p-4 max-w-md mx-4 animate-in fade-in zoom-in-95">
               <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-100 mb-4">
                 <Trash2 size={24} className="text-red-600" />
               </div>
-              <h3 className="text-lg font-bold text-gray-800 mb-2">
+              <h3 className="text-base font-bold text-hotel-text-primary mb-2">
                 Confirm Delete
               </h3>
-              <p className="text-gray-600 mb-6 text-sm leading-relaxed">
+              <p className="text-hotel-text-secondary mb-6 text-sm leading-relaxed">
                 Delete event lot{" "}
                 <span className="font-semibold text-red-600">
                   {selected?.lot}
@@ -321,13 +321,13 @@ export default function EventsLots() {
               <div className="flex gap-3 justify-end">
                 <button
                   onClick={() => setConfirmAction(false)}
-                  className="border-2 border-gray-200 hover:border-gray-300 px-6 py-2.5 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-all"
+                  className="border-2 border-hotel-border hover:border-hotel-border px-6 py-2.5 rounded text-sm font-semibold text-hotel-text-primary hover:bg-hotel-cream transition-colors"
                 >
                   {t("cancel")}
                 </button>
                 <button
                   onClick={confirmDelete}
-                  className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-2.5 rounded-lg text-sm font-semibold hover:shadow-lg hover:from-red-600 hover:to-red-700 transition-all"
+                  className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-2.5 rounded text-sm font-semibold hover:shadow-lg hover:from-red-600 hover:to-red-700 transition-colors"
                 >
                   {t("delete")}
                 </button>

@@ -52,25 +52,25 @@ export default function RoomsByStatus({
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-4 p-4">
       {/* Toolbar */}
-      <div className="flex justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-2xl shadow-sm border border-blue-100">
+      <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4 p-4 rounded border border-blue-100">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+          <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
             {titles[statusFilter] ?? t("roomsByStatus")}
           </h1>
         </div>
         <div className="flex gap-3">
           <button
             onClick={() => window.print()}
-            className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-3 rounded-xl flex items-center gap-2 text-sm font-medium hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-all duration-200 transform hover:scale-105"
+            className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-3 rounded flex items-center gap-2 text-sm font-medium hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-colors duration-200"
           >
             <Printer size={18} />
             {t("print")}
           </button>
           <button
             onClick={exportCSV}
-            className="border-2 border-green-500 text-green-700 px-6 py-3 rounded-xl flex items-center gap-2 text-sm font-medium bg-green-50 hover:bg-green-100 hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+            className="border-2 border-hotel-border text-hotel-text-primary px-6 py-3 rounded flex items-center gap-2 text-sm font-medium bg-green-50 hover:bg-green-100 hover:shadow-lg transition-colors duration-200"
           >
             <FileSpreadsheet size={18} />
             Excel
@@ -79,12 +79,12 @@ export default function RoomsByStatus({
       </div>
       <div
         id="report-output"
-        className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden"
+        className="bg-white rounded border border-hotel-border overflow-hidden"
       >
-        <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
-          <h2 className="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+        <div className="px-6 py-4 border-b border-hotel-border bg-white border border-hotel-border rounded p-4">
+          <h2 className="text-base font-bold bg-hotel-gold bg-clip-text text-transparent">
             {printTitles[statusFilter] ?? "Rooms situation"}{" "}
-            <span className="font-normal text-sm text-gray-500 ml-2">
+            <span className="font-normal text-sm text-hotel-text-secondary ml-2">
               {new Date().toLocaleDateString()}{" "}
               {new Date().toLocaleTimeString()}
             </span>
@@ -117,27 +117,27 @@ export default function RoomsByStatus({
             {filtered.map((r) => (
               <tr
                 key={r.room_num}
-                className="border-b border-gray-200 hover:bg-blue-50 transition-colors duration-150"
+                className="border-b border-hotel-border hover:bg-hotel-cream transition-colors duration-150"
               >
-                <td className="px-4 py-3 font-medium text-gray-900">
+                <td className="px-4 py-3 font-medium text-hotel-text-primary">
                   {r.room_num}
                 </td>
-                <td className="px-4 py-3 text-gray-700">{r.designation}</td>
-                <td className="px-4 py-3 text-gray-700">
+                <td className="px-4 py-3 text-hotel-text-primary">{r.designation}</td>
+                <td className="px-4 py-3 text-hotel-text-primary">
                   {r.price_1.toLocaleString()}
                 </td>
-                <td className="px-4 py-3 text-gray-700">
+                <td className="px-4 py-3 text-hotel-text-primary">
                   {r.price_2.toLocaleString()}
                 </td>
-                <td className="px-4 py-3 text-gray-700">{r.current_mon}</td>
+                <td className="px-4 py-3 text-hotel-text-primary">{r.current_mon}</td>
                 <td className="px-4 py-3">
                   <span
                     className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
                       r.status === "OCC"
                         ? "bg-red-100 text-red-700"
                         : r.status === "VC"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-gray-100 text-gray-700"
+                          ? "bg-green-100 text-hotel-text-primary"
+                          : "bg-gray-100 text-hotel-text-primary"
                     }`}
                   >
                     {r.status}

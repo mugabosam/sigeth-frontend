@@ -32,32 +32,32 @@ export default function BanquetRequestFollowUp() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50 p-8">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50 p-4">
+      <div className="max-w-6xl mx-auto space-y-4">
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
             {t("banquetRequestFollowUp")}
           </h1>
           <div className="flex gap-2">
             <button
               onClick={() => window.print()}
-              className="bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm hover:bg-gray-700 transition-all"
+              className="bg-gray-600 text-white px-4 py-2 rounded flex items-center gap-2 text-sm hover:bg-gray-700 transition-colors"
             >
               <Printer size={16} />
               {t("print")}
             </button>
             <button
               onClick={handleExport}
-              className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-all"
+              className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-4 py-2 rounded flex items-center gap-2 text-sm hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-colors"
             >
               <FileSpreadsheet size={16} />
               {t("excel")}
             </button>
           </div>
         </div>
-        <div className="bg-white rounded-xl shadow-sm border-2 border-emerald-200 p-4 flex gap-4">
+        <div className="bg-white rounded border-2 border-emerald-200 p-4 flex gap-3">
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">
+            <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
               {t("dateFrom")}
             </label>
             <input
@@ -65,11 +65,11 @@ export default function BanquetRequestFollowUp() {
               value={dateFrom}
               onChange={(e) => setDateFrom(e.target.value)}
               title={t("dateFrom")}
-              className="border-2 border-gray-200 hover:border-gray-300 focus:border-emerald-500 focus:outline-none rounded-lg px-4 py-2.5 text-sm font-medium transition-all"
+              className="border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">
+            <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
               {t("dateTo")}
             </label>
             <input
@@ -77,13 +77,13 @@ export default function BanquetRequestFollowUp() {
               value={dateTo}
               onChange={(e) => setDateTo(e.target.value)}
               title={t("dateTo")}
-              className="border-2 border-gray-200 hover:border-gray-300 focus:border-emerald-500 focus:outline-none rounded-lg px-4 py-2.5 text-sm font-medium transition-all"
+              className="border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
             />
           </div>
         </div>
-        <div className="bg-white rounded-xl shadow-sm border-2 border-emerald-200 overflow-hidden">
+        <div className="bg-white rounded border-2 border-emerald-200 overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b-2 border-emerald-200">
+            <thead className="bg-white border-b-2 border-emerald-200">
               <tr>
                 {[
                   t("dateD"),
@@ -96,7 +96,7 @@ export default function BanquetRequestFollowUp() {
                 ].map((h) => (
                   <th
                     key={h}
-                    className="text-left px-4 py-3 font-medium text-gray-600"
+                    className="text-left px-4 py-3 font-medium text-hotel-text-secondary"
                   >
                     {h}
                   </th>

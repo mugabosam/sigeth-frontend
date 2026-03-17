@@ -124,14 +124,14 @@ export default function InvoicePreview() {
   const displayData = invoice ?? preview;
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-4 p-4">
       {/* Toolbar */}
-      <div className="flex justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-2xl shadow-sm border border-blue-100">
+      <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4 p-4 rounded border border-blue-100">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+          <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
             {t("invoicePreview")}
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-hotel-text-secondary mt-1">
             Select an occupied room to preview charges
           </p>
         </div>
@@ -139,7 +139,7 @@ export default function InvoicePreview() {
           {displayData && !invoice && (
             <button
               onClick={() => setShowGenerateModal(true)}
-              className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl flex items-center gap-2 text-sm font-medium hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+              className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded flex items-center gap-2 text-sm font-medium hover:shadow-lg transition-colors duration-200"
             >
               <Receipt size={18} />
               Generate Invoice
@@ -148,7 +148,7 @@ export default function InvoicePreview() {
           {displayData && (
             <button
               onClick={() => window.print()}
-              className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-3 rounded-xl flex items-center gap-2 text-sm font-medium hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-all duration-200 transform hover:scale-105"
+              className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-3 rounded flex items-center gap-2 text-sm font-medium hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-colors duration-200"
             >
               <Printer size={18} />
               {t("print")}
@@ -158,33 +158,33 @@ export default function InvoicePreview() {
       </div>
 
       {/* Occupied rooms list */}
-      <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
-        <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+      <div className="bg-white rounded border border-hotel-border p-4">
+        <h3 className="text-base font-bold text-hotel-text-primary mb-4 flex items-center gap-2">
           <span className="w-1 h-6 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full" />
           Occupied Rooms
         </h3>
         {occupiedRooms.length === 0 ? (
-          <p className="text-sm text-gray-500 py-4 text-center">
+          <p className="text-sm text-hotel-text-secondary py-4 text-center">
             No occupied rooms found.
           </p>
         ) : (
-          <div className="max-h-64 overflow-y-auto border-2 border-gray-200 rounded-xl">
+          <div className="max-h-64 overflow-y-auto border-2 border-hotel-border rounded">
             {occupiedRooms.map((room) => (
               <button
                 key={room.room_num}
                 onClick={() => handleSelectGuest(room)}
-                className="w-full text-left px-4 py-4 text-sm border-b border-gray-200 last:border-b-0 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-colors duration-150"
+                className="w-full text-left px-4 py-4 text-sm border-b border-hotel-border last:border-b-0 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-colors duration-150"
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-semibold text-gray-800">
+                    <p className="font-semibold text-hotel-text-primary">
                       Room {room.room_num}
                     </p>
-                    <p className="text-xs text-gray-600 mt-0.5">
+                    <p className="text-xs text-hotel-text-secondary mt-0.5">
                       {room.guest_name}
                     </p>
                   </div>
-                  <div className="text-right text-xs text-gray-500">
+                  <div className="text-right text-xs text-hotel-text-secondary">
                     <p>{room.arrival_date}</p>
                     <p>{room.depart_date}</p>
                   </div>
@@ -199,18 +199,18 @@ export default function InvoicePreview() {
       {loading && (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="animate-spin text-blue-500" size={32} />
-          <span className="ml-3 text-gray-600">Loading preview...</span>
+          <span className="ml-3 text-hotel-text-secondary">Loading preview...</span>
         </div>
       )}
 
       {/* Invoice Document */}
       {displayData && displayData.items.length > 0 && (
         <div
-          className="bg-white text-[10px] leading-tight text-black max-w-[1000px] mx-auto p-6 font-sans shadow-lg rounded-2xl border border-gray-200"
+          className="bg-white text-[10px] leading-tight text-black max-w-[1000px] mx-auto p-4 font-sans rounded border border-hotel-border"
           id="invoice-preview"
         >
-          <div className="mb-4 pb-4 border-b-2 border-gray-300">
-            <p className="text-lg font-bold text-gray-800">
+          <div className="mb-4 pb-4 border-b-2 border-hotel-border">
+            <p className="text-base font-bold text-hotel-text-primary">
               {invoice ? "Definitive Invoice" : "Invoice Preview"}
             </p>
             {invoice && (
@@ -218,13 +218,13 @@ export default function InvoicePreview() {
                 {invoice.invoice_number}
               </p>
             )}
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-hotel-text-secondary mt-1">
               Generated: {invoice?.date || new Date().toLocaleDateString()}
             </p>
           </div>
 
           {/* Header Info */}
-          <div className="border-2 border-gray-800 rounded-lg overflow-hidden mb-4">
+          <div className="border-2 border-gray-800 rounded overflow-hidden mb-4">
             <div className="bg-gradient-to-r from-gray-800 to-gray-700 px-4 py-3 flex justify-between items-center text-white">
               <p className="font-bold text-sm">
                 {invoice ? "DEFINITIVE INVOICE" : "Guest Invoice Preview"}
@@ -275,24 +275,24 @@ export default function InvoicePreview() {
                   {displayData.items.map((item, i) => (
                     <tr
                       key={i}
-                      className="hover:bg-blue-50 transition-colors border-b border-gray-300"
+                      className="hover:bg-hotel-cream transition-colors border-b border-hotel-border"
                     >
-                      <td className="border border-gray-300 px-2 py-2 text-xs font-mono text-gray-700">
+                      <td className="border border-hotel-border px-2 py-2 text-xs font-mono text-hotel-text-primary">
                         {item.date}
                       </td>
-                      <td className="border border-gray-300 px-2 py-2 text-xs text-gray-800">
+                      <td className="border border-hotel-border px-2 py-2 text-xs text-hotel-text-primary">
                         {item.designation}
                       </td>
-                      <td className="border border-gray-300 px-2 py-2 text-xs text-center font-semibold">
+                      <td className="border border-hotel-border px-2 py-2 text-xs text-center font-semibold">
                         {item.qty}
                       </td>
-                      <td className="border border-gray-300 px-2 py-2 text-xs text-gray-700">
+                      <td className="border border-hotel-border px-2 py-2 text-xs text-hotel-text-primary">
                         {item.unity}
                       </td>
-                      <td className="border border-gray-300 px-2 py-2 text-xs text-right font-semibold">
+                      <td className="border border-hotel-border px-2 py-2 text-xs text-right font-semibold">
                         {fmt(item.puv)}
                       </td>
-                      <td className="border border-gray-300 px-2 py-2 text-xs text-right font-bold text-green-700">
+                      <td className="border border-hotel-border px-2 py-2 text-xs text-right font-bold text-hotel-text-primary">
                         {fmt(item.credit)}
                       </td>
                     </tr>
@@ -306,13 +306,13 @@ export default function InvoicePreview() {
               {invoice && (
                 <div className="space-y-3 text-xs">
                   <div className="flex items-baseline gap-3">
-                    <span className="font-semibold text-gray-800">
+                    <span className="font-semibold text-hotel-text-primary">
                       Company Signature
                     </span>
                     <span className="border-b-2 border-gray-400 w-24 inline-block" />
                   </div>
                   <div className="flex items-baseline gap-3">
-                    <span className="font-semibold text-gray-800">
+                    <span className="font-semibold text-hotel-text-primary">
                       Username:
                     </span>
                     <span className="font-bold text-blue-700">
@@ -323,15 +323,15 @@ export default function InvoicePreview() {
               )}
               <div className="space-y-2 text-xs ml-auto">
                 <div className="flex items-center justify-end gap-3">
-                  <span className="font-semibold text-gray-700">
+                  <span className="font-semibold text-hotel-text-primary">
                     Total Charges
                   </span>
-                  <span className="border-2 border-gray-400 bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-1.5 w-28 text-right font-bold text-green-700">
+                  <span className="border-2 border-gray-400 bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
                     {fmt(displayData.total_charges)} RWF
                   </span>
                 </div>
                 <div className="flex items-center justify-end gap-3">
-                  <span className="font-semibold text-gray-700">
+                  <span className="font-semibold text-hotel-text-primary">
                     Total Paid
                   </span>
                   <span className="border-2 border-gray-400 bg-gradient-to-r from-blue-50 to-cyan-50 px-3 py-1.5 w-28 text-right font-bold text-blue-700">
@@ -339,7 +339,7 @@ export default function InvoicePreview() {
                   </span>
                 </div>
                 <div className="flex items-center justify-end gap-3">
-                  <span className="font-semibold text-gray-700">
+                  <span className="font-semibold text-hotel-text-primary">
                     Balance Due
                   </span>
                   <span className="border-2 border-gray-400 bg-gradient-to-r from-orange-50 to-red-50 px-3 py-1.5 w-28 text-right font-bold text-red-700">
@@ -348,22 +348,22 @@ export default function InvoicePreview() {
                 </div>
                 {invoice?.tax?.taux != null && (
                   <>
-                    <div className="flex items-center justify-end gap-3 pt-2 border-t border-gray-300">
-                      <span className="font-semibold text-gray-700">HTVA</span>
-                      <span className="border-2 border-gray-400 px-3 py-1.5 w-28 text-right font-bold text-gray-700">
+                    <div className="flex items-center justify-end gap-3 pt-2 border-t border-hotel-border">
+                      <span className="font-semibold text-hotel-text-primary">HTVA</span>
+                      <span className="border-2 border-gray-400 px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
                         {fmt(invoice.tax.htva ?? 0)} RWF
                       </span>
                     </div>
                     <div className="flex items-center justify-end gap-3">
-                      <span className="font-semibold text-gray-700">
+                      <span className="font-semibold text-hotel-text-primary">
                         TVA ({invoice.tax.taux}%)
                       </span>
-                      <span className="border-2 border-gray-400 px-3 py-1.5 w-28 text-right font-bold text-gray-700">
+                      <span className="border-2 border-gray-400 px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
                         {fmt(invoice.tax.tva ?? 0)} RWF
                       </span>
                     </div>
                     <div className="flex items-center justify-end gap-3">
-                      <span className="font-semibold text-gray-700">
+                      <span className="font-semibold text-hotel-text-primary">
                         Total TTC
                       </span>
                       <span className="border-2 border-gray-400 bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-1.5 w-28 text-right font-bold text-green-800">
@@ -385,22 +385,22 @@ export default function InvoicePreview() {
       {/* Generate Invoice Modal */}
       {showGenerateModal && preview && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+          <div className="bg-white rounded p-4 w-full max-w-md">
+            <h3 className="text-base font-semibold text-hotel-text-primary mb-4">
               Generate Definitive Invoice
             </h3>
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-hotel-text-secondary mb-4">
               {preview.guest_name} — Room {preview.room_num}
             </p>
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">
+                <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                   {t("paymentMode")}
                 </label>
                 <select
                   value={genPaytMode}
                   onChange={(e) => setGenPaytMode(e.target.value)}
-                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                  className="w-full border rounded px-3 py-2 text-sm"
                 >
                   <option value="">-- Select --</option>
                   {paymentModes.map((m) => (
@@ -411,7 +411,7 @@ export default function InvoicePreview() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">
+                <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                   {t("phone")}
                 </label>
                 <input
@@ -419,11 +419,11 @@ export default function InvoicePreview() {
                   value={genPhone}
                   onChange={(e) => setGenPhone(e.target.value)}
                   placeholder="+250..."
-                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                  className="w-full border rounded px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">
+                <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                   TIN
                 </label>
                 <input
@@ -431,7 +431,7 @@ export default function InvoicePreview() {
                   value={genTin}
                   onChange={(e) => setGenTin(e.target.value)}
                   placeholder="Tax ID"
-                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                  className="w-full border rounded px-3 py-2 text-sm"
                 />
               </div>
             </div>
@@ -439,7 +439,7 @@ export default function InvoicePreview() {
               <button
                 onClick={handleGenerate}
                 disabled={generating}
-                className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                className="flex-1 bg-green-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-green-700 disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {generating && (
                   <Loader2 className="animate-spin" size={14} />
@@ -448,7 +448,7 @@ export default function InvoicePreview() {
               </button>
               <button
                 onClick={() => setShowGenerateModal(false)}
-                className="border px-4 py-2 rounded-lg text-sm"
+                className="border px-4 py-2 rounded text-sm"
               >
                 Cancel
               </button>
@@ -460,17 +460,17 @@ export default function InvoicePreview() {
       {/* Error Dialog */}
       {errorMsg && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-sm">
+          <div className="bg-white rounded p-4 w-full max-w-sm">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-2 bg-red-100 rounded-full">
                 <AlertTriangle className="text-red-600" size={20} />
               </div>
-              <h3 className="text-lg font-semibold text-gray-800">Error</h3>
+              <h3 className="text-base font-semibold text-hotel-text-primary">Error</h3>
             </div>
-            <p className="text-sm text-gray-600 mb-6">{errorMsg}</p>
+            <p className="text-sm text-hotel-text-secondary mb-6">{errorMsg}</p>
             <button
               onClick={() => setErrorMsg("")}
-              className="w-full bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700"
+              className="w-full bg-red-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-red-700"
             >
               OK
             </button>

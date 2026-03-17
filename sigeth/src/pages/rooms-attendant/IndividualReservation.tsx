@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Search, Plus, Save, Trash2, AlertTriangle } from "lucide-react";
+import { Search, Plus, Save, Trash2, CheckCircle2, AlertTriangle } from "lucide-react";
 import { useLang } from "../../hooks/useLang";
 import { useHotelData } from "../../context/HotelDataContext";
 import ConfirmationModal from "../../components/common/ConfirmationModal";
@@ -33,7 +33,6 @@ export default function IndividualReservation({
   const [queryGuest, setQueryGuest] = useState("");
   const [selected, setSelected] = useState<RCS | null>(null);
   const [isNew, setIsNew] = useState(false);
-  const [showCurrencyModal, setShowCurrencyModal] = useState(false);
   const [roomSuggestions, setRoomSuggestions] = useState<RCS[]>([]);
   const [guestSuggestions, setGuestSuggestions] = useState<RCS[]>([]);
   const [showRoomSuggestions, setShowRoomSuggestions] = useState(false);
@@ -41,6 +40,8 @@ export default function IndividualReservation({
   const [confirmSaveOpen, setConfirmSaveOpen] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [localPuv, setLocalPuv] = useState(0);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [errors, setErrors] = useState<ValidationResult>({
     isValid: true,
     errors: [],
@@ -122,7 +123,9 @@ export default function IndividualReservation({
 
   const handleSelectSuggestion = (r: RCS) => {
     setSelected({ ...r });
-    setLocalPuv(r.current_mon === "RWF" ? r.puv : 0);
+    // For existing reservations, store the current puv as localPuv for comparison
+    // If it's in RWF, it's the true base. If it's in another currency, we'll use it as reference
+    setLocalPuv(r.puv);
     setIsNew(false);
     setQueryRoom(r.room_num);
     setQueryGuest(r.guest_name);
@@ -141,7 +144,8 @@ export default function IndividualReservation({
     );
     if (found) {
       setSelected({ ...found });
-      setLocalPuv(found.current_mon === "RWF" ? found.puv : 0);
+      // Always store the puv value as localPuv for currency conversion reference
+      setLocalPuv(found.puv);
       setIsNew(false);
     } else {
       setSelected({ ...blank, room_num: queryRoom, guest_name: queryGuest });
@@ -163,7 +167,7 @@ export default function IndividualReservation({
         : 0;
     const base = qty * f.puv;
     const stay_cost = f.discount > 0 ? base * (1 - f.discount / 100) : base;
-    return { ...f, stay_cost, qty } as RCS;
+    return { ...f, stay_cost };
   };
 
   const handleChange = (field: keyof RCS, value: string | number) => {
@@ -204,12 +208,14 @@ export default function IndividualReservation({
         setRooms((prev) =>
           prev.map((room) => (room.id === response.room.id ? response.room : room)),
         );
+        setSuccessMessage("Check-in successful!");
       } else if (mode === "1116") {
         const response = await frontOfficeApi.walkin(selected);
         setReservations((prev) => [...prev, response.reservation]);
         setRooms((prev) =>
           prev.map((room) => (room.id === response.room.id ? response.room : room)),
         );
+        setSuccessMessage("Walk-in registration successful!");
       } else {
         const saved = isNew
           ? await frontOfficeApi.createReservation(selected)
@@ -219,26 +225,28 @@ export default function IndividualReservation({
 
         if (isNew || !selected.id) {
           setReservations((prev) => [...prev, saved]);
+          setSuccessMessage(`Reservation created successfully! Reservation ID: ${saved.code_p}`);
         } else {
           setReservations((prev) =>
             prev.map((r) => (r.id === saved.id ? saved : r)),
           );
+          setSuccessMessage(`Reservation updated successfully! Reservation ID: ${saved.code_p}`);
         }
       }
+      setShowSuccessModal(true);
+      setSelected(null);
+      setQueryRoom("");
+      setQueryGuest("");
     } catch (error) {
-      setErrorMsg(
+      const errorMessage =
         typeof error === "object" && error !== null && "message" in error
           ? String((error as { message: string }).message)
-          : t("loginError"),
-      );
+          : t("loginError");
+      setSuccessMessage(`Error: ${errorMessage}`);
+      setShowSuccessModal(true);
+    } finally {
       setConfirmSaveOpen(false);
-      return;
     }
-
-    setSelected(null);
-    setQueryRoom("");
-    setQueryGuest("");
-    setConfirmSaveOpen(false);
   };
 
   const handleDelete = () => {
@@ -268,21 +276,29 @@ export default function IndividualReservation({
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-2xl shadow-sm border border-blue-100">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+    <div className="space-y-4">
+      {/* Page title */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-display font-bold text-hotel-text-primary">
           {titles[mode]}
         </h1>
       </div>
+
+      {/* Error message */}
+      {errorMsg && (
+        <div className="bg-red-50 border border-red-200 rounded p-3 text-red-700 text-sm">
+          {errorMsg}
+        </div>
+      )}
+
       {/* Query window */}
-      <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
-        <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-          <span className="w-1 h-6 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full" />
+      <div className="bg-white border border-hotel-border rounded p-4">
+        <h3 className="text-sm font-semibold text-hotel-text-primary mb-3 uppercase tracking-wide">
           {t("queryWindow")}
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
           <div className="relative">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
               {t("roomNumber")}
             </label>
             <input
@@ -290,27 +306,27 @@ export default function IndividualReservation({
               onChange={(e) => handleRoomChange(e.target.value)}
               placeholder={t("roomNumber")}
               title={t("roomNumber")}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full border border-hotel-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
             />
             {showRoomSuggestions && roomSuggestions.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-32 overflow-y-auto">
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-hotel-border rounded shadow z-50 max-h-32 overflow-y-auto">
                 {roomSuggestions.map((r, i) => (
                   <button
                     key={`room-${i}`}
                     onClick={() => handleSelectSuggestion(r)}
-                    className="w-full text-left px-4 py-2 hover:bg-blue-50 transition-colors border-b last:border-b-0 text-sm"
+                    className="w-full text-left px-3 py-2 hover:bg-hotel-cream transition-colors border-b last:border-b-0 text-xs"
                   >
-                    <div className="font-medium text-gray-800">
+                    <div className="font-medium text-hotel-text-primary">
                       {r.room_num}
                     </div>
-                    <div className="text-xs text-gray-500">{r.guest_name}</div>
+                    <div className="text-xs text-hotel-text-secondary">{r.guest_name}</div>
                   </button>
                 ))}
               </div>
             )}
           </div>
           <div className="relative">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
               {t("guestName")}
             </label>
             <input
@@ -318,21 +334,21 @@ export default function IndividualReservation({
               onChange={(e) => handleGuestChange(e.target.value)}
               placeholder={t("guestName")}
               title={t("guestName")}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full border border-hotel-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             />
             {showGuestSuggestions && guestSuggestions.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-32 overflow-y-auto">
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-hotel-border rounded shadow z-50 max-h-32 overflow-y-auto">
                 {guestSuggestions.map((r, i) => (
                   <button
                     key={`guest-${i}`}
                     onClick={() => handleSelectSuggestion(r)}
-                    className="w-full text-left px-4 py-2 hover:bg-blue-50 transition-colors border-b last:border-b-0 text-sm"
+                    className="w-full text-left px-3 py-2 hover:bg-hotel-cream transition-colors border-b last:border-b-0 text-xs"
                   >
-                    <div className="font-medium text-gray-800">
+                    <div className="font-medium text-hotel-text-primary">
                       {r.guest_name}
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-hotel-text-secondary">
                       Room {r.room_num}
                     </div>
                   </button>
@@ -340,34 +356,36 @@ export default function IndividualReservation({
               </div>
             )}
           </div>
-          <div className="flex items-end gap-2">
-            <button
-              onClick={handleSearch}
-              className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2 rounded-lg flex items-center justify-center gap-2 text-sm font-medium hover:shadow-lg transition-all transform hover:scale-105"
-            >
-              <Search size={16} />
-              {t("search")}
-            </button>
-            <button
-              onClick={() => {
-                setSelected({ ...blank });
-                setIsNew(true);
-              }}
-              className="border-2 border-green-500 text-green-700 px-6 py-2 rounded-lg flex items-center gap-2 text-sm font-medium bg-green-50 hover:bg-green-100 transition-all transform hover:scale-105"
-            >
-              <Plus size={16} />
-              {t("newRecord")}
-            </button>
-          </div>
+          <button
+            onClick={handleSearch}
+            className="self-end bg-hotel-gold text-white px-4 py-2 rounded text-sm font-medium hover:bg-hotel-gold-dark transition-colors flex items-center justify-center gap-2"
+          >
+            <Search size={14} />
+            {t("search")}
+          </button>
+          <button
+            onClick={() => {
+              setSelected({ ...blank });
+              setIsNew(true);
+              setLocalPuv(0);
+            }}
+            className="self-end border border-hotel-gold text-hotel-gold px-4 py-2 rounded text-sm font-medium hover:bg-hotel-cream transition-colors flex items-center justify-center gap-2"
+          >
+            <Plus size={14} />
+            {t("newRecord")}
+          </button>
         </div>
       </div>
-      {/* Indiv_form */}
+
+      {/* Form section */}
       {selected && (
-        <div className="bg-white rounded-xl shadow-sm border p-6 space-y-4">
-          <h3 className="text-lg font-semibold text-gray-800">
-            {isNew ? t("newReservation") : t("editReservation")} — Indiv_form
+        <div className="bg-white border border-hotel-border rounded p-4 space-y-4">
+          <h3 className="text-sm font-semibold text-hotel-text-primary uppercase tracking-wide">
+            {isNew ? t("newReservation") : t("editReservation")}
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+          {/* Form fields grid */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
             {(
               [
                 ["room_num", t("roomNumber"), "text", true, {}],
@@ -420,19 +438,19 @@ export default function IndividualReservation({
               if (field === "nationality" || field === "country") {
                 return (
                   <div key={field}>
-                    <label className="block text-xs font-medium text-gray-500 mb-1">
+                    <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                       {label}{" "}
-                      {required && <span className="text-red-500">*</span>}
+                      {required && <span className="text-hotel-danger">*</span>}
                     </label>
                     <select
                       value={selected[field] ?? ""}
                       onChange={(e) => handleChange(field, e.target.value)}
                       required={required}
                       title={label}
-                      className={`w-full border rounded-lg px-3 py-2 text-sm ${
+                      className={`w-full border rounded px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-hotel-gold ${
                         errorMsg
-                          ? "border-red-500 focus:ring-red-500"
-                          : "border-gray-300"
+                          ? "border-hotel-danger"
+                          : "border-hotel-border"
                       }`}
                     >
                       <option value="">{t("select")}</option>
@@ -450,7 +468,7 @@ export default function IndividualReservation({
                         ))}
                     </select>
                     {errorMsg && (
-                      <p className="text-xs text-red-600 mt-1">{errorMsg}</p>
+                      <p className="text-xs text-hotel-danger mt-1">{errorMsg}</p>
                     )}
                   </div>
                 );
@@ -462,13 +480,12 @@ export default function IndividualReservation({
 
               return (
                 <div key={field}>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">
-                    {label}{" "}
-                    {required && <span className="text-red-500">*</span>}
+                  <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
+                    {label} {required && <span className="text-hotel-danger">*</span>}
                   </label>
                   {field === "phone" && phoneCode ? (
                     <div className="flex items-center gap-1">
-                      <span className="bg-gray-100 border border-gray-300 rounded-l-lg px-3 py-2 text-xs font-semibold text-gray-600">
+                      <span className="bg-hotel-cream border border-hotel-border rounded-l px-2 py-2 text-xs font-semibold text-hotel-text-secondary">
                         {phoneCode}
                       </span>
                       <input
@@ -478,10 +495,10 @@ export default function IndividualReservation({
                         required={required}
                         onChange={(e) => handleChange(field, e.target.value)}
                         title={label}
-                        className={`flex-1 border rounded-r-lg px-3 py-2 text-sm ${
+                        className={`flex-1 border rounded-r px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-hotel-gold ${
                           errorMsg
-                            ? "border-red-500 focus:ring-red-500"
-                            : "border-gray-300"
+                            ? "border-hotel-danger"
+                            : "border-hotel-border"
                         }`}
                       />
                     </div>
@@ -501,42 +518,74 @@ export default function IndividualReservation({
                       }
                       {...attrs}
                       title={label}
-                      className={`w-full border rounded-lg px-3 py-2 text-sm ${field === "stay_cost" ? "bg-gray-50" : ""} ${
+                      className={`w-full border rounded px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-hotel-gold ${field === "stay_cost" ? "bg-hotel-cream" : ""} ${
                         errorMsg
-                          ? "border-red-500 focus:ring-red-500"
-                          : "border-gray-300"
+                          ? "border-hotel-danger"
+                          : "border-hotel-border"
                       }`}
                     />
                   )}
                   {errorMsg && (
-                    <p className="text-xs text-red-600 mt-1">{errorMsg}</p>
+                    <p className="text-xs text-hotel-danger mt-1">{errorMsg}</p>
                   )}
                 </div>
               );
             })}
-            {/* Currency field — opens Monnaies.dat lookup */}
+
+            {/* Currency dropdown */}
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                 {t("currency")}
               </label>
-              <button
-                type="button"
-                onClick={() => setShowCurrencyModal(true)}
-                className="w-full border rounded-lg px-3 py-2 text-sm text-left bg-white hover:bg-gray-50"
+              <select
+                value={selected.current_mon || "RWF"}
+                onChange={(e) => {
+                  const code = e.target.value;
+                  let newPuv = selected.puv;
+
+                  if (code === "RWF") {
+                    // Converting to RWF - use the localPuv as base
+                    newPuv = localPuv > 0 ? localPuv : selected.puv;
+                  } else {
+                    // Converting to another currency
+                    const rate = currencyOptions.find(c => c.code === code)?.exchange_rate || 1;
+                    if (localPuv > 0) {
+                      // If we have a known base (RWF), convert from RWF
+                      newPuv = Math.round(localPuv / rate);
+                    } else {
+                      // Otherwise convert from current puv
+                      const currentRate = currencyOptions.find(c => c.code === selected.current_mon)?.exchange_rate || 1;
+                      const rwfEquivalent = Math.round(selected.puv * currentRate);
+                      newPuv = Math.round(rwfEquivalent / rate);
+                    }
+                  }
+
+                  // Update both puv and current_mon together and recalculate
+                  const updatedWithCurrency = { ...selected, puv: newPuv, current_mon: code };
+                  const updatedWithCalc = calc(updatedWithCurrency);
+                  setSelected(updatedWithCalc);
+                  setErrors(validateIndividualReservation(updatedWithCalc));
+                }}
+                className="w-full border border-hotel-border rounded px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-hotel-gold"
               >
-                {selected.current_mon || t("selectCurrency")}
-              </button>
+                {currencyOptions.map(c => (
+                  <option key={c.code} value={c.code}>
+                    {c.code} — {c.label} {c.code !== "RWF" ? `(1 = ${c.exchange_rate.toLocaleString()} RWF)` : "(local)"}
+                  </option>
+                ))}
+              </select>
             </div>
-            {/* Payment mode — Modep.dat dropdown */}
+
+            {/* Payment mode */}
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                 {t("paymentMode")}
               </label>
               <select
                 value={selected.payt_mode}
                 onChange={(e) => handleChange("payt_mode", e.target.value)}
                 title={t("paymentMode")}
-                className="w-full border rounded-lg px-3 py-2 text-sm"
+                className="w-full border border-hotel-border rounded px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-hotel-gold"
               >
                 <option value="">-- {t("select")} --</option>
                 {paymentModes.map((m) => (
@@ -547,16 +596,17 @@ export default function IndividualReservation({
               </select>
             </div>
           </div>
-          {/* Available rooms browser */}
+
+          {/* Available rooms table */}
           {(mode === "1112" || mode === "1114" || mode === "1116") && (
-            <div className="border rounded-lg p-4 bg-gray-50">
-              <h4 className="text-sm font-semibold text-gray-600 mb-2">
+            <div className="border border-hotel-border rounded p-3 bg-hotel-paper">
+              <h4 className="text-xs font-semibold text-hotel-text-primary mb-2 uppercase tracking-wide">
                 {t("availableRooms")}
               </h4>
               <div className="max-h-40 overflow-y-auto">
                 <table className="w-full text-xs">
-                  <thead>
-                    <tr className="border-b">
+                  <thead className="bg-hotel-navy text-white sticky top-0">
+                    <tr>
                       {[
                         t("roomNumber"),
                         t("designation"),
@@ -564,7 +614,7 @@ export default function IndividualReservation({
                         t("price2"),
                         t("status"),
                       ].map((h) => (
-                        <th key={h} className="text-left py-1 px-2">
+                        <th key={h} className="text-left py-2 px-2 font-medium">
                           {h}
                         </th>
                       ))}
@@ -576,7 +626,7 @@ export default function IndividualReservation({
                       .map((r) => (
                         <tr
                           key={r.room_num}
-                          className="border-b hover:bg-amber-50 cursor-pointer"
+                          className="border-b border-hotel-border hover:bg-hotel-cream cursor-pointer transition-colors"
                           onClick={() => {
                             if (!selected) return;
                             setLocalPuv(r.price_1);
@@ -589,18 +639,18 @@ export default function IndividualReservation({
                             setSelected(updated);
                           }}
                         >
-                          <td className="py-1 px-2 font-medium">
+                          <td className="py-2 px-2 font-medium text-hotel-text-primary">
                             {r.room_num}
                           </td>
-                          <td className="py-1 px-2">{r.designation}</td>
-                          <td className="py-1 px-2">
+                          <td className="py-2 px-2 text-hotel-text-secondary">{r.designation}</td>
+                          <td className="py-2 px-2 text-right font-mono">
                             {r.price_1.toLocaleString()}
                           </td>
-                          <td className="py-1 px-2">
+                          <td className="py-2 px-2 text-right font-mono">
                             {r.price_2.toLocaleString()}
                           </td>
-                          <td className="py-1 px-2">
-                            <span className="text-green-600">VC</span>
+                          <td className="py-2 px-2">
+                            <span className="text-hotel-success font-medium">VC</span>
                           </td>
                         </tr>
                       ))}
@@ -609,136 +659,28 @@ export default function IndividualReservation({
               </div>
             </div>
           )}
-          <div className="flex gap-3 pt-4 border-t">
+
+          {/* Action buttons */}
+          <div className="flex gap-2 pt-2 border-t border-hotel-border">
             <button
               onClick={handleSave}
-              className="bg-amber-500 text-white px-6 py-2 rounded-lg flex items-center gap-2 text-sm hover:bg-amber-600"
+              className="bg-hotel-gold text-white px-4 py-2 rounded text-sm font-medium hover:bg-hotel-gold-dark transition-colors flex items-center gap-2"
             >
-              <Save size={16} />
+              <Save size={14} />
               {t("save")}
             </button>
             {!isNew && (
               <button
                 onClick={handleDelete}
-                className="bg-red-500 text-white px-6 py-2 rounded-lg flex items-center gap-2 text-sm hover:bg-red-600"
+                className="bg-hotel-danger text-white px-4 py-2 rounded text-sm font-medium hover:bg-red-700 transition-colors flex items-center gap-2"
               >
-                <Trash2 size={16} />
+                <Trash2 size={14} />
                 {t("delete")}
               </button>
             )}
             <button
               onClick={() => setSelected(null)}
-              className="border px-6 py-2 rounded-lg text-sm"
-            >
-              {t("cancel")}
-            </button>
-          </div>
-        </div>
-      )}
-      {/* Current reservations */}
-      <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b">
-            <tr>
-              {[
-                t("roomNumber"),
-                t("guestName"),
-                t("phone"),
-                t("arrivalDate"),
-                t("departDate"),
-                t("stayCost"),
-                t("status"),
-              ].map((h) => (
-                <th
-                  key={h}
-                  className="text-left px-4 py-3 font-medium text-gray-600"
-                >
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {reservations.map((r, i) => (
-              <tr
-                key={i}
-                className="border-b hover:bg-gray-50 cursor-pointer"
-                onClick={() => {
-                  setSelected({ ...r });
-                  setLocalPuv(r.current_mon === "RWF" ? r.puv : 0);
-                  setIsNew(false);
-                }}
-              >
-                <td className="px-4 py-3">{r.room_num}</td>
-                <td className="px-4 py-3 font-medium">{r.guest_name}</td>
-                <td className="px-4 py-3">{r.phone}</td>
-                <td className="px-4 py-3">{r.arrival_date}</td>
-                <td className="px-4 py-3">{r.depart_date}</td>
-                <td className="px-4 py-3">{r.stay_cost.toLocaleString()} {r.current_mon}</td>
-                <td className="px-4 py-3">
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs ${r.status === 0 ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"}`}
-                  >
-                    {r.status === 0 ? t("statusOpen") : t("statusClosed")}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      {/* Currency lookup modal */}
-      {showCurrencyModal && selected && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
-              {t("selectCurrency")}
-            </h3>
-            <table className="w-full text-sm mb-4">
-              <thead className="bg-gray-50 border-b">
-                <tr>
-                  <th className="text-left px-3 py-2">{t("currency")}</th>
-                  <th className="text-left px-3 py-2">{t("localRate")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currencyOptions.map((c) => (
-                  <tr
-                    key={c.code}
-                    className={`border-b hover:bg-amber-50 cursor-pointer ${selected.current_mon === c.code ? "bg-amber-100" : ""}`}
-                    onClick={() => {
-                      if (c.code === "RWF") {
-                        if (localPuv > 0) handleChange("puv", localPuv);
-                        handleChange("current_mon", "RWF");
-                      } else if (c.exchange_rate > 0 && localPuv > 0) {
-                        const converted = Math.round(localPuv / c.exchange_rate);
-                        handleChange("current_mon", c.code);
-                        handleChange("puv", converted);
-                      } else {
-                        handleChange("current_mon", c.code);
-                      }
-                      setShowCurrencyModal(false);
-                    }}
-                  >
-                    <td className="px-3 py-2 font-medium">
-                      {c.code} — {c.label}
-                      {c.code === "RWF" && <span className="text-xs text-gray-400 ml-1">(default)</span>}
-                    </td>
-                    <td className="px-3 py-2">
-                      {c.code === "RWF" ? "—" : `${c.exchange_rate.toLocaleString()} RWF`}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {selected.current_mon !== "RWF" && localPuv > 0 && (
-              <p className="text-xs text-gray-500 mb-3">
-                Original: {localPuv.toLocaleString()} RWF
-              </p>
-            )}
-            <button
-              onClick={() => setShowCurrencyModal(false)}
-              className="border px-4 py-2 rounded-lg text-sm w-full"
+              className="border border-hotel-border text-hotel-text-primary px-4 py-2 rounded text-sm font-medium hover:bg-hotel-cream transition-colors"
             >
               {t("cancel")}
             </button>
@@ -749,38 +691,46 @@ export default function IndividualReservation({
       {/* Confirmation Modals */}
       <ConfirmationModal
         isOpen={confirmSaveOpen}
-        title={isNew ? "Create Reservation" : "Update Reservation"}
-        message={`Are you sure you want to ${isNew ? "create a new" : "update this"} reservation for ${selected?.guest_name}?`}
-        confirmText={isNew ? "Create" : "Update"}
-        cancelText="Cancel"
-        isDangerous={false}
+        title={t("confirm")}
+        message={t("confirmSave")}
         onConfirm={confirmSave}
         onCancel={() => setConfirmSaveOpen(false)}
       />
 
       <ConfirmationModal
         isOpen={confirmDeleteOpen}
-        title="Delete Reservation"
-        message={`Are you sure you want to delete the reservation for ${selected?.guest_name}? This action cannot be undone.`}
-        confirmText="Delete"
-        cancelText="Cancel"
-        isDangerous={true}
+        title={t("confirm")}
+        message={t("confirmDelete")}
         onConfirm={confirmDelete}
         onCancel={() => setConfirmDeleteOpen(false)}
       />
 
-      {/* Error Dialog */}
-      {errorMsg && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md text-center space-y-4">
-            <AlertTriangle size={40} className="text-red-500 mx-auto" />
-            <h3 className="text-lg font-semibold text-gray-800">Error</h3>
-            <p className="text-sm text-gray-600 whitespace-pre-wrap">{errorMsg}</p>
+      {/* Success/Failure Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+          <div className="bg-white border border-hotel-border rounded p-4 max-w-sm mx-auto">
+            <div className="flex items-center gap-3 mb-4">
+              {successMessage.includes("success") || successMessage.includes("Success") ? (
+                <div className="w-10 h-10 rounded-full bg-hotel-success/20 flex items-center justify-center">
+                  <CheckCircle2 className="text-hotel-success" size={20} />
+                </div>
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-hotel-danger/20 flex items-center justify-center">
+                  <AlertTriangle className="text-hotel-danger" size={20} />
+                </div>
+              )}
+              <h3 className="text-base font-semibold text-hotel-text-primary">
+                {successMessage.includes("success") || successMessage.includes("Success") ? "Success" : "Error"}
+              </h3>
+            </div>
+            <p className="text-sm text-hotel-text-secondary mb-6">
+              {successMessage}
+            </p>
             <button
-              onClick={() => setErrorMsg("")}
-              className="bg-red-500 text-white px-6 py-2 rounded-lg text-sm hover:bg-red-600"
+              onClick={() => setShowSuccessModal(false)}
+              className="w-full bg-hotel-gold text-white px-4 py-2 rounded text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
             >
-              OK
+              {t("close")}
             </button>
           </div>
         </div>

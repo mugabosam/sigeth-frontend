@@ -20,7 +20,6 @@ export default function GroupReservation() {
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<GRC | null>(null);
   const [isNew, setIsNew] = useState(false);
-  const [showCurrencyModal, setShowCurrencyModal] = useState(false);
   const [suggestions, setSuggestions] = useState<GRC[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [confirmSaveOpen, setConfirmSaveOpen] = useState(false);
@@ -118,7 +117,7 @@ export default function GroupReservation() {
         : 0;
     const base = qty * f.puv * f.number_pers;
     const stay_cost = f.discount > 0 ? base * (1 - f.discount / 100) : base;
-    return { ...f, qty, stay_cost };
+    return { ...f, stay_cost };
   };
 
   const handleChange = (field: keyof GRC, value: string | number) => {
@@ -204,40 +203,39 @@ export default function GroupReservation() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-2xl shadow-sm border border-blue-100">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+    <div className="space-y-4">
+      <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4">
+        <h1 className="text-2xl font-display font-bold text-hotel-text-primary">
           {t("groupReservation")}
         </h1>
       </div>
       {/* Query window */}
-      <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
-        <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-          <span className="w-1 h-6 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full" />
+      <div className="bg-white border border-hotel-border rounded p-4">
+        <h3 className="text-sm font-semibold text-hotel-text-primary mb-3 uppercase tracking-wide">
           {t("queryWindow")}
         </h3>
-        <div className="flex gap-3 flex-wrap relative">
+        <div className="flex gap-2 flex-wrap relative">
           <div className="flex-1 relative">
             <input
               value={query}
               onChange={(e) => handleQueryChange(e.target.value)}
               placeholder={t("searchGroupName")}
               title={t("searchGroupName")}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full border border-hotel-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             />
             {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-hotel-border rounded z-50 max-h-48 overflow-y-auto">
                 {suggestions.map((g) => (
                   <button
                     key={g.code_g}
                     onClick={() => handleSelectSuggestion(g)}
-                    className="w-full text-left px-4 py-2 hover:bg-blue-50 transition-colors border-b last:border-b-0 text-sm"
+                    className="w-full text-left px-3 py-2 hover:bg-hotel-cream transition-colors border-b last:border-b-0 text-sm"
                   >
-                    <div className="font-medium text-gray-800">
+                    <div className="font-medium text-hotel-text-primary">
                       {g.groupe_name}
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-hotel-text-secondary">
                       {g.code_g} • {g.number_pers} persons
                     </div>
                   </button>
@@ -247,7 +245,7 @@ export default function GroupReservation() {
           </div>
           <button
             onClick={handleSearch}
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2 rounded-lg flex items-center gap-2 text-sm font-medium hover:shadow-lg transition-all transform hover:scale-105"
+            className="bg-hotel-gold text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
           >
             <Search size={16} />
             {t("search")}
@@ -256,8 +254,9 @@ export default function GroupReservation() {
             onClick={() => {
               setSelected({ ...blank });
               setIsNew(true);
+              setLocalPuv(0);
             }}
-            className="border-2 border-green-500 text-green-700 px-6 py-2 rounded-lg flex items-center gap-2 text-sm font-medium bg-green-50 hover:bg-green-100 transition-all transform hover:scale-105"
+            className="border border-hotel-border text-hotel-text-primary px-4 py-2 rounded flex items-center gap-2 text-sm font-medium hover:bg-hotel-cream transition-colors"
           >
             <Plus size={16} />
             {t("newRecord")}
@@ -266,11 +265,11 @@ export default function GroupReservation() {
       </div>
       {/* Group_form */}
       {selected && (
-        <div className="bg-white rounded-xl shadow-sm border p-6 space-y-4">
-          <h3 className="text-lg font-semibold text-gray-800">
+        <div className="bg-white border border-hotel-border rounded p-4 space-y-3">
+          <h3 className="text-base font-display font-semibold text-hotel-text-primary">
             {isNew ? t("newGroup") : t("editGroup")} — Group_form
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
             {(
               [
                 ["groupe_name", t("groupName"), "text", true, {}],
@@ -300,13 +299,13 @@ export default function GroupReservation() {
                   : undefined;
               return (
                 <div key={field}>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">
+                  <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                     {label}{" "}
-                    {required && <span className="text-red-500">*</span>}
+                    {required && <span className="text-hotel-danger">*</span>}
                   </label>
                   {field === "phone" && phoneCode ? (
                     <div className="flex items-center gap-1">
-                      <span className="bg-gray-100 border border-gray-300 rounded-l-lg px-3 py-2 text-xs font-semibold text-gray-600 whitespace-nowrap">
+                      <span className="bg-hotel-cream border border-hotel-border rounded px-3 py-2 text-xs font-semibold text-hotel-text-primary whitespace-nowrap">
                         {phoneCode}
                       </span>
                       <input
@@ -323,10 +322,10 @@ export default function GroupReservation() {
                           )
                         }
                         title={label}
-                        className={`flex-1 border rounded-r-lg px-3 py-2 text-sm ${
+                        className={`flex-1 border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold ${
                           errorMsg
-                            ? "border-red-500 focus:ring-red-500"
-                            : "border-gray-300"
+                            ? "border-hotel-danger"
+                            : "border-hotel-border"
                         }`}
                       />
                     </div>
@@ -349,27 +348,27 @@ export default function GroupReservation() {
                       }
                       {...attrs}
                       title={label}
-                      className={`w-full border rounded-lg px-3 py-2 text-sm ${
+                      className={`w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold ${
                         (field as string) === "qty" ||
                         (field as string) === "stay_cost"
-                          ? "bg-gray-50"
+                          ? "bg-hotel-cream"
                           : ""
                       } ${
                         errorMsg
-                          ? "border-red-500 focus:ring-red-500"
-                          : "border-gray-300"
+                          ? "border-hotel-danger"
+                          : "border-hotel-border"
                       }`}
                     />
                   )}
                   {errorMsg && (
-                    <p className="text-xs text-red-600 mt-1">{errorMsg}</p>
+                    <p className="text-xs text-hotel-danger mt-1">{errorMsg}</p>
                   )}
                 </div>
               );
             })}
             {/* Nationality — Country select dropdown */}
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                 {t("nationality")}
               </label>
               <select
@@ -378,7 +377,7 @@ export default function GroupReservation() {
                   handleChange("nationality", e.target.value);
                 }}
                 title={t("nationality")}
-                className="w-full border rounded-lg px-3 py-2 text-sm border-gray-300"
+                className="w-full border border-hotel-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
               >
                 <option value="">{t("selectCountry")}</option>
                 {COUNTRIES.map((c) => (
@@ -388,29 +387,46 @@ export default function GroupReservation() {
                 ))}
               </select>
             </div>
-            {/* Currency field — opens Monnaies.dat lookup */}
+            {/* Currency dropdown */}
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                 {t("currency")}
               </label>
-              <button
-                type="button"
-                onClick={() => setShowCurrencyModal(true)}
-                className="w-full border rounded-lg px-3 py-2 text-sm text-left bg-white hover:bg-gray-50"
+              <select
+                value={selected.current_mon || "RWF"}
+                onChange={(e) => {
+                  const code = e.target.value;
+                  if (code === "RWF") {
+                    if (localPuv > 0) handleChange("puv", localPuv);
+                    handleChange("current_mon", "RWF");
+                  } else {
+                    const rate = currencyOptions.find(c => c.code === code)?.exchange_rate || 1;
+                    if (localPuv > 0) {
+                      const converted = Math.round(localPuv / rate);
+                      handleChange("puv", converted);
+                    }
+                    handleChange("current_mon", code);
+                  }
+                }}
+                className="w-full border border-hotel-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
               >
-                {selected.current_mon || t("selectCurrency")}
-              </button>
+                {currencyOptions.map(c => (
+                  <option key={c.code} value={c.code}>
+                    {c.code} — {c.label} {c.code !== "RWF" ? `(1 = ${c.exchange_rate.toLocaleString()} RWF)` : "(local)"}
+                  </option>
+                ))}
+              </select>
             </div>
             {/* Payment mode — Modep.dat dropdown */}
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                 {t("paymentMode")}
               </label>
               <select
                 value={selected.payt_mode}
                 onChange={(e) => handleChange("payt_mode", e.target.value)}
                 title={t("paymentMode")}
-                className="w-full border rounded-lg px-3 py-2 text-sm"
+                className="w-full border border-hotel-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
               >
                 {paymentModes.map((m) => (
                   <option key={m.id} value={m.id}>
@@ -420,10 +436,10 @@ export default function GroupReservation() {
               </select>
             </div>
           </div>
-          <div className="flex gap-3 pt-4 border-t">
+          <div className="flex gap-2 pt-2 border-t border-hotel-border">
             <button
               onClick={handleSave}
-              className="bg-amber-500 text-white px-6 py-2 rounded-lg flex items-center gap-2 text-sm hover:bg-amber-600"
+              className="bg-hotel-gold text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
             >
               <Save size={16} />
               {t("save")}
@@ -431,7 +447,7 @@ export default function GroupReservation() {
             {!isNew && (
               <button
                 onClick={handleDelete}
-                className="bg-red-500 text-white px-6 py-2 rounded-lg flex items-center gap-2 text-sm hover:bg-red-600"
+                className="bg-hotel-danger text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium hover:bg-red-700 transition-colors"
               >
                 <Trash2 size={16} />
                 {t("delete")}
@@ -439,7 +455,7 @@ export default function GroupReservation() {
             )}
             <button
               onClick={() => setSelected(null)}
-              className="border px-6 py-2 rounded-lg text-sm"
+              className="border border-hotel-border text-hotel-text-primary px-4 py-2 rounded text-sm font-medium hover:bg-hotel-cream transition-colors"
             >
               {t("cancel")}
             </button>
@@ -447,9 +463,9 @@ export default function GroupReservation() {
         </div>
       )}
       {/* Existing groups list */}
-      <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b">
+      <div className="bg-white border border-hotel-border rounded overflow-hidden">
+        <table className="w-full text-xs">
+          <thead className="bg-hotel-navy text-white">
             <tr>
               {[
                 t("groupCode"),
@@ -463,7 +479,7 @@ export default function GroupReservation() {
               ].map((h) => (
                 <th
                   key={h}
-                  className="text-left px-4 py-3 font-medium text-gray-600"
+                  className="text-left py-2 px-2 font-medium"
                 >
                   {h}
                 </th>
@@ -474,25 +490,25 @@ export default function GroupReservation() {
             {groupReservations.map((g) => (
               <tr
                 key={g.code_g}
-                className="border-b hover:bg-gray-50 cursor-pointer"
+                className="border-b border-hotel-border hover:bg-hotel-cream cursor-pointer"
                 onClick={() => {
                   setSelected({ ...g });
                   setLocalPuv(g.current_mon === "RWF" ? g.puv : 0);
                   setIsNew(false);
                 }}
               >
-                <td className="px-4 py-3">{g.code_g}</td>
-                <td className="px-4 py-3 font-medium">{g.groupe_name}</td>
-                <td className="px-4 py-3">{g.phone}</td>
-                <td className="px-4 py-3">{g.arrival_date}</td>
-                <td className="px-4 py-3">{g.depart_date}</td>
-                <td className="px-4 py-3">{g.number_pers}</td>
-                <td className="px-4 py-3">
+                <td className="py-2 px-2 text-hotel-text-primary">{g.code_g}</td>
+                <td className="py-2 px-2 font-medium text-hotel-text-primary">{g.groupe_name}</td>
+                <td className="py-2 px-2 text-hotel-text-primary">{g.phone}</td>
+                <td className="py-2 px-2 text-hotel-text-primary">{g.arrival_date}</td>
+                <td className="py-2 px-2 text-hotel-text-primary">{g.depart_date}</td>
+                <td className="py-2 px-2 text-hotel-text-primary">{g.number_pers}</td>
+                <td className="py-2 px-2 text-hotel-text-primary">
                   {g.stay_cost.toLocaleString()} {g.current_mon}
                 </td>
-                <td className="px-4 py-3">
+                <td className="py-2 px-2">
                   <span
-                    className={`px-2 py-1 rounded-full text-xs ${g.status === 0 ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"}`}
+                    className={`px-2 py-1 rounded text-xs font-medium ${g.status === 0 ? "bg-green-100 text-hotel-success" : "bg-gray-100 text-gray-600"}`}
                   >
                     {g.status === 0 ? t("statusOpen") : t("statusClosed")}
                   </span>
@@ -502,66 +518,6 @@ export default function GroupReservation() {
           </tbody>
         </table>
       </div>
-      {/* Currency lookup modal */}
-      {showCurrencyModal && selected && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
-              {t("selectCurrency")}
-            </h3>
-            <table className="w-full text-sm mb-4">
-              <thead className="bg-gray-50 border-b">
-                <tr>
-                  <th className="text-left px-3 py-2">{t("currency")}</th>
-                  <th className="text-left px-3 py-2">{t("localRate")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currencyOptions.map((c) => (
-                  <tr
-                    key={c.code}
-                    className={`border-b hover:bg-amber-50 cursor-pointer ${selected.current_mon === c.code ? "bg-amber-100" : ""}`}
-                    onClick={() => {
-                      if (c.code === "RWF") {
-                        if (localPuv > 0) handleChange("puv", localPuv);
-                        handleChange("current_mon", "RWF");
-                        handleChange("exchange", 1);
-                      } else if (c.exchange_rate > 0 && localPuv > 0) {
-                        const converted = Math.round(localPuv / c.exchange_rate);
-                        handleChange("current_mon", c.code);
-                        handleChange("puv", converted);
-                        handleChange("exchange", c.exchange_rate);
-                      } else {
-                        handleChange("current_mon", c.code);
-                      }
-                      setShowCurrencyModal(false);
-                    }}
-                  >
-                    <td className="px-3 py-2 font-medium">
-                      {c.code} — {c.label}
-                      {c.code === "RWF" && <span className="text-xs text-gray-400 ml-1">(default)</span>}
-                    </td>
-                    <td className="px-3 py-2">
-                      {c.code === "RWF" ? "—" : `${c.exchange_rate.toLocaleString()} RWF`}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {selected.current_mon !== "RWF" && localPuv > 0 && (
-              <p className="text-xs text-gray-500 mb-3">
-                Original: {localPuv.toLocaleString()} RWF
-              </p>
-            )}
-            <button
-              onClick={() => setShowCurrencyModal(false)}
-              className="border px-4 py-2 rounded-lg text-sm w-full"
-            >
-              {t("cancel")}
-            </button>
-          </div>
-        </div>
-      )}
       {/* Confirmation Modals */}
       <ConfirmationModal
         isOpen={confirmSaveOpen}
@@ -587,13 +543,13 @@ export default function GroupReservation() {
       {/* Error Dialog */}
       {errorMsg && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md text-center space-y-4">
-            <AlertTriangle size={40} className="text-red-500 mx-auto" />
-            <h3 className="text-lg font-semibold text-gray-800">Error</h3>
-            <p className="text-sm text-gray-600 whitespace-pre-wrap">{errorMsg}</p>
+          <div className="bg-white border border-hotel-border rounded p-4 w-full max-w-md text-center space-y-3">
+            <AlertTriangle size={40} className="text-hotel-danger mx-auto" />
+            <h3 className="text-base font-display font-semibold text-hotel-text-primary">Error</h3>
+            <p className="text-xs text-hotel-text-secondary whitespace-pre-wrap">{errorMsg}</p>
             <button
               onClick={() => setErrorMsg("")}
-              className="bg-red-500 text-white px-6 py-2 rounded-lg text-sm hover:bg-red-600"
+              className="bg-hotel-danger text-white px-4 py-2 rounded text-sm font-medium hover:bg-red-700 transition-colors"
             >
               OK
             </button>

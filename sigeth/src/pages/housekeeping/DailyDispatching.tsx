@@ -70,30 +70,30 @@ export default function DailyDispatching() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50 p-6 space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50 p-4 space-y-4">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
           {t("dailyDispatching")}
         </h1>
-        <p className="text-sm text-gray-600">{t("assignStaffDesc")}</p>
+        <p className="text-sm text-hotel-text-secondary">{t("assignStaffDesc")}</p>
       </div>
       <div className="flex gap-3">
         <button
           onClick={handleSave}
-          className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-all duration-200"
+          className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-colors duration-200"
         >
           <Save size={16} />
           {t("saveAll")}
         </button>
       </div>
-      <div className="bg-white rounded-xl shadow-md border border-emerald-100 overflow-hidden">
+      <div className="bg-white rounded border border-emerald-100 overflow-hidden">
         <div className="bg-gradient-to-r from-emerald-50 to-green-50 px-6 py-4 border-b border-emerald-100">
-          <h2 className="text-lg font-bold text-gray-800">
+          <h2 className="text-base font-bold text-hotel-text-primary">
             {t("roomsAssignment")}
           </h2>
         </div>
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b-2 border-emerald-200">
+          <thead className="bg-white border-b-2 border-emerald-200">
             <tr>
               {[
                 t("roomNumber"),
@@ -105,7 +105,7 @@ export default function DailyDispatching() {
               ].map((h) => (
                 <th
                   key={h}
-                  className="text-left px-6 py-3 font-bold text-gray-700"
+                  className="text-left px-6 py-3 font-bold text-hotel-text-primary"
                 >
                   {h}
                 </th>
@@ -125,13 +125,13 @@ export default function DailyDispatching() {
                   <td className="px-6 py-3 font-semibold text-emerald-600">
                     {room.room_num}
                   </td>
-                  <td className="px-6 py-3 text-gray-700">
+                  <td className="px-6 py-3 text-hotel-text-primary">
                     {room.guest_name || "—"}
                   </td>
-                  <td className="px-6 py-3 text-gray-700">
+                  <td className="px-6 py-3 text-hotel-text-primary">
                     {room.arrival_date || "—"}
                   </td>
-                  <td className="px-6 py-3 text-gray-700">
+                  <td className="px-6 py-3 text-hotel-text-primary">
                     {room.depart_date || "—"}
                   </td>
                   <td className="px-6 py-3">
@@ -154,7 +154,7 @@ export default function DailyDispatching() {
                         handleAssign(room.room_num, Number(e.target.value))
                       }
                       title={t("selectStaff")}
-                      className="border-2 border-gray-200 hover:border-gray-300 focus:border-emerald-500 focus:outline-none rounded-lg px-3 py-2 text-sm w-full font-medium transition-all"
+                      className="border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded px-3 py-2 text-sm w-full font-medium transition-colors"
                     >
                       <option value="">{t("selectStaff")}</option>
                       {staff.map((s) => (
@@ -170,7 +170,7 @@ export default function DailyDispatching() {
           </tbody>
         </table>
         {roomsToAssign.length === 0 && (
-          <div className="px-6 py-12 text-center text-gray-500">
+          <div className="px-6 py-12 text-center text-hotel-text-secondary">
             <p className="text-sm">{t("noRoomsHousekeeping")}</p>
           </div>
         )}
@@ -178,22 +178,22 @@ export default function DailyDispatching() {
 
       {/* Daily Journal (JSTAFF.dat) - Available for printing */}
       {assignments.length > 0 && (
-        <div className="bg-white rounded-xl shadow-md border border-emerald-100 overflow-hidden">
+        <div className="bg-white rounded border border-emerald-100 overflow-hidden">
           <div className="bg-gradient-to-r from-emerald-50 to-green-50 px-6 py-4 border-b border-emerald-100 flex justify-between items-center">
-            <h2 className="text-lg font-bold text-gray-800">
+            <h2 className="text-base font-bold text-hotel-text-primary">
               {t("dailyHousekeepingJournal")}
             </h2>
             <div className="flex gap-2">
               <button
                 onClick={() => window.print()}
-                className="bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm hover:bg-gray-700 transition-all"
+                className="bg-gray-600 text-white px-4 py-2 rounded flex items-center gap-2 text-sm hover:bg-gray-700 transition-colors"
               >
                 <Printer size={16} />
                 {t("print")}
               </button>
               <button
                 onClick={handleExport}
-                className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm hover:shadow-lg transition-all"
+                className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-4 py-2 rounded flex items-center gap-2 text-sm hover:shadow-lg transition-colors"
               >
                 <FileSpreadsheet size={16} />
                 {t("excel")}
@@ -201,7 +201,7 @@ export default function DailyDispatching() {
             </div>
           </div>
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b-2 border-emerald-200">
+            <thead className="bg-white border-b-2 border-emerald-200">
               <tr>
                 {[
                   t("staffName"),
@@ -214,7 +214,7 @@ export default function DailyDispatching() {
                 ].map((h) => (
                   <th
                     key={h}
-                    className="text-left px-6 py-3 font-bold text-gray-700"
+                    className="text-left px-6 py-3 font-bold text-hotel-text-primary"
                   >
                     {h}
                   </th>
@@ -230,14 +230,14 @@ export default function DailyDispatching() {
                   <td className="px-6 py-3 font-semibold text-emerald-600">
                     {a.staff_name}
                   </td>
-                  <td className="px-6 py-3 text-gray-700">{a.room_num}</td>
-                  <td className="px-6 py-3 text-gray-700">
+                  <td className="px-6 py-3 text-hotel-text-primary">{a.room_num}</td>
+                  <td className="px-6 py-3 text-hotel-text-primary">
                     {a.guest_name || "—"}
                   </td>
-                  <td className="px-6 py-3 text-gray-700">
+                  <td className="px-6 py-3 text-hotel-text-primary">
                     {a.arrival_date || "—"}
                   </td>
-                  <td className="px-6 py-3 text-gray-700">
+                  <td className="px-6 py-3 text-hotel-text-primary">
                     {a.depart_date || "—"}
                   </td>
                   <td className="px-6 py-3">
@@ -253,7 +253,7 @@ export default function DailyDispatching() {
                       {a.status}
                     </span>
                   </td>
-                  <td className="px-6 py-3 font-medium text-gray-700">
+                  <td className="px-6 py-3 font-medium text-hotel-text-primary">
                     {a.date}
                   </td>
                 </tr>

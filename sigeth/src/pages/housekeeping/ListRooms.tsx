@@ -43,31 +43,31 @@ export default function ListRooms() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50 p-6 space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50 p-4 space-y-4">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
           {t("listRooms")}
         </h1>
-        <p className="text-sm text-gray-600">Complete list of all rooms</p>
+        <p className="text-sm text-hotel-text-secondary">Complete list of all rooms</p>
       </div>
       <div className="flex gap-3">
         <button
           onClick={() => window.print()}
-          className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-all"
+          className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-colors"
         >
           <Printer size={16} />
           {t("print")}
         </button>
         <button
           onClick={handleExport}
-          className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-all"
+          className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-colors"
         >
           <FileSpreadsheet size={16} />
           {t("excel")}
         </button>
       </div>
-      <div className="bg-white rounded-xl shadow-md border border-emerald-100 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200">
+      <div className="bg-white rounded border border-emerald-100 overflow-hidden">
+        <div className="px-6 py-4 border-b border-hotel-border">
           <div className="relative">
             <Search
               className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -78,12 +78,12 @@ export default function ListRooms() {
               placeholder={`${t("search")} rooms by number, designation, or status...`}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-10 py-2.5 border-2 border-gray-200 hover:border-gray-300 focus:border-emerald-500 focus:outline-none rounded-lg text-sm font-medium transition-colors"
+              className="w-full pl-10 pr-10 py-2.5 border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded text-sm font-medium transition-colors"
             />
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm("")}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-hotel-text-secondary"
               >
                 <X size={18} />
               </button>
@@ -91,7 +91,7 @@ export default function ListRooms() {
           </div>
         </div>
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b-2 border-emerald-200">
+          <thead className="bg-white border-b-2 border-emerald-200">
             <tr>
               {[
                 t("roomNum"),
@@ -102,7 +102,7 @@ export default function ListRooms() {
               ].map((h) => (
                 <th
                   key={h}
-                  className="text-left px-6 py-3 font-bold text-gray-700"
+                  className="text-left px-6 py-3 font-bold text-hotel-text-primary"
                 >
                   {h}
                 </th>
@@ -118,11 +118,11 @@ export default function ListRooms() {
                 <td className="px-6 py-3 font-semibold text-emerald-600">
                   {r.room_num}
                 </td>
-                <td className="px-6 py-3 text-gray-700">{r.designation}</td>
-                <td className="px-6 py-3 text-gray-700">
+                <td className="px-6 py-3 text-hotel-text-primary">{r.designation}</td>
+                <td className="px-6 py-3 text-hotel-text-primary">
                   {r.price_1.toLocaleString()}
                 </td>
-                <td className="px-6 py-3 text-gray-700">
+                <td className="px-6 py-3 text-hotel-text-primary">
                   {r.price_2.toLocaleString()}
                 </td>
                 <td className="px-6 py-3">
@@ -135,7 +135,7 @@ export default function ListRooms() {
           </tbody>
         </table>
         {filteredRooms.length === 0 && (
-          <div className="px-6 py-12 text-center text-gray-500">
+          <div className="px-6 py-12 text-center text-hotel-text-secondary">
             <p className="text-sm">
               {searchTerm ? `No rooms match "${searchTerm}"` : "No rooms found"}
             </p>

@@ -1,97 +1,86 @@
 import { useNavigate } from "react-router-dom";
-import { Building2, Sun, Moon } from "lucide-react";
+import { Building2 } from "lucide-react";
 import { useLang } from "../hooks/useLang";
 
 export default function ModuleSelection() {
-  const { t, lang, dark, toggleDark, toggleLang } = useLang();
+  const { t, lang, toggleLang } = useLang();
   const navigate = useNavigate();
 
   return (
-    <div className={`min-h-screen flex flex-col ${dark ? "dark" : ""}`}>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
-        {/* Top bar */}
-        <div className="flex items-center justify-between px-8 py-6">
-          <div className="flex items-center gap-3">
-            <img
-              src="/logo.jpeg"
-              alt="SIGETH"
-              className="w-10 h-10 rounded-xl object-cover"
-            />
-            <span className="text-xl font-bold text-gray-900 dark:text-white tracking-wide">
-              {t("hotelName")}
-            </span>
-          </div>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={toggleDark}
-              className="p-2 rounded-lg bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors shadow-sm"
-              aria-label="Toggle dark mode"
-            >
-              {dark ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
-            <button
-              type="button"
-              onClick={toggleLang}
-              className="p-2 rounded-lg bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-1.5 shadow-sm"
-              aria-label="Toggle language"
-            >
-              {/* Flag image */}
-              {lang === "en" ? (
-                <img
-                  src="https://flagcdn.com/w40/gb.png"
-                  alt="English"
-                  className="w-5 h-3 rounded"
-                />
-              ) : (
-                <img
-                  src="https://flagcdn.com/w40/fr.png"
-                  alt="Français"
-                  className="w-5 h-3 rounded"
-                />
-              )}
-              {/* Language code */}
-              <span className="text-xs font-bold">
-                {lang === "en" ? "EN" : "FR"}
-              </span>
-            </button>
-          </div>
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#F5F3EF' }}>
+      {/* Top bar */}
+      <div className="flex items-center justify-between px-6 py-4 border-b border-hotel-border bg-white">
+        <div className="flex items-center gap-3">
+          <img
+            src="/logo.jpeg"
+            alt="SIGETH"
+            className="w-9 h-9 rounded object-cover"
+          />
+          <span className="text-lg font-display font-bold text-hotel-text-primary">
+            {t("hotelName")}
+          </span>
         </div>
+        <button
+          type="button"
+          onClick={toggleLang}
+          className="px-3 py-1.5 rounded border border-hotel-border text-xs font-medium text-hotel-text-primary hover:bg-hotel-cream transition-colors flex items-center gap-1.5"
+          aria-label="Toggle language"
+        >
+          {lang === "en" ? (
+            <>
+              <img
+                src="https://flagcdn.com/w40/gb.png"
+                alt="English"
+                className="w-4 h-3 rounded"
+              />
+              <span>EN</span>
+            </>
+          ) : (
+            <>
+              <img
+                src="https://flagcdn.com/w40/fr.png"
+                alt="Français"
+                className="w-4 h-3 rounded"
+              />
+              <span>FR</span>
+            </>
+          )}
+        </button>
+      </div>
 
-        {/* Content */}
-        <div className="flex-1 flex flex-col items-center justify-center px-8 py-16">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            {t("selectModule")}
-          </h1>
-          <p className="text-gray-500 dark:text-gray-400 mb-12">
-            {t("selectModuleDesc")}
-          </p>
+      {/* Content */}
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-16">
+        <h1 className="text-2xl font-display font-bold text-hotel-text-primary mb-2">
+          {t("selectModule")}
+        </h1>
+        <p className="text-sm text-hotel-text-secondary mb-12">
+          {t("selectModuleDesc")}
+        </p>
 
-          {/* Front Office card */}
-          <button
-            onClick={() => navigate("/front-office")}
-            className="group w-full max-w-md p-8 rounded-2xl bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 hover:border-gold-400 dark:hover:border-gold-400 shadow-sm hover:shadow-lg transition-all duration-200"
-          >
-            <div className="flex flex-col items-center text-center gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-sigeth-800 to-sigeth-950 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Building2 className="w-8 h-8 text-gold-400" />
-              </div>
-              <div>
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
-                  {t("pillFrontOffice")}
-                </h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {t("frontOfficeDesc")}
-                </p>
-              </div>
+        {/* Front Office card */}
+        <button
+          onClick={() => navigate("/front-office")}
+          className="w-full max-w-md p-6 rounded border border-hotel-border bg-white hover:bg-hotel-cream transition-colors"
+        >
+          <div className="flex flex-col items-center text-center gap-4">
+            <div className="w-14 h-14 rounded bg-hotel-navy flex items-center justify-center">
+              <Building2 className="w-7 h-7 text-hotel-gold" />
             </div>
-          </button>
+            <div>
+              <h2 className="text-lg font-semibold text-hotel-text-primary mb-1">
+                {t("pillFrontOffice")}
+              </h2>
+              <p className="text-xs text-hotel-text-secondary">
+                {t("frontOfficeDesc")}
+              </p>
+            </div>
+          </div>
+        </button>
 
-          {/* Footer */}
-          <p className="mt-16 text-xs text-gray-400">
-            © 2026 SIGETH — {t("allRightsReserved")}
-          </p>
-        </div>
+        {/* Footer */}
+        <p className="mt-12 text-xs text-hotel-text-secondary">
+          © 2026 SIGETH — {t("allRightsReserved")}
+        </p>
       </div>
     </div>
   );

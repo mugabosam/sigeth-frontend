@@ -101,17 +101,17 @@ export default function LaundryOrder() {
   const totalOrder = items.reduce((s, i) => s + i.orderQty * i.puv, 0);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50 p-6 space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50 p-4 space-y-4">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
           {t("laundryOrder")}
         </h1>
-        <p className="text-sm text-gray-600">{t("placeLaundryOrderDesc")}</p>
+        <p className="text-sm text-hotel-text-secondary">{t("placeLaundryOrderDesc")}</p>
       </div>
-      <div className="bg-white rounded-xl shadow-md border border-emerald-100 p-7 space-y-4">
+      <div className="bg-white rounded border border-emerald-100 p-7 space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-hotel-text-primary mb-2">
               {t("date")}
             </label>
             <input
@@ -126,10 +126,10 @@ export default function LaundryOrder() {
                 }
               }}
               title={t("date")}
-              className={`w-full border-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all focus:outline-none ${
+              className={`w-full border-2 rounded px-4 py-2.5 text-sm font-medium transition-colors focus:outline-none ${
                 errors["orderDate"]
                   ? "border-red-400 bg-red-50 focus:border-red-500"
-                  : "border-gray-200 hover:border-gray-300 focus:border-emerald-500"
+                  : "border-hotel-border hover:border-hotel-border focus:border-emerald-500"
               }`}
             />
             {errors["orderDate"] && (
@@ -139,7 +139,7 @@ export default function LaundryOrder() {
             )}
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-hotel-text-primary mb-2">
               {t("roomNumber")}
             </label>
             <input
@@ -155,10 +155,10 @@ export default function LaundryOrder() {
               }}
               placeholder="e.g., 101"
               title={t("roomNumber")}
-              className={`w-full border-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all focus:outline-none ${
+              className={`w-full border-2 rounded px-4 py-2.5 text-sm font-medium transition-colors focus:outline-none ${
                 errors["roomNum"]
                   ? "border-red-400 bg-red-50 focus:border-red-500"
-                  : "border-gray-200 hover:border-gray-300 focus:border-emerald-500"
+                  : "border-hotel-border hover:border-hotel-border focus:border-emerald-500"
               }`}
             />
             {errors["roomNum"] && (
@@ -168,14 +168,14 @@ export default function LaundryOrder() {
             )}
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-hotel-text-primary mb-2">
               {t("laundryCategory")}
             </label>
             <select
               value={selectedCat}
               onChange={(e) => handleSelectCategory(e.target.value)}
               title={t("laundryCategory")}
-              className="w-full border-2 border-gray-200 hover:border-gray-300 focus:border-emerald-500 focus:outline-none rounded-lg px-4 py-2.5 text-sm font-medium transition-all"
+              className="w-full border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
             >
               <option value="">{t("selectCategory")}</option>
               {catlaundry.map((c) => (
@@ -191,9 +191,9 @@ export default function LaundryOrder() {
         )}
       </div>
       {items.length > 0 && (
-        <div className="bg-white rounded-xl shadow-md border border-emerald-100 overflow-hidden">
+        <div className="bg-white rounded border border-emerald-100 overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b-2 border-emerald-200">
+            <thead className="bg-white border-b-2 border-emerald-200">
               <tr>
                 {[
                   t("designation"),
@@ -204,7 +204,7 @@ export default function LaundryOrder() {
                 ].map((h) => (
                   <th
                     key={h}
-                    className="text-left px-6 py-3 font-bold text-gray-700"
+                    className="text-left px-6 py-3 font-bold text-hotel-text-primary"
                   >
                     {h}
                   </th>
@@ -217,11 +217,11 @@ export default function LaundryOrder() {
                   key={i}
                   className="border-b hover:bg-emerald-50/50 transition-colors duration-150"
                 >
-                  <td className="px-6 py-3 text-gray-700">
+                  <td className="px-6 py-3 text-hotel-text-primary">
                     {item.designation}
                   </td>
-                  <td className="px-6 py-3 text-gray-700">{item.type}</td>
-                  <td className="px-6 py-3 text-gray-700">
+                  <td className="px-6 py-3 text-hotel-text-primary">{item.type}</td>
+                  <td className="px-6 py-3 text-hotel-text-primary">
                     {item.puv.toLocaleString()}
                   </td>
                   <td className="px-6 py-3">
@@ -233,7 +233,7 @@ export default function LaundryOrder() {
                         handleQtyChange(i, Number(e.target.value))
                       }
                       title={t("qty")}
-                      className="w-20 border-2 border-gray-200 hover:border-gray-300 focus:border-emerald-500 focus:outline-none rounded-lg px-2 py-1.5 text-sm font-medium transition-all"
+                      className="w-20 border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded px-2 py-1.5 text-sm font-medium transition-colors"
                     />
                   </td>
                   <td className="px-6 py-3 font-semibold text-emerald-700">
@@ -244,7 +244,7 @@ export default function LaundryOrder() {
             </tbody>
           </table>
           <div className="px-6 py-4 bg-gradient-to-r from-emerald-50 to-green-50 border-t-2 border-emerald-200 flex justify-between items-center">
-            <span className="font-bold text-gray-800">
+            <span className="font-bold text-hotel-text-primary">
               {t("total")}:{" "}
               <span className="text-emerald-700">
                 {totalOrder.toLocaleString()}
@@ -253,7 +253,7 @@ export default function LaundryOrder() {
             <div className="flex gap-2">
               <button
                 onClick={handleSave}
-                className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-6 py-2.5 rounded-lg flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-all duration-200"
+                className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-6 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-colors duration-200"
               >
                 <Save size={16} />
                 {t("save")}

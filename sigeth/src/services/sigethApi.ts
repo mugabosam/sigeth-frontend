@@ -354,6 +354,10 @@ const toReservationPayload = (res: Partial<RCS>): ApiRecord => {
     delete payload.status;
   }
   delete payload.id;
+  // qty is computed for display only; not a backend field
+  if ("qty" in payload) {
+    delete payload.qty;
+  }
   // payt_mode is a FK (UUID) — empty string is invalid; send null instead
   if (!payload.payt_mode) payload.payt_mode = null;
   // airport_time is a TimeField — empty string is invalid; send null instead
@@ -369,6 +373,10 @@ const toGroupPayload = (group: Partial<GRC>): ApiRecord => {
     delete payload.status;
   }
   delete payload.id;
+  // qty is computed for display only; not a backend field
+  if ("qty" in payload) {
+    delete payload.qty;
+  }
   // payt_mode is a FK (UUID) — empty string is invalid; send null instead
   if (!payload.payt_mode) payload.payt_mode = null;
   // code_g is required (max 3 chars, unique) — auto-generate if empty

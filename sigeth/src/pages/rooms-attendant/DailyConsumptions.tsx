@@ -53,36 +53,36 @@ export default function DailyConsumptions() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-2xl shadow-sm border border-blue-100">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+    <div className="space-y-4">
+      <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4 p-4 rounded border border-blue-100">
+        <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
           {t("dailyConsumptions")}
         </h1>
         <div className="flex gap-3">
           <button
             onClick={() => window.print()}
-            className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-3 rounded-xl flex items-center gap-2 text-sm font-medium hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-all duration-200 transform hover:scale-105"
+            className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-3 rounded flex items-center gap-2 text-sm font-medium hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-colors duration-200"
           >
             <Printer size={18} />
             {t("print")}
           </button>
           <button
             onClick={exportCSV}
-            className="border-2 border-green-500 text-green-700 px-6 py-3 rounded-xl flex items-center gap-2 text-sm font-medium bg-green-50 hover:bg-green-100 hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+            className="border-2 border-hotel-border text-hotel-text-primary px-6 py-3 rounded flex items-center gap-2 text-sm font-medium bg-green-50 hover:bg-green-100 hover:shadow-lg transition-colors duration-200"
           >
             <FileSpreadsheet size={18} />
             Excel
           </button>
         </div>
       </div>
-      <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
-        <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+      <div className="bg-white rounded border border-hotel-border p-4">
+        <h3 className="text-base font-bold text-hotel-text-primary mb-4 flex items-center gap-2">
           <span className="w-1 h-6 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full" />
           Filters
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-hotel-text-primary mb-2">
               {t("roomNumber")}
             </label>
             <input
@@ -90,11 +90,11 @@ export default function DailyConsumptions() {
               onChange={(e) => setFilterRoom(e.target.value)}
               placeholder={t("roomNumber")}
               title={t("roomNumber")}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full border border-hotel-border rounded px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-hotel-text-primary mb-2">
               {t("date")}
             </label>
             <input
@@ -102,7 +102,7 @@ export default function DailyConsumptions() {
               value={filterDate}
               onChange={(e) => setFilterDate(e.target.value)}
               title={t("date")}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full border border-hotel-border rounded px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
             />
           </div>
           <div className="flex items-end">
@@ -111,7 +111,7 @@ export default function DailyConsumptions() {
                 setFilterRoom("");
                 setFilterDate("");
               }}
-              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-150"
+              className="w-full bg-gray-100 hover:bg-gray-200 text-hotel-text-primary px-4 py-2 rounded text-sm font-medium transition-colors duration-150"
             >
               {t("clearFilters")}
             </button>
@@ -120,12 +120,12 @@ export default function DailyConsumptions() {
       </div>
       <div
         id="report-output"
-        className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden"
+        className="bg-white rounded border border-hotel-border overflow-hidden"
       >
-        <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
-          <h2 className="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+        <div className="px-6 py-4 border-b border-hotel-border bg-white border border-hotel-border rounded p-4">
+          <h2 className="text-base font-bold bg-hotel-gold bg-clip-text text-transparent">
             Daily Consumptions by Guest{" "}
-            <span className="font-normal text-sm text-gray-500 ml-2">
+            <span className="font-normal text-sm text-hotel-text-secondary ml-2">
               {new Date().toLocaleDateString()}{" "}
               {new Date().toLocaleTimeString()}
             </span>
@@ -167,23 +167,23 @@ export default function DailyConsumptions() {
             {filtered.map((s, i) => (
               <tr
                 key={i}
-                className="border-b border-gray-200 hover:bg-blue-50 transition-colors duration-150"
+                className="border-b border-hotel-border hover:bg-hotel-cream transition-colors duration-150"
               >
-                <td className="px-4 py-3 font-medium text-gray-900">
+                <td className="px-4 py-3 font-medium text-hotel-text-primary">
                   {s.date}
                 </td>
-                <td className="px-4 py-3 text-gray-700">{s.order_num}</td>
-                <td className="px-4 py-3 text-gray-700">{s.code_art}</td>
-                <td className="px-4 py-3 text-gray-700">{s.item}</td>
-                <td className="px-4 py-3 text-gray-700">{s.unity}</td>
-                <td className="px-4 py-3 text-gray-700">{s.qty_s}</td>
-                <td className="px-4 py-3 text-right text-gray-700">
+                <td className="px-4 py-3 text-hotel-text-primary">{s.order_num}</td>
+                <td className="px-4 py-3 text-hotel-text-primary">{s.code_art}</td>
+                <td className="px-4 py-3 text-hotel-text-primary">{s.item}</td>
+                <td className="px-4 py-3 text-hotel-text-primary">{s.unity}</td>
+                <td className="px-4 py-3 text-hotel-text-primary">{s.qty_s}</td>
+                <td className="px-4 py-3 text-right text-hotel-text-primary">
                   {s.price_s.toLocaleString()}
                 </td>
-                <td className="px-4 py-3 text-right font-medium text-gray-900">
+                <td className="px-4 py-3 text-right font-medium text-hotel-text-primary">
                   {s.montant.toLocaleString()}
                 </td>
-                <td className="px-4 py-3 text-right font-medium text-gray-900">
+                <td className="px-4 py-3 text-right font-medium text-hotel-text-primary">
                   {s.credit.toLocaleString()}
                 </td>
               </tr>
@@ -200,18 +200,18 @@ export default function DailyConsumptions() {
             )}
           </tbody>
         </table>
-        <div className="flex justify-end items-center gap-4 px-6 py-4 border-t border-gray-100 bg-gradient-to-r from-gray-50 to-gray-100">
-          <span className="font-semibold text-gray-700">Totaux</span>
-          <div className="flex gap-4">
+        <div className="flex justify-end items-center gap-3 px-6 py-4 border-t border-hotel-border bg-gradient-to-r from-gray-50 to-gray-100">
+          <span className="font-semibold text-hotel-text-primary">Totaux</span>
+          <div className="flex gap-3">
             <div className="flex flex-col items-end">
-              <span className="text-xs text-gray-600 mb-1">Debit</span>
-              <span className="bg-blue-50 border border-blue-200 px-4 py-2 rounded-lg min-w-[120px] text-right font-bold text-gray-900">
+              <span className="text-xs text-hotel-text-secondary mb-1">Debit</span>
+              <span className="bg-hotel-cream border border-blue-200 px-4 py-2 rounded min-w-[120px] text-right font-bold text-hotel-text-primary">
                 {totalDebit.toLocaleString()}
               </span>
             </div>
             <div className="flex flex-col items-end">
-              <span className="text-xs text-gray-600 mb-1">Credit</span>
-              <span className="bg-green-50 border border-green-200 px-4 py-2 rounded-lg min-w-[120px] text-right font-bold text-gray-900">
+              <span className="text-xs text-hotel-text-secondary mb-1">Credit</span>
+              <span className="bg-green-50 border border-green-200 px-4 py-2 rounded min-w-[120px] text-right font-bold text-hotel-text-primary">
                 {totalCredit.toLocaleString()}
               </span>
             </div>

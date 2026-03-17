@@ -37,24 +37,24 @@ export default function RequestFollowUp({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50 p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50 p-4">
+      <div className="max-w-7xl mx-auto space-y-4">
         {/* Page Title */}
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
             {t("requestFollowUp")}
           </h1>
           <div className="flex gap-2">
             <button
               onClick={() => window.print()}
-              className="bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm hover:bg-gray-700 transition-all"
+              className="bg-gray-600 text-white px-4 py-2 rounded flex items-center gap-2 text-sm hover:bg-gray-700 transition-colors"
             >
               <Printer size={16} />
               {t("print")}
             </button>
             <button
               onClick={handleExport}
-              className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-all"
+              className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-4 py-2 rounded flex items-center gap-2 text-sm hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-colors"
             >
               <FileSpreadsheet size={16} />
               {t("excel")}
@@ -63,13 +63,13 @@ export default function RequestFollowUp({
         </div>
 
         {/* Search/Filter Section */}
-        <div className="bg-white rounded-xl shadow-sm border-2 border-emerald-200 p-4">
-          <h3 className="text-sm font-semibold text-gray-700 mb-4">
+        <div className="bg-white rounded border-2 border-emerald-200 p-4">
+          <h3 className="text-sm font-semibold text-hotel-text-primary mb-4">
             {t("filters")}
           </h3>
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-wrap gap-3">
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                 {t("poste")}
               </label>
               <input
@@ -77,11 +77,11 @@ export default function RequestFollowUp({
                 value={poste}
                 onChange={(e) => setPoste(e.target.value)}
                 placeholder={t("poste")}
-                className="border-2 border-gray-200 hover:border-gray-300 focus:border-emerald-500 focus:outline-none rounded-lg px-4 py-2.5 text-sm font-medium transition-all"
+                className="border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                 {t("dateFrom")}
               </label>
               <input
@@ -89,11 +89,11 @@ export default function RequestFollowUp({
                 value={dateFrom}
                 onChange={(e) => setDateFrom(e.target.value)}
                 title={t("dateFrom")}
-                className="border-2 border-gray-200 hover:border-gray-300 focus:border-emerald-500 focus:outline-none rounded-lg px-4 py-2.5 text-sm font-medium transition-all"
+                className="border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                 {t("dateTo")}
               </label>
               <input
@@ -101,78 +101,78 @@ export default function RequestFollowUp({
                 value={dateTo}
                 onChange={(e) => setDateTo(e.target.value)}
                 title={t("dateTo")}
-                className="border-2 border-gray-200 hover:border-gray-300 focus:border-emerald-500 focus:outline-none rounded-lg px-4 py-2.5 text-sm font-medium transition-all"
+                className="border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
               />
             </div>
           </div>
         </div>
 
         {/* Report Section */}
-        <div className="bg-white rounded-xl shadow-md border-2 border-emerald-200 overflow-hidden print:border-black print:shadow-none">
+        <div className="bg-white rounded border-2 border-emerald-200 overflow-hidden print:border-black print:shadow-none">
           {/* Header Information */}
-          <div className="p-6 border-b-2 border-emerald-200 print:border-black bg-emerald-50 print:bg-white space-y-3">
-            <div className="grid grid-cols-2 gap-4 print:grid-cols-1 text-sm">
+          <div className="p-4 border-b-2 border-emerald-200 print:border-black bg-emerald-50 print:bg-white space-y-3">
+            <div className="grid grid-cols-2 gap-3 print:grid-cols-1 text-sm">
               <div>
-                <span className="font-semibold text-gray-800">
+                <span className="font-semibold text-hotel-text-primary">
                   {t("mPEName")}:
                 </span>
-                <span className="text-gray-600 ml-2">
+                <span className="text-hotel-text-secondary ml-2">
                   SIGETH Hotel Management
                 </span>
               </div>
               <div>
-                <span className="font-semibold text-gray-800">
+                <span className="font-semibold text-hotel-text-primary">
                   {t("address")}:
                 </span>
-                <span className="text-gray-600 ml-2">Kigali, Rwanda</span>
+                <span className="text-hotel-text-secondary ml-2">Kigali, Rwanda</span>
               </div>
               <div>
-                <span className="font-semibold text-gray-800">
+                <span className="font-semibold text-hotel-text-primary">
                   {t("phone")}:
                 </span>
-                <span className="text-gray-600 ml-2">+250 (0) 1234567</span>
+                <span className="text-hotel-text-secondary ml-2">+250 (0) 1234567</span>
               </div>
               <div>
-                <span className="font-semibold text-gray-800">
+                <span className="font-semibold text-hotel-text-primary">
                   {t("email")}:
                 </span>
-                <span className="text-gray-600 ml-2">info@sigeth.com</span>
+                <span className="text-hotel-text-secondary ml-2">info@sigeth.com</span>
               </div>
               <div>
-                <span className="font-semibold text-gray-800">{t("tin")}:</span>
-                <span className="text-gray-600 ml-2">101234567890</span>
+                <span className="font-semibold text-hotel-text-primary">{t("tin")}:</span>
+                <span className="text-hotel-text-secondary ml-2">101234567890</span>
               </div>
             </div>
 
             {/* Title Section */}
             <div className="text-center py-3 border-y border-emerald-300 print:border-black">
-              <h2 className="text-lg font-bold text-emerald-700 print:text-black">
+              <h2 className="text-base font-bold text-emerald-700 print:text-black">
                 {t("requestFollowUp")}
               </h2>
             </div>
 
             {/* Filter Display */}
-            <div className="grid grid-cols-3 gap-4 text-sm print:grid-cols-2">
+            <div className="grid grid-cols-3 gap-3 text-sm print:grid-cols-2">
               <div>
-                <span className="font-semibold text-gray-800">
+                <span className="font-semibold text-hotel-text-primary">
                   {t("poste")}:
                 </span>
-                <span className="text-gray-600 ml-2">{poste}</span>
+                <span className="text-hotel-text-secondary ml-2">{poste}</span>
               </div>
               {dateFrom && (
                 <div>
-                  <span className="font-semibold text-gray-800">
+                  <span className="font-semibold text-hotel-text-primary">
                     {t("dateFrom")}:
                   </span>
-                  <span className="text-gray-600 ml-2">{dateFrom}</span>
+                  <span className="text-hotel-text-secondary ml-2">{dateFrom}</span>
                 </div>
               )}
               {dateTo && (
                 <div>
-                  <span className="font-semibold text-gray-800">
+                  <span className="font-semibold text-hotel-text-primary">
                     {t("dateTo")}:
                   </span>
-                  <span className="text-gray-600 ml-2">{dateTo}</span>
+                  <span className="text-hotel-text-secondary ml-2">{dateTo}</span>
                 </div>
               )}
             </div>
@@ -180,27 +180,27 @@ export default function RequestFollowUp({
 
           {/* Requisitions Table */}
           <table className="w-full text-sm">
-            <thead className="bg-gray-100 border-b-2 border-emerald-200 print:border-black print:bg-gray-50">
+            <thead className="bg-gray-100 border-b-2 border-emerald-200 print:border-black print:bg-white">
               <tr>
-                <th className="text-left px-4 py-3 font-bold text-gray-700 border-r border-gray-300 print:border-black">
+                <th className="text-left px-4 py-3 font-bold text-hotel-text-primary border-r border-hotel-border print:border-black">
                   {t("dateD")}
                 </th>
-                <th className="text-left px-4 py-3 font-bold text-gray-700 border-r border-gray-300 print:border-black">
+                <th className="text-left px-4 py-3 font-bold text-hotel-text-primary border-r border-hotel-border print:border-black">
                   {t("designation")}
                 </th>
-                <th className="text-left px-4 py-3 font-bold text-gray-700 border-r border-gray-300 print:border-black">
+                <th className="text-left px-4 py-3 font-bold text-hotel-text-primary border-r border-hotel-border print:border-black">
                   {t("unity")}
                 </th>
-                <th className="text-center px-4 py-3 font-bold text-gray-700 border-r border-gray-300 print:border-black">
+                <th className="text-center px-4 py-3 font-bold text-hotel-text-primary border-r border-hotel-border print:border-black">
                   {t("qty")}
                 </th>
-                <th className="text-right px-4 py-3 font-bold text-gray-700 border-r border-gray-300 print:border-black">
+                <th className="text-right px-4 py-3 font-bold text-hotel-text-primary border-r border-hotel-border print:border-black">
                   {t("credit1")}
                 </th>
-                <th className="text-right px-4 py-3 font-bold text-gray-700 border-r border-gray-300 print:border-black">
+                <th className="text-right px-4 py-3 font-bold text-hotel-text-primary border-r border-hotel-border print:border-black">
                   {t("credit2")}
                 </th>
-                <th className="text-left px-4 py-3 font-bold text-gray-700">
+                <th className="text-left px-4 py-3 font-bold text-hotel-text-primary">
                   {t("dateR")}
                 </th>
               </tr>
@@ -210,22 +210,22 @@ export default function RequestFollowUp({
                 filtered.map((r, i) => (
                   <tr
                     key={i}
-                    className="border-b border-gray-200 hover:bg-emerald-50/50 transition-colors print:border-black print:hover:bg-white"
+                    className="border-b border-hotel-border hover:bg-emerald-50/50 transition-colors print:border-black print:hover:bg-white"
                   >
-                    <td className="px-4 py-3 border-r border-gray-200 print:border-black">
+                    <td className="px-4 py-3 border-r border-hotel-border print:border-black">
                       {r.date_d}
                     </td>
-                    <td className="px-4 py-3 border-r border-gray-200 print:border-black">
+                    <td className="px-4 py-3 border-r border-hotel-border print:border-black">
                       {r.libelle}
                     </td>
-                    <td className="px-4 py-3 border-r border-gray-200 print:border-black"></td>
-                    <td className="px-4 py-3 text-center border-r border-gray-200 print:border-black">
+                    <td className="px-4 py-3 border-r border-hotel-border print:border-black"></td>
+                    <td className="px-4 py-3 text-center border-r border-hotel-border print:border-black">
                       {r.qty}
                     </td>
-                    <td className="px-4 py-3 text-right font-medium border-r border-gray-200 print:border-black">
+                    <td className="px-4 py-3 text-right font-medium border-r border-hotel-border print:border-black">
                       {r.credit_1.toLocaleString()}
                     </td>
-                    <td className="px-4 py-3 text-right font-medium border-r border-gray-200 print:border-black">
+                    <td className="px-4 py-3 text-right font-medium border-r border-hotel-border print:border-black">
                       {r.credit_2.toLocaleString()}
                     </td>
                     <td className="px-4 py-3">{r.date_r || "—"}</td>
@@ -246,7 +246,7 @@ export default function RequestFollowUp({
         </div>
 
         {/* Legends */}
-        <div className="bg-white rounded-lg p-4 border border-gray-300 print:border-black text-xs text-gray-600 print:text-gray-700">
+        <div className="bg-white rounded p-4 border border-hotel-border print:border-black text-xs text-hotel-text-secondary print:text-hotel-text-primary">
           <p className="font-semibold mb-2">{t("legends")}:</p>
           <div className="space-y-1">
             <p>

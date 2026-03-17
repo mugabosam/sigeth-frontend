@@ -418,15 +418,15 @@ export default function CheckOut() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
-      <div className="flex justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-2xl shadow-sm border border-blue-100">
+      <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4 p-4 rounded border border-blue-100">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+          <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
             Check-Out
           </h1>
           {step !== "select" && step !== "done" && (
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-hotel-text-secondary mt-1">
               {step === "preview"
                 ? "Step 1: Review invoice preview"
                 : "Step 2: Invoice generated — proceed to check out"}
@@ -437,7 +437,7 @@ export default function CheckOut() {
           {step !== "select" && (
             <button
               onClick={resetFlow}
-              className="px-5 py-2.5 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 text-sm font-medium"
+              className="px-5 py-2.5 rounded bg-gray-100 text-hotel-text-secondary hover:bg-gray-200 text-sm font-medium"
             >
               Back to List
             </button>
@@ -445,7 +445,7 @@ export default function CheckOut() {
           {(step === "preview" || step === "invoice") && (
             <button
               onClick={() => window.print()}
-              className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 text-sm font-medium hover:shadow-lg transition-all"
+              className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-medium hover:shadow-lg transition-colors"
             >
               <Printer size={16} />
               {t("print")}
@@ -458,17 +458,17 @@ export default function CheckOut() {
       {step === "select" && (
         <>
           {/* Tab toggle + search */}
-          <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
+          <div className="bg-white rounded border border-hotel-border p-4">
             <div className="flex gap-3 mb-4">
               <button
                 onClick={() => {
                   setTab("individual");
                   setSearch("");
                 }}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                className={`flex items-center gap-2 px-5 py-2.5 rounded text-sm font-semibold transition-colors ${
                   tab === "individual"
-                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    ? "bg-hotel-gold text-white"
+                    : "bg-gray-100 text-hotel-text-secondary hover:bg-gray-200"
                 }`}
               >
                 <User size={16} />
@@ -479,10 +479,10 @@ export default function CheckOut() {
                   setTab("group");
                   setSearch("");
                 }}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                className={`flex items-center gap-2 px-5 py-2.5 rounded text-sm font-semibold transition-colors ${
                   tab === "group"
-                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    ? "bg-hotel-gold text-white"
+                    : "bg-gray-100 text-hotel-text-secondary hover:bg-gray-200"
                 }`}
               >
                 <Users size={16} />
@@ -502,7 +502,7 @@ export default function CheckOut() {
                     ? `${t("search")} ${t("roomNumber")} / ${t("guestName")}...`
                     : `${t("search")} ${t("groupName")} / ${t("groupCode")}...`
                 }
-                className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-12 pr-4 py-3 border border-hotel-border rounded text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
               />
             </div>
           </div>
@@ -510,9 +510,9 @@ export default function CheckOut() {
           {/* Individual room list */}
           {isIndividual && (
             <div className="space-y-3">
-              <div className="flex items-center gap-3 bg-gradient-to-r from-red-50 to-orange-50 p-4 rounded-xl border border-red-100">
+              <div className="flex items-center gap-3 bg-gradient-to-r from-red-50 to-orange-50 p-4 rounded border border-red-100">
                 <LogOut size={20} className="text-red-600" />
-                <h2 className="flex-1 text-lg font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
+                <h2 className="flex-1 text-base font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
                   Occupied Rooms
                 </h2>
                 <span className="bg-red-100 text-red-700 text-sm font-bold px-3 py-1 rounded-full">
@@ -520,7 +520,7 @@ export default function CheckOut() {
                 </span>
               </div>
               {occupiedRooms.length === 0 ? (
-                <div className="bg-gray-50 rounded-2xl border border-dashed border-gray-300 p-8 text-center text-gray-400 text-sm">
+                <div className="bg-white rounded border border-dashed border-hotel-border p-4 text-center text-gray-400 text-sm">
                   {search
                     ? `No occupied rooms match "${search}"`
                     : "No occupied rooms to check out"}
@@ -536,7 +536,7 @@ export default function CheckOut() {
                       key={room.room_num}
                       onClick={() => handleSelectGuest(room)}
                       disabled={loading}
-                      className="w-full text-left bg-white rounded-2xl shadow-md border border-gray-100 p-5 hover:shadow-lg transition-all"
+                      className="w-full text-left bg-white rounded border border-hotel-border p-5 hover:shadow-lg transition-colors"
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
@@ -549,51 +549,51 @@ export default function CheckOut() {
                                 .slice(0, 2)}
                             </div>
                             <div>
-                              <h3 className="font-semibold text-gray-800 text-lg">
+                              <h3 className="font-semibold text-hotel-text-primary text-base">
                                 {room.guest_name}
                               </h3>
-                              <p className="text-xs text-gray-500">
+                              <p className="text-xs text-hotel-text-secondary">
                                 Room {room.room_num} — {room.designation}
                               </p>
                             </div>
                           </div>
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm p-3 bg-gray-50 rounded-lg">
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm p-3 bg-white rounded">
                             <div>
-                              <span className="text-gray-500 text-xs">
+                              <span className="text-hotel-text-secondary text-xs">
                                 {t("arrivalDate")}
                               </span>
-                              <p className="font-semibold text-gray-900">
+                              <p className="font-semibold text-hotel-text-primary">
                                 {room.arrival_date}
                               </p>
                             </div>
                             <div>
-                              <span className="text-gray-500 text-xs">
+                              <span className="text-hotel-text-secondary text-xs">
                                 {t("departDate")}
                               </span>
-                              <p className="font-semibold text-gray-900">
+                              <p className="font-semibold text-hotel-text-primary">
                                 {room.depart_date}
                               </p>
                             </div>
                             <div>
-                              <span className="text-gray-500 text-xs">
+                              <span className="text-hotel-text-secondary text-xs">
                                 {t("nights")}
                               </span>
-                              <p className="font-semibold text-gray-900">
+                              <p className="font-semibold text-hotel-text-primary">
                                 {nights}
                               </p>
                             </div>
                             <div>
-                              <span className="text-gray-500 text-xs">
+                              <span className="text-hotel-text-secondary text-xs">
                                 {t("deposit")}
                               </span>
-                              <p className="font-semibold text-gray-900">
+                              <p className="font-semibold text-hotel-text-primary">
                                 {room.deposit.toLocaleString()}{" "}
                                 {room.current_mon}
                               </p>
                             </div>
                           </div>
                         </div>
-                        <div className="ml-4 px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium shrink-0 bg-gradient-to-r from-blue-500 to-indigo-500 text-white">
+                        <div className="ml-4 px-4 py-2 rounded flex items-center gap-2 text-sm font-medium shrink-0 bg-gradient-to-r from-blue-500 to-indigo-500 text-white">
                           <Receipt size={16} />
                           Select
                         </div>
@@ -608,9 +608,9 @@ export default function CheckOut() {
           {/* Group list */}
           {!isIndividual && (
             <div className="space-y-3">
-              <div className="flex items-center gap-3 bg-gradient-to-r from-amber-50 to-orange-50 p-4 rounded-xl border border-amber-100">
+              <div className="flex items-center gap-3 bg-gradient-to-r from-amber-50 to-orange-50 p-4 rounded border border-amber-100">
                 <Users size={20} className="text-amber-600" />
-                <h2 className="flex-1 text-lg font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+                <h2 className="flex-1 text-base font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
                   Active Groups
                 </h2>
                 <span className="bg-amber-100 text-amber-700 text-sm font-bold px-3 py-1 rounded-full">
@@ -618,7 +618,7 @@ export default function CheckOut() {
                 </span>
               </div>
               {activeGroups.length === 0 ? (
-                <div className="bg-gray-50 rounded-2xl border border-dashed border-gray-300 p-8 text-center text-gray-400 text-sm">
+                <div className="bg-white rounded border border-dashed border-hotel-border p-4 text-center text-gray-400 text-sm">
                   {search
                     ? `No active groups match "${search}"`
                     : "No active groups to check out"}
@@ -629,7 +629,7 @@ export default function CheckOut() {
                     key={group.id ?? group.code_g}
                     onClick={() => handleSelectGroup(group)}
                     disabled={loading}
-                    className="w-full text-left bg-white rounded-2xl shadow-md border border-gray-100 p-5 hover:shadow-lg transition-all"
+                    className="w-full text-left bg-white rounded border border-hotel-border p-5 hover:shadow-lg transition-colors"
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -638,53 +638,53 @@ export default function CheckOut() {
                             <Users size={20} />
                           </div>
                           <div>
-                            <h3 className="font-semibold text-gray-800 text-lg">
+                            <h3 className="font-semibold text-hotel-text-primary text-base">
                               {group.groupe_name}
                             </h3>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-hotel-text-secondary">
                               Code: {group.code_g} — {group.number_pers}{" "}
                               persons
                             </p>
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm p-3 bg-gray-50 rounded-lg">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm p-3 bg-white rounded">
                           <div>
-                            <span className="text-gray-500 text-xs">
+                            <span className="text-hotel-text-secondary text-xs">
                               {t("arrivalDate")}
                             </span>
-                            <p className="font-semibold text-gray-900">
+                            <p className="font-semibold text-hotel-text-primary">
                               {group.arrival_date}
                             </p>
                           </div>
                           <div>
-                            <span className="text-gray-500 text-xs">
+                            <span className="text-hotel-text-secondary text-xs">
                               {t("departDate")}
                             </span>
-                            <p className="font-semibold text-gray-900">
+                            <p className="font-semibold text-hotel-text-primary">
                               {group.depart_date}
                             </p>
                           </div>
                           <div>
-                            <span className="text-gray-500 text-xs">
+                            <span className="text-hotel-text-secondary text-xs">
                               {t("stayCost")}
                             </span>
-                            <p className="font-semibold text-gray-900">
+                            <p className="font-semibold text-hotel-text-primary">
                               {group.stay_cost.toLocaleString()}{" "}
                               {group.current_mon}
                             </p>
                           </div>
                           <div>
-                            <span className="text-gray-500 text-xs">
+                            <span className="text-hotel-text-secondary text-xs">
                               {t("deposit")}
                             </span>
-                            <p className="font-semibold text-gray-900">
+                            <p className="font-semibold text-hotel-text-primary">
                               {group.deposit.toLocaleString()}{" "}
                               {group.current_mon}
                             </p>
                           </div>
                         </div>
                       </div>
-                      <div className="ml-4 px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium shrink-0 bg-gradient-to-r from-blue-500 to-indigo-500 text-white">
+                      <div className="ml-4 px-4 py-2 rounded flex items-center gap-2 text-sm font-medium shrink-0 bg-gradient-to-r from-blue-500 to-indigo-500 text-white">
                         <Receipt size={16} />
                         Select
                       </div>
@@ -701,7 +701,7 @@ export default function CheckOut() {
       {loading && (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="animate-spin text-blue-500" size={32} />
-          <span className="ml-3 text-gray-600">Processing...</span>
+          <span className="ml-3 text-hotel-text-secondary">Processing...</span>
         </div>
       )}
 
@@ -711,10 +711,10 @@ export default function CheckOut() {
         indivDisplay && (
           <div
             id="checkout-invoice"
-            className="bg-white text-[10px] leading-tight text-black max-w-[1000px] mx-auto p-6 font-sans shadow-lg rounded-2xl border border-gray-200"
+            className="bg-white text-[10px] leading-tight text-black max-w-[1000px] mx-auto p-4 font-sans rounded border border-hotel-border"
           >
-            <div className="mb-4 pb-4 border-b-2 border-gray-300">
-              <p className="text-lg font-bold text-gray-800">
+            <div className="mb-4 pb-4 border-b-2 border-hotel-border">
+              <p className="text-base font-bold text-hotel-text-primary">
                 {invoice ? "Definitive Invoice" : "Invoice Preview"}
               </p>
               {invoice && (
@@ -722,12 +722,12 @@ export default function CheckOut() {
                   {invoice.invoice_number}
                 </p>
               )}
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-hotel-text-secondary mt-1">
                 {invoice?.date || new Date().toLocaleDateString()}
               </p>
             </div>
 
-            <div className="border-2 border-gray-800 rounded-lg overflow-hidden mb-4">
+            <div className="border-2 border-gray-800 rounded overflow-hidden mb-4">
               <div className="bg-gradient-to-r from-gray-800 to-gray-700 px-4 py-3 flex justify-between items-center text-white">
                 <p className="font-bold text-sm">
                   {invoice ? "DEFINITIVE INVOICE" : "Guest Invoice Preview"}
@@ -777,24 +777,24 @@ export default function CheckOut() {
                   {tableItems.map((item, i) => (
                     <tr
                       key={i}
-                      className="hover:bg-blue-50 transition-colors border-b border-gray-300"
+                      className="hover:bg-hotel-cream transition-colors border-b border-hotel-border"
                     >
-                      <td className="border border-gray-300 px-2 py-2 text-xs font-mono text-gray-700">
+                      <td className="border border-hotel-border px-2 py-2 text-xs font-mono text-hotel-text-primary">
                         {item.date}
                       </td>
-                      <td className="border border-gray-300 px-2 py-2 text-xs text-gray-800">
+                      <td className="border border-hotel-border px-2 py-2 text-xs text-hotel-text-primary">
                         {item.designation}
                       </td>
-                      <td className="border border-gray-300 px-2 py-2 text-xs text-center font-semibold">
+                      <td className="border border-hotel-border px-2 py-2 text-xs text-center font-semibold">
                         {item.qty}
                       </td>
-                      <td className="border border-gray-300 px-2 py-2 text-xs text-gray-700">
+                      <td className="border border-hotel-border px-2 py-2 text-xs text-hotel-text-primary">
                         {item.unity}
                       </td>
-                      <td className="border border-gray-300 px-2 py-2 text-xs text-right font-semibold">
+                      <td className="border border-hotel-border px-2 py-2 text-xs text-right font-semibold">
                         {fmt(item.puv)}
                       </td>
-                      <td className="border border-gray-300 px-2 py-2 text-xs text-right font-bold text-green-700">
+                      <td className="border border-hotel-border px-2 py-2 text-xs text-right font-bold text-hotel-text-primary">
                         {fmt(item.credit)}
                       </td>
                     </tr>
@@ -807,13 +807,13 @@ export default function CheckOut() {
                 {invoice && (
                   <div className="space-y-3 text-xs">
                     <div className="flex items-baseline gap-3">
-                      <span className="font-semibold text-gray-800">
+                      <span className="font-semibold text-hotel-text-primary">
                         Company Signature
                       </span>
                       <span className="border-b-2 border-gray-400 w-24 inline-block" />
                     </div>
                     <div className="flex items-baseline gap-3">
-                      <span className="font-semibold text-gray-800">
+                      <span className="font-semibold text-hotel-text-primary">
                         Username:
                       </span>
                       <span className="font-bold text-blue-700">
@@ -824,15 +824,15 @@ export default function CheckOut() {
                 )}
                 <div className="space-y-2 text-xs ml-auto">
                   <div className="flex items-center justify-end gap-3">
-                    <span className="font-semibold text-gray-700">
+                    <span className="font-semibold text-hotel-text-primary">
                       Total Charges
                     </span>
-                    <span className="border-2 border-gray-400 bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-1.5 w-28 text-right font-bold text-green-700">
+                    <span className="border-2 border-gray-400 bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
                       {fmt(indivDisplay.total_charges)} RWF
                     </span>
                   </div>
                   <div className="flex items-center justify-end gap-3">
-                    <span className="font-semibold text-gray-700">
+                    <span className="font-semibold text-hotel-text-primary">
                       Total Paid
                     </span>
                     <span className="border-2 border-gray-400 bg-gradient-to-r from-blue-50 to-cyan-50 px-3 py-1.5 w-28 text-right font-bold text-blue-700">
@@ -840,7 +840,7 @@ export default function CheckOut() {
                     </span>
                   </div>
                   <div className="flex items-center justify-end gap-3">
-                    <span className="font-semibold text-gray-700">
+                    <span className="font-semibold text-hotel-text-primary">
                       Balance Due
                     </span>
                     <span className="border-2 border-gray-400 bg-gradient-to-r from-orange-50 to-red-50 px-3 py-1.5 w-28 text-right font-bold text-red-700">
@@ -849,24 +849,24 @@ export default function CheckOut() {
                   </div>
                   {invoice?.tax?.taux != null && (
                     <>
-                      <div className="flex items-center justify-end gap-3 pt-2 border-t border-gray-300">
-                        <span className="font-semibold text-gray-700">
+                      <div className="flex items-center justify-end gap-3 pt-2 border-t border-hotel-border">
+                        <span className="font-semibold text-hotel-text-primary">
                           HTVA
                         </span>
-                        <span className="border-2 border-gray-400 px-3 py-1.5 w-28 text-right font-bold text-gray-700">
+                        <span className="border-2 border-gray-400 px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
                           {fmt(invoice.tax.htva ?? 0)} RWF
                         </span>
                       </div>
                       <div className="flex items-center justify-end gap-3">
-                        <span className="font-semibold text-gray-700">
+                        <span className="font-semibold text-hotel-text-primary">
                           TVA ({invoice.tax.taux}%)
                         </span>
-                        <span className="border-2 border-gray-400 px-3 py-1.5 w-28 text-right font-bold text-gray-700">
+                        <span className="border-2 border-gray-400 px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
                           {fmt(invoice.tax.tva ?? 0)} RWF
                         </span>
                       </div>
                       <div className="flex items-center justify-end gap-3">
-                        <span className="font-semibold text-gray-700">
+                        <span className="font-semibold text-hotel-text-primary">
                           Total TTC
                         </span>
                         <span className="border-2 border-gray-400 bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-1.5 w-28 text-right font-bold text-green-800">
@@ -887,10 +887,10 @@ export default function CheckOut() {
         groupDisplay && (
           <div
             id="checkout-invoice"
-            className="bg-white text-[10px] leading-tight text-black max-w-[1000px] mx-auto p-6 font-sans shadow-lg rounded-2xl border border-gray-200"
+            className="bg-white text-[10px] leading-tight text-black max-w-[1000px] mx-auto p-4 font-sans rounded border border-hotel-border"
           >
-            <div className="mb-4 pb-4 border-b-2 border-gray-300">
-              <p className="text-lg font-bold text-gray-800">
+            <div className="mb-4 pb-4 border-b-2 border-hotel-border">
+              <p className="text-base font-bold text-hotel-text-primary">
                 {groupInvoice
                   ? "Definitive Group Invoice"
                   : "Group Invoice Preview"}
@@ -900,13 +900,13 @@ export default function CheckOut() {
                   {groupInvoice.invoice_number}
                 </p>
               )}
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-hotel-text-secondary mt-1">
                 {groupDisplay.groupe_name} ({groupDisplay.code_g}) —{" "}
                 {groupDisplay.number_pers} persons
               </p>
             </div>
 
-            <div className="border-2 border-gray-800 rounded-lg overflow-hidden mb-4">
+            <div className="border-2 border-gray-800 rounded overflow-hidden mb-4">
               <div className="bg-gradient-to-r from-gray-800 to-gray-700 px-4 py-3 flex justify-between items-center text-white">
                 <p className="font-bold text-sm">
                   {groupInvoice ? "GROUP INVOICE" : "GROUP INVOICE PREVIEW"}
@@ -954,33 +954,33 @@ export default function CheckOut() {
                   {tableItems.map((item, i) => (
                     <tr
                       key={i}
-                      className="hover:bg-blue-50 transition-colors border-b border-gray-300"
+                      className="hover:bg-hotel-cream transition-colors border-b border-hotel-border"
                     >
-                      <td className="border border-gray-300 px-2 py-2 text-xs font-mono text-gray-700">
+                      <td className="border border-hotel-border px-2 py-2 text-xs font-mono text-hotel-text-primary">
                         {item.date}
                       </td>
-                      <td className="border border-gray-300 px-2 py-2 text-xs font-semibold text-gray-800">
+                      <td className="border border-hotel-border px-2 py-2 text-xs font-semibold text-hotel-text-primary">
                         {item.room_num}
                       </td>
-                      <td className="border border-gray-300 px-2 py-2 text-xs text-gray-800">
+                      <td className="border border-hotel-border px-2 py-2 text-xs text-hotel-text-primary">
                         {item.guest_name}
                       </td>
-                      <td className="border border-gray-300 px-2 py-2 text-xs text-gray-800">
+                      <td className="border border-hotel-border px-2 py-2 text-xs text-hotel-text-primary">
                         {item.designation}
                       </td>
-                      <td className="border border-gray-300 px-2 py-2 text-xs text-center font-semibold">
+                      <td className="border border-hotel-border px-2 py-2 text-xs text-center font-semibold">
                         {item.qty}
                       </td>
-                      <td className="border border-gray-300 px-2 py-2 text-xs text-gray-700">
+                      <td className="border border-hotel-border px-2 py-2 text-xs text-hotel-text-primary">
                         {item.unity}
                       </td>
-                      <td className="border border-gray-300 px-2 py-2 text-xs text-right font-semibold">
+                      <td className="border border-hotel-border px-2 py-2 text-xs text-right font-semibold">
                         {fmt(item.puv)}
                       </td>
-                      <td className="border border-gray-300 px-2 py-2 text-xs text-right font-bold text-green-700">
+                      <td className="border border-hotel-border px-2 py-2 text-xs text-right font-bold text-hotel-text-primary">
                         {fmt(item.credit)}
                       </td>
-                      <td className="border border-gray-300 px-2 py-2 text-xs text-right font-bold text-red-700">
+                      <td className="border border-hotel-border px-2 py-2 text-xs text-right font-bold text-red-700">
                         {fmt(item.debit)}
                       </td>
                     </tr>
@@ -993,13 +993,13 @@ export default function CheckOut() {
                 {groupInvoice && (
                   <div className="space-y-3 text-xs">
                     <div className="flex items-baseline gap-3">
-                      <span className="font-semibold text-gray-800">
+                      <span className="font-semibold text-hotel-text-primary">
                         Company Signature
                       </span>
                       <span className="border-b-2 border-gray-400 w-24 inline-block" />
                     </div>
                     <div className="flex items-baseline gap-3">
-                      <span className="font-semibold text-gray-800">
+                      <span className="font-semibold text-hotel-text-primary">
                         Username:
                       </span>
                       <span className="font-bold text-blue-700">
@@ -1010,15 +1010,15 @@ export default function CheckOut() {
                 )}
                 <div className="space-y-2 text-xs ml-auto">
                   <div className="flex items-center justify-end gap-3">
-                    <span className="font-semibold text-gray-700">
+                    <span className="font-semibold text-hotel-text-primary">
                       Total Charges
                     </span>
-                    <span className="border-2 border-gray-400 bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-1.5 w-28 text-right font-bold text-green-700">
+                    <span className="border-2 border-gray-400 bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
                       {fmt(groupDisplay.total_charges)} RWF
                     </span>
                   </div>
                   <div className="flex items-center justify-end gap-3">
-                    <span className="font-semibold text-gray-700">
+                    <span className="font-semibold text-hotel-text-primary">
                       Group Deposit
                     </span>
                     <span className="border-2 border-gray-400 bg-gradient-to-r from-purple-50 to-violet-50 px-3 py-1.5 w-28 text-right font-bold text-purple-700">
@@ -1026,7 +1026,7 @@ export default function CheckOut() {
                     </span>
                   </div>
                   <div className="flex items-center justify-end gap-3">
-                    <span className="font-semibold text-gray-700">
+                    <span className="font-semibold text-hotel-text-primary">
                       Total Paid
                     </span>
                     <span className="border-2 border-gray-400 bg-gradient-to-r from-blue-50 to-cyan-50 px-3 py-1.5 w-28 text-right font-bold text-blue-700">
@@ -1034,7 +1034,7 @@ export default function CheckOut() {
                     </span>
                   </div>
                   <div className="flex items-center justify-end gap-3">
-                    <span className="font-semibold text-gray-700">
+                    <span className="font-semibold text-hotel-text-primary">
                       Balance Due
                     </span>
                     <span className="border-2 border-gray-400 bg-gradient-to-r from-orange-50 to-red-50 px-3 py-1.5 w-28 text-right font-bold text-red-700">
@@ -1043,24 +1043,24 @@ export default function CheckOut() {
                   </div>
                   {groupInvoice?.tax?.taux != null && (
                     <>
-                      <div className="flex items-center justify-end gap-3 pt-2 border-t border-gray-300">
-                        <span className="font-semibold text-gray-700">
+                      <div className="flex items-center justify-end gap-3 pt-2 border-t border-hotel-border">
+                        <span className="font-semibold text-hotel-text-primary">
                           HTVA
                         </span>
-                        <span className="border-2 border-gray-400 px-3 py-1.5 w-28 text-right font-bold text-gray-700">
+                        <span className="border-2 border-gray-400 px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
                           {fmt(groupInvoice.tax.htva ?? 0)} RWF
                         </span>
                       </div>
                       <div className="flex items-center justify-end gap-3">
-                        <span className="font-semibold text-gray-700">
+                        <span className="font-semibold text-hotel-text-primary">
                           TVA ({groupInvoice.tax.taux}%)
                         </span>
-                        <span className="border-2 border-gray-400 px-3 py-1.5 w-28 text-right font-bold text-gray-700">
+                        <span className="border-2 border-gray-400 px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
                           {fmt(groupInvoice.tax.tva ?? 0)} RWF
                         </span>
                       </div>
                       <div className="flex items-center justify-end gap-3">
-                        <span className="font-semibold text-gray-700">
+                        <span className="font-semibold text-hotel-text-primary">
                           Total TTC
                         </span>
                         <span className="border-2 border-gray-400 bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-1.5 w-28 text-right font-bold text-green-800">
@@ -1080,7 +1080,7 @@ export default function CheckOut() {
         <div className="flex justify-center">
           <button
             onClick={() => setShowGenModal(true)}
-            className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-8 py-3 rounded-xl flex items-center gap-2 text-sm font-medium hover:shadow-lg transition-all transform hover:scale-105"
+            className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-8 py-3 rounded flex items-center gap-2 text-sm font-medium hover:shadow-lg transition-colors"
           >
             <Receipt size={18} />
             Generate Definitive Invoice
@@ -1092,7 +1092,7 @@ export default function CheckOut() {
         <div className="flex justify-center">
           <button
             onClick={() => setStep("checkout-confirm")}
-            className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-8 py-3 rounded-xl flex items-center gap-2 text-sm font-medium hover:shadow-lg transition-all transform hover:scale-105"
+            className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-8 py-3 rounded flex items-center gap-2 text-sm font-medium hover:shadow-lg transition-colors"
           >
             <LogOut size={18} />
             Proceed to Check-Out
@@ -1103,19 +1103,19 @@ export default function CheckOut() {
       {/* ═══ STEP: CHECKOUT CONFIRM ═══ */}
       {step === "checkout-confirm" && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[9999]">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 overflow-hidden">
+          <div className="bg-white rounded max-w-sm w-full mx-4 overflow-hidden">
             <div className="px-6 py-4 bg-gradient-to-r from-red-50 to-orange-50 border-b border-red-100">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
                   <AlertTriangle size={20} className="text-red-600" />
                 </div>
-                <h2 className="text-lg font-bold text-red-900">
+                <h2 className="text-base font-bold text-red-900">
                   Confirm Check-Out
                 </h2>
               </div>
             </div>
             <div className="px-6 py-4">
-              <p className="text-gray-700 text-sm leading-relaxed">
+              <p className="text-hotel-text-primary text-sm leading-relaxed">
                 {isIndividual
                   ? `Are you sure you want to check out ${selectedRoom?.guest_name} from room ${selectedRoom?.room_num}? This will archive the reservation and release the room.`
                   : `Are you sure you want to check out the entire group "${selectedGroup?.groupe_name}"? This will archive all member reservations and release all rooms.`}
@@ -1130,11 +1130,11 @@ export default function CheckOut() {
                 </p>
               )}
             </div>
-            <div className="px-6 py-4 bg-gray-50 flex gap-3 justify-end border-t border-gray-100">
+            <div className="px-6 py-4 bg-white flex gap-3 justify-end border-t border-hotel-border">
               <button
                 onClick={() => setStep("invoice")}
                 disabled={loading}
-                className="px-4 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors font-medium text-sm"
+                className="px-4 py-2 rounded bg-gray-200 text-hotel-text-primary hover:bg-gray-300 transition-colors font-medium text-sm"
               >
                 Cancel
               </button>
@@ -1143,7 +1143,7 @@ export default function CheckOut() {
                   isIndividual ? handleCheckout : handleGroupCheckout
                 }
                 disabled={loading}
-                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors font-medium text-sm flex items-center gap-2"
+                className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700 transition-colors font-medium text-sm flex items-center gap-2"
               >
                 {loading && <Loader2 className="animate-spin" size={14} />}
                 {loading ? "Checking out..." : "Check-Out"}
@@ -1155,25 +1155,25 @@ export default function CheckOut() {
 
       {/* ═══ STEP: DONE ═══ */}
       {step === "done" && (
-        <div className="max-w-lg mx-auto bg-white rounded-2xl shadow-lg border border-green-200 p-8 text-center space-y-4">
+        <div className="max-w-lg mx-auto bg-white rounded border border-green-200 p-4 text-center space-y-4">
           <div className="w-16 h-16 mx-auto rounded-full bg-green-100 flex items-center justify-center">
-            <CheckCircle size={32} className="text-green-600" />
+            <CheckCircle size={32} className="text-hotel-gold" />
           </div>
           <h2 className="text-2xl font-bold text-green-800">
             Check-Out Complete
           </h2>
-          <p className="text-sm text-gray-600">{doneMsg}</p>
+          <p className="text-sm text-hotel-text-secondary">{doneMsg}</p>
           <div className="flex justify-center gap-3 pt-4">
             <button
               onClick={() => window.print()}
-              className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 text-sm font-medium hover:shadow-lg transition-all"
+              className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-medium hover:shadow-lg transition-colors"
             >
               <Printer size={16} />
               Print Invoice
             </button>
             <button
               onClick={resetFlow}
-              className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:shadow-lg transition-all"
+              className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-5 py-2.5 rounded text-sm font-medium hover:shadow-lg transition-colors"
             >
               New Check-Out
             </button>
@@ -1184,24 +1184,24 @@ export default function CheckOut() {
       {/* ═══ GENERATE INVOICE MODAL ═══ */}
       {showGenModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+          <div className="bg-white rounded p-4 w-full max-w-md">
+            <h3 className="text-base font-semibold text-hotel-text-primary mb-4">
               Generate Definitive Invoice
             </h3>
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-hotel-text-secondary mb-4">
               {isIndividual
                 ? `${selectedRoom?.guest_name} — Room ${selectedRoom?.room_num}`
                 : `${selectedGroup?.groupe_name} (${selectedGroup?.code_g})`}
             </p>
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">
+                <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                   {t("paymentMode")}
                 </label>
                 <select
                   value={genPaytMode}
                   onChange={(e) => setGenPaytMode(e.target.value)}
-                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                  className="w-full border rounded px-3 py-2 text-sm"
                 >
                   <option value="">-- Select --</option>
                   {paymentModes.map((m) => (
@@ -1212,7 +1212,7 @@ export default function CheckOut() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">
+                <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                   {t("phone")}
                 </label>
                 <input
@@ -1220,11 +1220,11 @@ export default function CheckOut() {
                   value={genPhone}
                   onChange={(e) => setGenPhone(e.target.value)}
                   placeholder="+250..."
-                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                  className="w-full border rounded px-3 py-2 text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">
+                <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                   TIN
                 </label>
                 <input
@@ -1232,7 +1232,7 @@ export default function CheckOut() {
                   value={genTin}
                   onChange={(e) => setGenTin(e.target.value)}
                   placeholder="Tax ID"
-                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                  className="w-full border rounded px-3 py-2 text-sm"
                 />
               </div>
             </div>
@@ -1244,7 +1244,7 @@ export default function CheckOut() {
                     : handleGenerateGroupInvoice
                 }
                 disabled={generating}
-                className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                className="flex-1 bg-green-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-green-700 disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {generating && (
                   <Loader2 className="animate-spin" size={14} />
@@ -1253,7 +1253,7 @@ export default function CheckOut() {
               </button>
               <button
                 onClick={() => setShowGenModal(false)}
-                className="border px-4 py-2 rounded-lg text-sm"
+                className="border px-4 py-2 rounded text-sm"
               >
                 Cancel
               </button>
@@ -1265,17 +1265,17 @@ export default function CheckOut() {
       {/* ═══ ERROR DIALOG ═══ */}
       {errorMsg && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-sm">
+          <div className="bg-white rounded p-4 w-full max-w-sm">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-2 bg-red-100 rounded-full">
                 <AlertTriangle className="text-red-600" size={20} />
               </div>
-              <h3 className="text-lg font-semibold text-gray-800">Error</h3>
+              <h3 className="text-base font-semibold text-hotel-text-primary">Error</h3>
             </div>
-            <p className="text-sm text-gray-600 mb-6">{errorMsg}</p>
+            <p className="text-sm text-hotel-text-secondary mb-6">{errorMsg}</p>
             <button
               onClick={() => setErrorMsg("")}
-              className="w-full bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700"
+              className="w-full bg-red-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-red-700"
             >
               OK
             </button>

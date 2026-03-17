@@ -91,12 +91,12 @@ export default function LaundryServices() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50 p-6 space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50 p-4 space-y-4">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
           {t("laundryServices")}
         </h1>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-hotel-text-secondary">
           {t("manageLaundryServicesDesc")}
         </p>
       </div>
@@ -106,20 +106,20 @@ export default function LaundryServices() {
             setSelected({ ...blank });
             setIsNew(true);
           }}
-          className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-all duration-200"
+          className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-colors duration-200"
         >
           <Plus size={16} />
           {t("newRecord")}
         </button>
       </div>
       {selected && (
-        <div className="bg-white rounded-xl shadow-md border border-emerald-100 p-7 space-y-4">
-          <h3 className="text-lg font-bold text-emerald-700">
+        <div className="bg-white rounded border border-emerald-100 p-7 space-y-4">
+          <h3 className="text-base font-bold text-emerald-700">
             {isNew ? t("newService") : t("editService")}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-hotel-text-primary mb-2">
                 {t("designation")}
               </label>
               <input
@@ -129,11 +129,11 @@ export default function LaundryServices() {
                   setSelected({ ...selected, designation: e.target.value })
                 }
                 title={t("designation")}
-                className="w-full border-2 border-gray-200 hover:border-gray-300 focus:border-emerald-500 focus:outline-none rounded-lg px-4 py-2.5 text-sm font-medium transition-all"
+                className="w-full border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-hotel-text-primary mb-2">
                 {t("type")}
               </label>
               <input
@@ -143,11 +143,11 @@ export default function LaundryServices() {
                   setSelected({ ...selected, type: e.target.value })
                 }
                 title={t("type")}
-                className="w-full border-2 border-gray-200 hover:border-gray-300 focus:border-emerald-500 focus:outline-none rounded-lg px-4 py-2.5 text-sm font-medium transition-all"
+                className="w-full border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-hotel-text-primary mb-2">
                 {t("qty")}
               </label>
               <input
@@ -157,11 +157,11 @@ export default function LaundryServices() {
                   setSelected({ ...selected, qty: Number(e.target.value) })
                 }
                 title={t("qty")}
-                className="w-full border-2 border-gray-200 hover:border-gray-300 focus:border-emerald-500 focus:outline-none rounded-lg px-4 py-2.5 text-sm font-medium transition-all"
+                className="w-full border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-hotel-text-primary mb-2">
                 {t("puv")}
               </label>
               <input
@@ -171,11 +171,11 @@ export default function LaundryServices() {
                   setSelected({ ...selected, puv: Number(e.target.value) })
                 }
                 title={t("puv")}
-                className="w-full border-2 border-gray-200 hover:border-gray-300 focus:border-emerald-500 focus:outline-none rounded-lg px-4 py-2.5 text-sm font-medium transition-all"
+                className="w-full border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-hotel-text-primary mb-2">
                 {t("category")}
               </label>
               <select
@@ -184,7 +184,7 @@ export default function LaundryServices() {
                   setSelected({ ...selected, category: e.target.value })
                 }
                 title={t("category")}
-                className="w-full border-2 border-gray-200 hover:border-gray-300 focus:border-emerald-500 focus:outline-none rounded-lg px-4 py-2.5 text-sm font-medium transition-all"
+                className="w-full border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
               >
                 <option value="">{t("selectCategory")}</option>
                 {catlaundry.map((c) => (
@@ -195,7 +195,7 @@ export default function LaundryServices() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-hotel-text-primary mb-2">
                 {t("roomNumber")}
               </label>
               <input
@@ -205,11 +205,11 @@ export default function LaundryServices() {
                   setSelected({ ...selected, room_num: e.target.value })
                 }
                 title={t("roomNumber")}
-                className="w-full border-2 border-gray-200 hover:border-gray-300 focus:border-emerald-500 focus:outline-none rounded-lg px-4 py-2.5 text-sm font-medium transition-all"
+                className="w-full border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-hotel-text-primary mb-2">
                 {t("guestName")}
               </label>
               <input
@@ -219,14 +219,14 @@ export default function LaundryServices() {
                   setSelected({ ...selected, guest_name: e.target.value })
                 }
                 title={t("guestName")}
-                className="w-full border-2 border-gray-200 hover:border-gray-300 focus:border-emerald-500 focus:outline-none rounded-lg px-4 py-2.5 text-sm font-medium transition-all"
+                className="w-full border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
               />
             </div>
           </div>
-          <div className="flex gap-3 pt-5 border-t border-gray-200">
+          <div className="flex gap-3 pt-5 border-t border-hotel-border">
             <button
               onClick={handleSave}
-              className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-6 py-2.5 rounded-lg flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-all duration-200"
+              className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-6 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-colors duration-200"
             >
               <Save size={16} />
               {t("save")}
@@ -234,7 +234,7 @@ export default function LaundryServices() {
             {!isNew && (
               <button
                 onClick={() => setShowDeleteConfirm(true)}
-                className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-2.5 rounded-lg flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-red-600 hover:to-red-700 transition-all duration-200"
+                className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-red-600 hover:to-red-700 transition-colors duration-200"
               >
                 <Trash2 size={16} />
                 {t("delete")}
@@ -242,7 +242,7 @@ export default function LaundryServices() {
             )}
             <button
               onClick={() => setSelected(null)}
-              className="border-2 border-gray-300 px-6 py-2.5 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+              className="border-2 border-hotel-border px-6 py-2.5 rounded text-sm font-semibold text-hotel-text-primary hover:bg-hotel-cream transition-colors"
             >
               {t("cancel")}
             </button>
@@ -275,13 +275,13 @@ export default function LaundryServices() {
       />
 
       {/* Services Directory Table */}
-      <div className="bg-white rounded-xl shadow-md border border-emerald-100 overflow-hidden">
+      <div className="bg-white rounded border border-emerald-100 overflow-hidden">
         <div className="bg-gradient-to-r from-emerald-50 to-green-50 px-6 py-4 border-b border-emerald-100">
-          <h2 className="text-lg font-bold text-gray-800">
+          <h2 className="text-base font-bold text-hotel-text-primary">
             {t("laundryServicesDirectory")}
           </h2>
         </div>
-        <div className="px-6 py-4 border-b border-gray-200">
+        <div className="px-6 py-4 border-b border-hotel-border">
           <div className="relative">
             <Search
               className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -292,12 +292,12 @@ export default function LaundryServices() {
               placeholder={`${t("search")} services by designation, type, or category...`}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-10 py-2.5 border-2 border-gray-200 hover:border-gray-300 focus:border-emerald-500 focus:outline-none rounded-lg text-sm font-medium transition-colors"
+              className="w-full pl-10 pr-10 py-2.5 border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded text-sm font-medium transition-colors"
             />
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm("")}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-hotel-text-secondary"
               >
                 <X size={18} />
               </button>
@@ -305,7 +305,7 @@ export default function LaundryServices() {
           </div>
         </div>
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b-2 border-emerald-200">
+          <thead className="bg-white border-b-2 border-emerald-200">
             <tr>
               {[
                 t("designation"),
@@ -316,7 +316,7 @@ export default function LaundryServices() {
               ].map((h) => (
                 <th
                   key={h}
-                  className="text-left px-6 py-3 font-bold text-gray-700"
+                  className="text-left px-6 py-3 font-bold text-hotel-text-primary"
                 >
                   {h}
                 </th>
@@ -336,18 +336,18 @@ export default function LaundryServices() {
                 <td className="px-6 py-3 font-semibold text-emerald-600">
                   {s.designation}
                 </td>
-                <td className="px-6 py-3 text-gray-700">{s.type}</td>
-                <td className="px-6 py-3 text-gray-700">{s.qty}</td>
-                <td className="px-6 py-3 text-gray-700">
+                <td className="px-6 py-3 text-hotel-text-primary">{s.type}</td>
+                <td className="px-6 py-3 text-hotel-text-primary">{s.qty}</td>
+                <td className="px-6 py-3 text-hotel-text-primary">
                   {s.puv.toLocaleString()}
                 </td>
-                <td className="px-6 py-3 text-gray-700">{s.category}</td>
+                <td className="px-6 py-3 text-hotel-text-primary">{s.category}</td>
               </tr>
             ))}
           </tbody>
         </table>
         {filteredServices.length === 0 && (
-          <div className="px-6 py-12 text-center text-gray-500">
+          <div className="px-6 py-12 text-center text-hotel-text-secondary">
             <p className="text-sm">
               {searchTerm
                 ? `No services match "${searchTerm}"`

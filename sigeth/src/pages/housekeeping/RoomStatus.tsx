@@ -36,15 +36,15 @@ export default function RoomStatus() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50 p-6 space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50 p-4 space-y-4">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
           {t("updateRoomStatus")}
         </h1>
-        <p className="text-sm text-gray-600">{t("updateRoomStatusDesc")}</p>
+        <p className="text-sm text-hotel-text-secondary">{t("updateRoomStatusDesc")}</p>
       </div>
       {/* Category selection (CATROOM.dat browser) */}
-      <div className="bg-white rounded-xl shadow-md border border-emerald-100 p-6">
+      <div className="bg-white rounded border border-emerald-100 p-4">
         <h3 className="text-sm font-semibold text-emerald-700 mb-4">
           {t("selectCategory")}
         </h3>
@@ -53,10 +53,10 @@ export default function RoomStatus() {
             <button
               key={c.code}
               onClick={() => setSelectedCat(c.code)}
-              className={`px-4 py-2.5 rounded-lg text-sm font-semibold border-2 transition-all ${
+              className={`px-4 py-2.5 rounded text-sm font-semibold border-2 transition-colors ${
                 selectedCat === c.code
-                  ? "bg-gradient-to-r from-emerald-600 to-emerald-700 text-white border-emerald-600 shadow-md"
-                  : "border-gray-200 text-gray-700 hover:border-emerald-300 hover:bg-emerald-50"
+                  ? "bg-gradient-to-r from-emerald-600 to-emerald-700 text-white border-emerald-600"
+                  : "border-hotel-border text-hotel-text-primary hover:border-emerald-300 hover:bg-emerald-50"
               }`}
             >
               {c.code} — {c.name}
@@ -66,9 +66,9 @@ export default function RoomStatus() {
       </div>
       {/* Room status browser */}
       {selectedCat !== null && (
-        <div className="bg-white rounded-xl shadow-md border border-emerald-100 overflow-hidden">
+        <div className="bg-white rounded border border-emerald-100 overflow-hidden">
           <div className="px-6 py-4 bg-gradient-to-r from-emerald-50 to-green-50 border-b border-emerald-100">
-            <p className="text-sm text-gray-700 font-semibold">
+            <p className="text-sm text-hotel-text-primary font-semibold">
               {t("roomsInCategory")}:{" "}
               <span className="text-emerald-700">
                 {catrooms.find((c) => c.code === selectedCat)?.name}
@@ -78,7 +78,7 @@ export default function RoomStatus() {
             </p>
           </div>
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b-2 border-emerald-200">
+            <thead className="bg-white border-b-2 border-emerald-200">
               <tr>
                 {[
                   t("roomNumber"),
@@ -90,7 +90,7 @@ export default function RoomStatus() {
                 ].map((h) => (
                   <th
                     key={h}
-                    className="text-left px-6 py-3 font-bold text-gray-700"
+                    className="text-left px-6 py-3 font-bold text-hotel-text-primary"
                   >
                     {h}
                   </th>
@@ -106,11 +106,11 @@ export default function RoomStatus() {
                   <td className="px-6 py-3 font-semibold text-emerald-600">
                     {r.room_num}
                   </td>
-                  <td className="px-6 py-3 text-gray-700">{r.designation}</td>
-                  <td className="px-6 py-3 text-gray-700">
+                  <td className="px-6 py-3 text-hotel-text-primary">{r.designation}</td>
+                  <td className="px-6 py-3 text-hotel-text-primary">
                     {r.price_1.toLocaleString()}
                   </td>
-                  <td className="px-6 py-3 text-gray-700">
+                  <td className="px-6 py-3 text-hotel-text-primary">
                     {r.price_2.toLocaleString()}
                   </td>
                   <td className="px-6 py-3">
@@ -128,7 +128,7 @@ export default function RoomStatus() {
                         )
                       }
                       title={t("currentStatus")}
-                      className="border-2 border-gray-200 hover:border-gray-300 focus:border-emerald-500 focus:outline-none rounded-lg px-3 py-2 text-sm font-medium transition-all"
+                      className="border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded px-3 py-2 text-sm font-medium transition-colors"
                     >
                       {statuses.map((s) => (
                         <option key={s.code} value={s.code}>

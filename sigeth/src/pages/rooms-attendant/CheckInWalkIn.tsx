@@ -55,7 +55,6 @@ export default function CheckInWalkIn() {
   const [confirmSubmitOpen, setConfirmSubmitOpen] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
   const [localPuv, setLocalPuv] = useState(0);
-  const [showCurrencyModal, setShowCurrencyModal] = useState(false);
   const [errors, setErrors] = useState<ValidationResult>({
     isValid: true,
     errors: [],
@@ -191,24 +190,23 @@ export default function CheckInWalkIn() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-2xl shadow-sm border border-blue-100">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+    <div className="space-y-4">
+      <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4">
+        <h1 className="text-2xl font-bold text-hotel-text-primary">
           {t("checkInWithoutReservation")}
         </h1>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         {/* ── Left: Quick Registration Form ── */}
-        <div className="lg:col-span-2 bg-white rounded-2xl shadow-md border border-gray-100 p-6 space-y-5">
-          <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-            <span className="w-1 h-6 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full" />
-            <UserPlus size={20} className="text-blue-600" />
+        <div className="lg:col-span-2 bg-white border border-hotel-border rounded p-4 space-y-3">
+          <h2 className="text-base font-semibold text-hotel-text-primary mb-3 flex items-center gap-2">
+            <UserPlus size={20} className="text-hotel-gold" />
             {t("quickRegistration")}
           </h2>
 
           {/* Guest info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {(
               [
                 [
@@ -250,19 +248,19 @@ export default function CheckInWalkIn() {
               if (field === "nationality" || field === "country") {
                 return (
                   <div key={field}>
-                    <label className="block text-xs font-medium text-gray-500 mb-1">
+                    <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                       {label}{" "}
-                      {required && <span className="text-red-500">*</span>}
+                      {required && <span className="text-hotel-danger">*</span>}
                     </label>
                     <select
                       value={String(form[field] ?? "")}
                       onChange={(e) => handleChange(field, e.target.value)}
                       required={required}
                       title={label}
-                      className={`w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-300 focus:border-amber-400 outline-none ${
+                      className={`w-full border rounded px-3 py-2 text-sm focus:ring-1 focus:ring-hotel-gold outline-none ${
                         errorMsg
-                          ? "border-red-500 focus:ring-red-500"
-                          : "border-gray-300"
+                          ? "border-hotel-danger"
+                          : "border-hotel-border"
                       }`}
                     >
                       <option value="">{t("select")}</option>
@@ -280,7 +278,7 @@ export default function CheckInWalkIn() {
                         ))}
                     </select>
                     {errorMsg && (
-                      <p className="text-xs text-red-600 mt-1">{errorMsg}</p>
+                      <p className="text-xs text-hotel-danger mt-1">{errorMsg}</p>
                     )}
                   </div>
                 );
@@ -293,13 +291,13 @@ export default function CheckInWalkIn() {
 
               return (
                 <div key={field}>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">
+                  <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                     {label}{" "}
-                    {required && <span className="text-red-500">*</span>}
+                    {required && <span className="text-hotel-danger">*</span>}
                   </label>
                   {field === "phone" && phoneCode ? (
                     <div className="flex items-center gap-1">
-                      <span className="bg-gray-100 border border-gray-300 rounded-l-lg px-3 py-2 text-xs font-semibold text-gray-600">
+                      <span className="bg-white border border-hotel-border rounded-l px-3 py-2 text-xs font-semibold text-hotel-text-secondary">
                         {phoneCode}
                       </span>
                       <input
@@ -309,10 +307,10 @@ export default function CheckInWalkIn() {
                         value={String(form[field] ?? "")}
                         required={required}
                         onChange={(e) => handleChange(field, e.target.value)}
-                        className={`flex-1 border rounded-r-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-300 focus:border-amber-400 outline-none ${
+                        className={`flex-1 border rounded-r px-3 py-2 text-sm focus:ring-1 focus:ring-hotel-gold outline-none ${
                           errorMsg
-                            ? "border-red-500 focus:ring-red-500"
-                            : "border-gray-300"
+                            ? "border-hotel-danger"
+                            : "border-hotel-border"
                         }`}
                       />
                     </div>
@@ -324,22 +322,22 @@ export default function CheckInWalkIn() {
                       required={required}
                       onChange={(e) => handleChange(field, e.target.value)}
                       {...attrs}
-                      className={`w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-300 focus:border-amber-400 outline-none ${
+                      className={`w-full border rounded px-3 py-2 text-sm focus:ring-1 focus:ring-hotel-gold outline-none ${
                         errorMsg
-                          ? "border-red-500 focus:ring-red-500"
-                          : "border-gray-300"
+                          ? "border-hotel-danger"
+                          : "border-hotel-border"
                       }`}
                     />
                   )}
                   {errorMsg && (
-                    <p className="text-xs text-red-600 mt-1">{errorMsg}</p>
+                    <p className="text-xs text-hotel-danger mt-1">{errorMsg}</p>
                   )}
                 </div>
               );
             })}
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
-                {t("adults")} <span className="text-red-500">*</span>
+              <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
+                {t("adults")} <span className="text-hotel-danger">*</span>
               </label>
               <input
                 type="number"
@@ -348,14 +346,14 @@ export default function CheckInWalkIn() {
                 required
                 onChange={(e) => handleChange("adulte", Number(e.target.value))}
                 min={1}
-                className={`w-full border rounded-lg px-3 py-2 text-sm ${
+                className={`w-full border rounded px-3 py-2 text-sm ${
                   getErrorMessage("adulte")
-                    ? "border-red-500"
-                    : "border-gray-300"
+                    ? "border-hotel-danger"
+                    : "border-hotel-border"
                 }`}
               />
               {getErrorMessage("adulte") && (
-                <p className="text-xs text-red-600 mt-1">
+                <p className="text-xs text-hotel-danger mt-1">
                   {getErrorMessage("adulte")}
                 </p>
               )}
@@ -363,10 +361,10 @@ export default function CheckInWalkIn() {
           </div>
 
           {/* Dates & payment */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
-                {t("arrivalDate")} <span className="text-red-500">*</span>
+              <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
+                {t("arrivalDate")} <span className="text-hotel-danger">*</span>
               </label>
               <input
                 type="date"
@@ -374,21 +372,21 @@ export default function CheckInWalkIn() {
                 value={form.arrival_date}
                 required
                 onChange={(e) => handleChange("arrival_date", e.target.value)}
-                className={`w-full border rounded-lg px-3 py-2 text-sm ${
+                className={`w-full border rounded px-3 py-2 text-sm ${
                   getErrorMessage("arrival_date")
-                    ? "border-red-500"
-                    : "border-gray-300"
+                    ? "border-hotel-danger"
+                    : "border-hotel-border"
                 }`}
               />
               {getErrorMessage("arrival_date") && (
-                <p className="text-xs text-red-600 mt-1">
+                <p className="text-xs text-hotel-danger mt-1">
                   {getErrorMessage("arrival_date")}
                 </p>
               )}
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
-                {t("departDate")} <span className="text-red-500">*</span>
+              <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
+                {t("departDate")} <span className="text-hotel-danger">*</span>
               </label>
               <input
                 type="date"
@@ -396,27 +394,27 @@ export default function CheckInWalkIn() {
                 value={form.depart_date}
                 required
                 onChange={(e) => handleChange("depart_date", e.target.value)}
-                className={`w-full border rounded-lg px-3 py-2 text-sm ${
+                className={`w-full border rounded px-3 py-2 text-sm ${
                   getErrorMessage("depart_date")
-                    ? "border-red-500"
-                    : "border-gray-300"
+                    ? "border-hotel-danger"
+                    : "border-hotel-border"
                 }`}
               />
               {getErrorMessage("depart_date") && (
-                <p className="text-xs text-red-600 mt-1">
+                <p className="text-xs text-hotel-danger mt-1">
                   {getErrorMessage("depart_date")}
                 </p>
               )}
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                 {t("paymentMode")}
               </label>
               <select
                 title="Payment mode"
                 value={form.payt_mode}
                 onChange={(e) => handleChange("payt_mode", e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                className="w-full border border-hotel-border rounded px-3 py-2 text-sm"
               >
                 {paymentModes.map((m) => (
                   <option key={m.id} value={m.id}>
@@ -427,9 +425,9 @@ export default function CheckInWalkIn() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                 {t("discount")} (%)
               </label>
               <input
@@ -441,20 +439,20 @@ export default function CheckInWalkIn() {
                 onChange={(e) =>
                   handleChange("discount", Number(e.target.value))
                 }
-                className={`w-full border rounded-lg px-3 py-2 text-sm ${
+                className={`w-full border rounded px-3 py-2 text-sm ${
                   getErrorMessage("discount")
-                    ? "border-red-500"
-                    : "border-gray-300"
+                    ? "border-hotel-danger"
+                    : "border-hotel-border"
                 }`}
               />
               {getErrorMessage("discount") && (
-                <p className="text-xs text-red-600 mt-1">
+                <p className="text-xs text-hotel-danger mt-1">
                   {getErrorMessage("discount")}
                 </p>
               )}
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                 {t("deposit")}
               </label>
               <input
@@ -465,53 +463,77 @@ export default function CheckInWalkIn() {
                 onChange={(e) =>
                   handleChange("deposit", Number(e.target.value))
                 }
-                className={`w-full border rounded-lg px-3 py-2 text-sm ${
+                className={`w-full border rounded px-3 py-2 text-sm ${
                   getErrorMessage("deposit")
-                    ? "border-red-500"
-                    : "border-gray-300"
+                    ? "border-hotel-danger"
+                    : "border-hotel-border"
                 }`}
               />
               {getErrorMessage("deposit") && (
-                <p className="text-xs text-red-600 mt-1">
+                <p className="text-xs text-hotel-danger mt-1">
                   {getErrorMessage("deposit")}
                 </p>
               )}
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                 {t("stayCost")}
               </label>
-              <div className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-gray-50 font-semibold">
+              <div className="w-full border border-hotel-border rounded px-3 py-2 text-sm bg-white font-semibold">
                 {form.stay_cost.toLocaleString()} {form.current_mon}
               </div>
             </div>
           </div>
 
-          {/* Currency selector */}
-          <button
-            type="button"
-            onClick={() => setShowCurrencyModal(true)}
-            className="w-full border rounded-lg px-3 py-2 text-sm text-left bg-white hover:bg-gray-50"
-          >
-            {t("currency")}: <strong>{form.current_mon}</strong>
-          </button>
+          {/* Currency dropdown */}
+          <div>
+            <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
+              {t("currency")}
+            </label>
+            <select
+              value={form.current_mon || "RWF"}
+              onChange={(e) => {
+                const code = e.target.value;
+                if (code === "RWF") {
+                  if (localPuv > 0) {
+                    handleChange("puv", localPuv);
+                  }
+                  handleChange("current_mon", "RWF");
+                } else {
+                  const rate = currencyOptions.find(c => c.code === code)?.exchange_rate || 1;
+                  if (localPuv > 0) {
+                    const converted = Math.round(localPuv / rate);
+                    handleChange("puv", converted);
+                  }
+                  handleChange("current_mon", code);
+                }
+              }}
+              className="w-full border rounded px-3 py-2 text-sm border-hotel-border"
+            >
+              {currencyOptions.map(c => (
+                <option key={c.code} value={c.code}>
+                  {c.code} — {c.label} {c.code !== "RWF" ? `(1 = ${c.exchange_rate.toLocaleString()} RWF)` : "(local)"}
+                </option>
+              ))}
+            </select>
+          </div>
 
           {/* Selected room summary */}
           {selectedRoomNum && (
-            <div className="bg-emerald-50 border border-emerald-200 rounded-lg px-4 py-3 flex items-center justify-between">
+            <div className="bg-white border border-hotel-border rounded p-4 flex items-center justify-between">
               <div>
-                <span className="text-xs text-emerald-600">
+                <span className="text-xs text-hotel-gold">
                   {t("assignedRoom")}
                 </span>
-                <p className="font-bold text-emerald-800">
+                <p className="font-bold text-hotel-text-primary">
                   {form.room_num} —{" "}
                   {rooms.find((r) => r.room_num === form.room_num)?.designation}
                 </p>
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-hotel-text-secondary">
                   {form.puv.toLocaleString()} {form.current_mon} / {t("nights")}
                 </span>
               </div>
-              <Check size={24} className="text-emerald-500" />
+              <Check size={24} className="text-hotel-gold" />
             </div>
           )}
 
@@ -519,10 +541,10 @@ export default function CheckInWalkIn() {
           <button
             disabled={!canSubmit}
             onClick={handleSubmit}
-            className={`w-full py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-colors ${
+            className={`w-full py-2 rounded font-semibold text-sm flex items-center justify-center gap-2 transition-colors ${
               canSubmit
-                ? "bg-emerald-500 text-white hover:bg-emerald-600"
-                : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                ? "bg-hotel-gold text-white hover:bg-hotel-gold-dark"
+                : "bg-white border border-hotel-border text-hotel-text-secondary cursor-not-allowed"
             }`}
           >
             <UserPlus size={18} />
@@ -531,9 +553,8 @@ export default function CheckInWalkIn() {
         </div>
 
         {/* ── Right: Available Rooms Grid ── */}
-        <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-5">
-          <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
-            <span className="w-1 h-6 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full" />
+        <div className="bg-white border border-hotel-border rounded p-4">
+          <h3 className="font-semibold text-hotel-text-primary mb-3 flex items-center gap-2">
             {t("availableRooms")} ({filteredRooms.length}/{vacantRooms.length})
           </h3>
           <input
@@ -542,11 +563,11 @@ export default function CheckInWalkIn() {
             onChange={(e) => setRoomSearch(e.target.value)}
             placeholder={`${t("search")} ${t("room")}...`}
             title={`${t("search")} ${t("room")}...`}
-            className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full border border-hotel-border rounded px-3 py-2 text-sm mb-3 focus:outline-none focus:ring-1 focus:ring-hotel-gold"
           />
           <div className="space-y-2 max-h-[60vh] overflow-y-auto pr-1">
             {filteredRooms.length === 0 ? (
-              <div className="text-center py-8 text-gray-400 text-sm">
+              <div className="text-center py-8 text-hotel-text-secondary text-sm">
                 No rooms match "{roomSearch}"
               </div>
             ) : (
@@ -554,36 +575,36 @@ export default function CheckInWalkIn() {
                 <div
                   key={room.room_num}
                   onClick={() => handleSelectRoom(room.room_num)}
-                  className={`border rounded-lg px-4 py-3 cursor-pointer transition-all ${
+                  className={`border rounded px-3 py-2 cursor-pointer transition-colors ${
                     selectedRoomNum === room.room_num
-                      ? "border-emerald-400 bg-emerald-50 ring-2 ring-emerald-200"
-                      : "hover:border-amber-300 hover:bg-amber-50"
+                      ? "border-hotel-gold bg-white"
+                      : "hover:bg-hotel-cream border-hotel-border"
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-bold text-gray-800">{room.room_num}</p>
-                      <p className="text-xs text-gray-500">
+                      <p className="font-bold text-hotel-text-primary">{room.room_num}</p>
+                      <p className="text-xs text-hotel-text-secondary">
                         {getCatName(room.categorie)}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-semibold text-gray-700">
+                      <p className="text-sm font-semibold text-hotel-text-primary">
                         {room.price_1.toLocaleString()}
                       </p>
-                      <p className="text-xs text-gray-400">
+                      <p className="text-xs text-hotel-text-secondary">
                         {room.current_mon}
                       </p>
                     </div>
                   </div>
-                  <p className="text-xs text-gray-400 mt-1">
+                  <p className="text-xs text-hotel-text-secondary mt-1">
                     {room.designation}
                   </p>
                 </div>
               ))
             )}
             {vacantRooms.length === 0 && (
-              <p className="text-sm text-gray-400 text-center py-8">
+              <p className="text-sm text-hotel-text-secondary text-center py-8">
                 {t("noResults")}
               </p>
             )}
@@ -591,66 +612,6 @@ export default function CheckInWalkIn() {
         </div>
       </div>
 
-      {/* Currency lookup modal */}
-      {showCurrencyModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
-              {t("selectCurrency")}
-            </h3>
-            <table className="w-full text-sm mb-4">
-              <thead className="bg-gray-50 border-b">
-                <tr>
-                  <th className="text-left px-3 py-2">{t("currency")}</th>
-                  <th className="text-left px-3 py-2">{t("localRate")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currencyOptions.map((c) => (
-                  <tr
-                    key={c.code}
-                    className={`border-b hover:bg-amber-50 cursor-pointer ${form.current_mon === c.code ? "bg-amber-100" : ""}`}
-                    onClick={() => {
-                      if (c.code === "RWF") {
-                        if (localPuv > 0) {
-                          handleChange("puv", localPuv);
-                        }
-                        handleChange("current_mon", "RWF");
-                      } else if (c.exchange_rate > 0 && localPuv > 0) {
-                        const converted = Math.round(localPuv / c.exchange_rate);
-                        handleChange("current_mon", c.code);
-                        handleChange("puv", converted);
-                      } else {
-                        handleChange("current_mon", c.code);
-                      }
-                      setShowCurrencyModal(false);
-                    }}
-                  >
-                    <td className="px-3 py-2 font-medium">
-                      {c.code} — {c.label}
-                      {c.code === "RWF" && <span className="text-xs text-gray-400 ml-1">(default)</span>}
-                    </td>
-                    <td className="px-3 py-2">
-                      {c.code === "RWF" ? "—" : `${c.exchange_rate.toLocaleString()} RWF`}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {form.current_mon !== "RWF" && localPuv > 0 && (
-              <p className="text-xs text-gray-500 mb-3">
-                Original: {localPuv.toLocaleString()} RWF
-              </p>
-            )}
-            <button
-              onClick={() => setShowCurrencyModal(false)}
-              className="border px-4 py-2 rounded-lg text-sm w-full"
-            >
-              {t("cancel")}
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Confirmation Modal */}
       <ConfirmationModal
@@ -667,13 +628,13 @@ export default function CheckInWalkIn() {
       {/* Success Confirmation Dialog */}
       {successMsg && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md text-center space-y-4">
-            <CheckCircle2 size={40} className="text-green-500 mx-auto" />
-            <h3 className="text-lg font-semibold text-gray-800">Check-In Complete</h3>
-            <p className="text-sm text-gray-600">{successMsg}</p>
+          <div className="bg-white rounded p-4 w-full max-w-md text-center space-y-4 border border-hotel-border">
+            <CheckCircle2 size={40} className="text-hotel-gold mx-auto" />
+            <h3 className="text-base font-semibold text-hotel-text-primary">Check-In Complete</h3>
+            <p className="text-sm text-hotel-text-secondary">{successMsg}</p>
             <button
               onClick={() => setSuccessMsg("")}
-              className="bg-green-500 text-white px-6 py-2 rounded-lg text-sm hover:bg-green-600"
+              className="bg-hotel-gold text-white px-6 py-2 rounded text-sm hover:bg-hotel-gold-dark"
             >
               OK
             </button>
@@ -684,13 +645,13 @@ export default function CheckInWalkIn() {
       {/* Error Dialog */}
       {errorMsg && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md text-center space-y-4">
-            <AlertTriangle size={40} className="text-red-500 mx-auto" />
-            <h3 className="text-lg font-semibold text-gray-800">Error</h3>
-            <p className="text-sm text-gray-600 whitespace-pre-wrap">{errorMsg}</p>
+          <div className="bg-white rounded p-4 w-full max-w-md text-center space-y-4 border border-hotel-border">
+            <AlertTriangle size={40} className="text-hotel-danger mx-auto" />
+            <h3 className="text-base font-semibold text-hotel-text-primary">Error</h3>
+            <p className="text-sm text-hotel-text-secondary whitespace-pre-wrap">{errorMsg}</p>
             <button
               onClick={() => setErrorMsg("")}
-              className="bg-red-500 text-white px-6 py-2 rounded-lg text-sm hover:bg-red-600"
+              className="bg-hotel-danger text-white px-6 py-2 rounded text-sm hover:opacity-90"
             >
               OK
             </button>
