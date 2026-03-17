@@ -22,6 +22,7 @@ export default function CheckInGroup() {
     rooms,
     setRooms,
     catrooms,
+    currencies,
   } = useHotelData();
 
   const [queryCode, setQueryCode] = useState("");
@@ -31,6 +32,14 @@ export default function CheckInGroup() {
   const [swapRoom, setSwapRoom] = useState<string | null>(null);
   const [groupSuggestions, setGroupSuggestions] = useState<GRC[]>([]);
   const [showGroupSuggestions, setShowGroupSuggestions] = useState(false);
+  const [successMsg, setSuccessMsg] = useState("");
+  const [localPuv, setLocalPuv] = useState(0);
+  const [showCurrencyModal, setShowCurrencyModal] = useState(false);
+
+  const currencyOptions = useMemo(() => [
+    { code: "RWF", label: "Rwandan Franc", exchange_rate: 1 },
+    ...currencies,
+  ], [currencies]);
 
   const getCatName = (cat: number) =>
     catrooms.find((c) => c.code === cat)?.name ?? "";
@@ -139,12 +148,17 @@ export default function CheckInGroup() {
   /* ── Batch check-in all pending ── */
   const handleBatchCheckIn = async () => {
     const pending = groupMembers.filter((m) => m.status === 0);
+    let count = 0;
     for (const member of pending) {
       try {
         await checkInMember(member);
+        count++;
       } catch {
         break;
       }
+    }
+    if (count > 0) {
+      setSuccessMsg(`${count} group member(s) checked in successfully.`);
     }
   };
 
@@ -152,6 +166,9 @@ export default function CheckInGroup() {
   const handleConfirmMemberCheckIn = async () => {
     if (!processingMember) return;
     await checkInMember(processingMember, swapRoom ?? undefined);
+    setSuccessMsg(
+      `${processingMember.guest_name} has been checked in to room ${swapRoom ?? processingMember.room_num} successfully.`,
+    );
     setProcessingMember(null);
     setSwapRoom(null);
   };
@@ -396,6 +413,7 @@ export default function CheckInGroup() {
                           <button
                             onClick={() => {
                               setProcessingMember(m);
+                              setLocalPuv(m.current_mon === "RWF" ? m.puv : 0);
                               setSwapRoom(null);
                             }}
                             className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:shadow-lg transition-all transform hover:scale-105 flex items-center gap-1"
@@ -521,6 +539,15 @@ export default function CheckInGroup() {
                 </strong>
               </div>
 
+              {/* Currency selector */}
+              <button
+                type="button"
+                onClick={() => setShowCurrencyModal(true)}
+                className="w-full border rounded-lg px-3 py-2 text-sm text-left bg-white hover:bg-gray-50"
+              >
+                {t("currency")}: <strong>{processingMember.current_mon}</strong>
+              </button>
+
               <button
                 onClick={handleConfirmMemberCheckIn}
                 className="w-full py-3 rounded-lg font-semibold text-sm bg-emerald-500 text-white hover:bg-emerald-600 flex items-center justify-center gap-2"
@@ -529,6 +556,90 @@ export default function CheckInGroup() {
                 {t("confirmAndCheckIn")}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Currency lookup modal */}
+      {showCurrencyModal && processingMember && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[60]">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+              {t("selectCurrency")}
+            </h3>
+            <table className="w-full text-sm mb-4">
+              <thead className="bg-gray-50 border-b">
+                <tr>
+                  <th className="text-left px-3 py-2">{t("currency")}</th>
+                  <th className="text-left px-3 py-2">{t("localRate")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currencyOptions.map((c) => (
+                  <tr
+                    key={c.code}
+                    className={`border-b hover:bg-amber-50 cursor-pointer ${processingMember.current_mon === c.code ? "bg-amber-100" : ""}`}
+                    onClick={() => {
+                      let puv = processingMember.puv;
+                      let mon = processingMember.current_mon;
+                      if (c.code === "RWF") {
+                        if (localPuv > 0) puv = localPuv;
+                        mon = "RWF";
+                      } else if (c.exchange_rate > 0 && localPuv > 0) {
+                        puv = Math.round(localPuv / c.exchange_rate);
+                        mon = c.code;
+                      } else {
+                        mon = c.code;
+                      }
+                      const updated = { ...processingMember, puv, current_mon: mon };
+                      const arr = updated.arrival_date ? new Date(updated.arrival_date) : null;
+                      const dep = updated.depart_date ? new Date(updated.depart_date) : null;
+                      const qty = arr && dep ? Math.max(Math.round((dep.getTime() - arr.getTime()) / 86400000), 0) : 0;
+                      const base = qty * updated.puv;
+                      updated.stay_cost = updated.discount > 0 ? base * (1 - updated.discount / 100) : base;
+                      setProcessingMember(updated);
+                      setShowCurrencyModal(false);
+                    }}
+                  >
+                    <td className="px-3 py-2 font-medium">
+                      {c.code} — {c.label}
+                      {c.code === "RWF" && <span className="text-xs text-gray-400 ml-1">(default)</span>}
+                    </td>
+                    <td className="px-3 py-2">
+                      {c.code === "RWF" ? "—" : `${c.exchange_rate.toLocaleString()} RWF`}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {processingMember.current_mon !== "RWF" && localPuv > 0 && (
+              <p className="text-xs text-gray-500 mb-3">
+                Original: {localPuv.toLocaleString()} RWF
+              </p>
+            )}
+            <button
+              onClick={() => setShowCurrencyModal(false)}
+              className="border px-4 py-2 rounded-lg text-sm w-full"
+            >
+              {t("cancel")}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Success Confirmation Dialog */}
+      {successMsg && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md text-center space-y-4">
+            <CheckCircle2 size={40} className="text-green-500 mx-auto" />
+            <h3 className="text-lg font-semibold text-gray-800">Check-In Complete</h3>
+            <p className="text-sm text-gray-600">{successMsg}</p>
+            <button
+              onClick={() => setSuccessMsg("")}
+              className="bg-green-500 text-white px-6 py-2 rounded-lg text-sm hover:bg-green-600"
+            >
+              OK
+            </button>
           </div>
         </div>
       )}

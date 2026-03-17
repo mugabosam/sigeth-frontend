@@ -25,27 +25,41 @@ const today = () => {
 
 export default function CheckInReservation() {
   const { t } = useLang();
-  const { reservations, setReservations, rooms, setRooms, catrooms } =
+  const { reservations, setReservations, rooms, setRooms, catrooms, currencies } =
     useHotelData();
 
   const [errorMsg, setErrorMsg] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
   const [search, setSearch] = useState("");
   const [processing, setProcessing] = useState<RCS | null>(null);
   const [idVerified, setIdVerified] = useState(false);
   const [swapRoom, setSwapRoom] = useState<string | null>(null);
   const [confirmCheckInOpen, setConfirmCheckInOpen] = useState(false);
   const [checkedInMap, setCheckedInMap] = useState<Map<string, RCS>>(new Map());
+  const [localPuv, setLocalPuv] = useState(0);
+  const [showCurrencyModal, setShowCurrencyModal] = useState(false);
 
-  /* Today's arrivals = open reservations arriving today or earlier (not yet checked in) */
+  const currencyOptions = useMemo(() => [
+    { code: "RWF", label: "Rwandan Franc", exchange_rate: 1 },
+    ...currencies,
+  ], [currencies]);
+
+  /* Today's arrivals = open reservations arriving today or earlier (not yet checked in)
+     + recently checked-in guests kept visible via checkedInMap */
   const arrivals = useMemo(() => {
     const td = today();
-    return reservations.filter(
+    const active = reservations.filter(
       (r) =>
         r.status === 0 &&
-        !r.code_p && // skip group members — handled in group check-in
+        !r.code_p &&
         r.arrival_date <= td,
     );
-  }, [reservations]);
+    const activeIds = new Set(active.map((r) => r.id));
+    const recentCheckedIn = [...checkedInMap.values()].filter(
+      (r) => !activeIds.has(r.id) && !r.code_p && r.arrival_date <= td,
+    );
+    return [...active, ...recentCheckedIn];
+  }, [reservations, checkedInMap]);
 
   /* Upcoming (arriving after today, still open and not group) */
   const upcoming = useMemo(() => {
@@ -114,6 +128,8 @@ export default function CheckInReservation() {
       const response = await frontOfficeApi.checkin({
         room_num: targetRoom,
         guest_name: res.guest_name,
+        current_mon: processing.current_mon,
+        puv: processing.puv,
       });
 
       setReservations((prev) =>
@@ -128,6 +144,10 @@ export default function CheckInReservation() {
         next.set(response.reservation.id!, response.reservation);
         return next;
       });
+
+      setSuccessMsg(
+        `${res.guest_name} has been checked in to room ${targetRoom} successfully.`,
+      );
     } catch (error) {
       setErrorMsg(
         typeof error === "object" && error !== null && "message" in error
@@ -165,6 +185,7 @@ export default function CheckInReservation() {
   }) => {
     const room = rooms.find((r) => r.room_num === res.room_num);
     const nights = calcNights(res.arrival_date, res.depart_date);
+    const isCheckedIn = checkedInMap.has(res.id!) || room?.status === "OCC";
 
     return (
       <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-5 hover:shadow-lg transition-all duration-200">
@@ -223,21 +244,29 @@ export default function CheckInReservation() {
               </p>
             </div>
           </div>
-          <button
-            onClick={() => {
-              setProcessing(res);
-              setIdVerified(false);
-              setSwapRoom(null);
-            }}
-            className={`ml-4 px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-all transform hover:scale-105 shrink-0 ${
-              isUpcoming
-                ? "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                : "bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:shadow-lg"
-            }`}
-          >
-            <UserCheck size={16} />
-            {t("checkIn")}
-          </button>
+          {isCheckedIn ? (
+            <div className="ml-4 px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium bg-green-100 text-green-700 shrink-0">
+              <CheckCircle2 size={16} />
+              Checked In
+            </div>
+          ) : (
+            <button
+              onClick={() => {
+                setProcessing(res);
+                setLocalPuv(res.current_mon === "RWF" ? res.puv : 0);
+                setIdVerified(false);
+                setSwapRoom(null);
+              }}
+              className={`ml-4 px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-all transform hover:scale-105 shrink-0 ${
+                isUpcoming
+                  ? "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  : "bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:shadow-lg"
+              }`}
+            >
+              <UserCheck size={16} />
+              {t("checkIn")}
+            </button>
+          )}
         </div>
       </div>
     );
@@ -495,6 +524,15 @@ export default function CheckInReservation() {
                 </div>
               </div>
 
+              {/* Currency selector */}
+              <button
+                type="button"
+                onClick={() => setShowCurrencyModal(true)}
+                className="w-full border rounded-lg px-3 py-2 text-sm text-left bg-white hover:bg-gray-50"
+              >
+                {t("currency")}: <strong>{processing.current_mon}</strong>
+              </button>
+
               {/* Action */}
               <button
                 disabled={!idVerified}
@@ -513,6 +551,73 @@ export default function CheckInReservation() {
         </div>
       )}
 
+      {/* Currency lookup modal */}
+      {showCurrencyModal && processing && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[60]">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+              {t("selectCurrency")}
+            </h3>
+            <table className="w-full text-sm mb-4">
+              <thead className="bg-gray-50 border-b">
+                <tr>
+                  <th className="text-left px-3 py-2">{t("currency")}</th>
+                  <th className="text-left px-3 py-2">{t("localRate")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currencyOptions.map((c) => (
+                  <tr
+                    key={c.code}
+                    className={`border-b hover:bg-amber-50 cursor-pointer ${processing.current_mon === c.code ? "bg-amber-100" : ""}`}
+                    onClick={() => {
+                      let puv = processing.puv;
+                      let mon = processing.current_mon;
+                      if (c.code === "RWF") {
+                        if (localPuv > 0) puv = localPuv;
+                        mon = "RWF";
+                      } else if (c.exchange_rate > 0 && localPuv > 0) {
+                        puv = Math.round(localPuv / c.exchange_rate);
+                        mon = c.code;
+                      } else {
+                        mon = c.code;
+                      }
+                      const updated = { ...processing, puv, current_mon: mon };
+                      const arr = updated.arrival_date ? new Date(updated.arrival_date) : null;
+                      const dep = updated.depart_date ? new Date(updated.depart_date) : null;
+                      const qty = arr && dep ? Math.max(Math.round((dep.getTime() - arr.getTime()) / 86400000), 0) : 0;
+                      const base = qty * updated.puv;
+                      updated.stay_cost = updated.discount > 0 ? base * (1 - updated.discount / 100) : base;
+                      setProcessing(updated);
+                      setShowCurrencyModal(false);
+                    }}
+                  >
+                    <td className="px-3 py-2 font-medium">
+                      {c.code} — {c.label}
+                      {c.code === "RWF" && <span className="text-xs text-gray-400 ml-1">(default)</span>}
+                    </td>
+                    <td className="px-3 py-2">
+                      {c.code === "RWF" ? "—" : `${c.exchange_rate.toLocaleString()} RWF`}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {processing.current_mon !== "RWF" && localPuv > 0 && (
+              <p className="text-xs text-gray-500 mb-3">
+                Original: {localPuv.toLocaleString()} RWF
+              </p>
+            )}
+            <button
+              onClick={() => setShowCurrencyModal(false)}
+              className="border px-4 py-2 rounded-lg text-sm w-full"
+            >
+              {t("cancel")}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Confirmation Modal */}
       <ConfirmationModal
         isOpen={confirmCheckInOpen}
@@ -524,6 +629,23 @@ export default function CheckInReservation() {
         onConfirm={confirmCheckIn}
         onCancel={() => setConfirmCheckInOpen(false)}
       />
+
+      {/* Success Confirmation Dialog */}
+      {successMsg && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md text-center space-y-4">
+            <CheckCircle2 size={40} className="text-green-500 mx-auto" />
+            <h3 className="text-lg font-semibold text-gray-800">Check-In Complete</h3>
+            <p className="text-sm text-gray-600">{successMsg}</p>
+            <button
+              onClick={() => setSuccessMsg("")}
+              className="bg-green-500 text-white px-6 py-2 rounded-lg text-sm hover:bg-green-600"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Error Dialog */}
       {errorMsg && (

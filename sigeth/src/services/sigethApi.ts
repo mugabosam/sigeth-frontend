@@ -428,7 +428,24 @@ export const coreApi = {
   },
   async exchange() {
     const { data } = await api.get<ApiRecord[]>("/v1/core/exchange/");
-    return data.map(normalizeCurrency);
+    // Find the Rwanda row (country code +250) and expand into per-currency entries
+    const rwanda = data.find((r) => String(r.code_p) === "+250");
+    if (!rwanda) return data.map(normalizeCurrency);
+
+    const currencyFields: Array<{ code: string; label: string; field: string }> = [
+      { code: "USD", label: "US Dollar", field: "usd" },
+      { code: "GBP", label: "British Pound", field: "gbp" },
+      { code: "EUR", label: "Euro", field: "eur" },
+      { code: "JPY", label: "Japanese Yen", field: "jpy" },
+      { code: "CHF", label: "Swiss Franc", field: "chf" },
+    ];
+
+    return currencyFields.map((cf) => ({
+      id: stringValue(rwanda.id),
+      code: cf.code,
+      label: cf.label,
+      exchange_rate: numberValue(rwanda[cf.field]),
+    }));
   },
   async taxes() {
     const { data } = await api.get<ApiRecord[]>("/v1/core/taxes/");

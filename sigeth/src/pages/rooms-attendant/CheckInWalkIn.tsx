@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { UserPlus, Check, AlertTriangle } from "lucide-react";
+import { UserPlus, Check, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { useLang } from "../../hooks/useLang";
 import { useHotelData } from "../../context/HotelDataContext";
 import ConfirmationModal from "../../components/common/ConfirmationModal";
@@ -17,7 +17,7 @@ const today = () => new Date().toISOString().slice(0, 10);
 
 export default function CheckInWalkIn() {
   const { t } = useLang();
-  const { setReservations, rooms, setRooms, paymentModes, catrooms } =
+  const { setReservations, rooms, setRooms, paymentModes, catrooms, currencies } =
     useHotelData();
 
   const blank: RCS = {
@@ -53,10 +53,18 @@ export default function CheckInWalkIn() {
   const [selectedRoomNum, setSelectedRoomNum] = useState<string | null>(null);
   const [roomSearch, setRoomSearch] = useState("");
   const [confirmSubmitOpen, setConfirmSubmitOpen] = useState(false);
+  const [successMsg, setSuccessMsg] = useState("");
+  const [localPuv, setLocalPuv] = useState(0);
+  const [showCurrencyModal, setShowCurrencyModal] = useState(false);
   const [errors, setErrors] = useState<ValidationResult>({
     isValid: true,
     errors: [],
   });
+
+  const currencyOptions = useMemo(() => [
+    { code: "RWF", label: "Rwandan Franc", exchange_rate: 1 },
+    ...currencies,
+  ], [currencies]);
 
   /* Vacant rooms with search */
   const vacantRooms = useMemo(
@@ -110,12 +118,13 @@ export default function CheckInWalkIn() {
     const room = rooms.find((r) => r.room_num === roomNum);
     if (!room) return;
     setSelectedRoomNum(roomNum);
+    setLocalPuv(room.price_1);
     setForm((prev) =>
       calc({
         ...prev,
         room_num: roomNum,
         puv: room.price_1,
-        current_mon: room.current_mon,
+        current_mon: "RWF",
       }),
     );
   };
@@ -151,6 +160,9 @@ export default function CheckInWalkIn() {
       setReservations((prev) => [...prev, response.reservation]);
       setRooms((prev) =>
         prev.map((room) => (room.id === response.room.id ? response.room : room)),
+      );
+      setSuccessMsg(
+        `${form.guest_name} has been checked in to room ${form.room_num} successfully.`,
       );
     } catch (error) {
       setErrorMsg(
@@ -475,6 +487,15 @@ export default function CheckInWalkIn() {
             </div>
           </div>
 
+          {/* Currency selector */}
+          <button
+            type="button"
+            onClick={() => setShowCurrencyModal(true)}
+            className="w-full border rounded-lg px-3 py-2 text-sm text-left bg-white hover:bg-gray-50"
+          >
+            {t("currency")}: <strong>{form.current_mon}</strong>
+          </button>
+
           {/* Selected room summary */}
           {selectedRoomNum && (
             <div className="bg-emerald-50 border border-emerald-200 rounded-lg px-4 py-3 flex items-center justify-between">
@@ -570,6 +591,67 @@ export default function CheckInWalkIn() {
         </div>
       </div>
 
+      {/* Currency lookup modal */}
+      {showCurrencyModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+              {t("selectCurrency")}
+            </h3>
+            <table className="w-full text-sm mb-4">
+              <thead className="bg-gray-50 border-b">
+                <tr>
+                  <th className="text-left px-3 py-2">{t("currency")}</th>
+                  <th className="text-left px-3 py-2">{t("localRate")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currencyOptions.map((c) => (
+                  <tr
+                    key={c.code}
+                    className={`border-b hover:bg-amber-50 cursor-pointer ${form.current_mon === c.code ? "bg-amber-100" : ""}`}
+                    onClick={() => {
+                      if (c.code === "RWF") {
+                        if (localPuv > 0) {
+                          handleChange("puv", localPuv);
+                        }
+                        handleChange("current_mon", "RWF");
+                      } else if (c.exchange_rate > 0 && localPuv > 0) {
+                        const converted = Math.round(localPuv / c.exchange_rate);
+                        handleChange("current_mon", c.code);
+                        handleChange("puv", converted);
+                      } else {
+                        handleChange("current_mon", c.code);
+                      }
+                      setShowCurrencyModal(false);
+                    }}
+                  >
+                    <td className="px-3 py-2 font-medium">
+                      {c.code} — {c.label}
+                      {c.code === "RWF" && <span className="text-xs text-gray-400 ml-1">(default)</span>}
+                    </td>
+                    <td className="px-3 py-2">
+                      {c.code === "RWF" ? "—" : `${c.exchange_rate.toLocaleString()} RWF`}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {form.current_mon !== "RWF" && localPuv > 0 && (
+              <p className="text-xs text-gray-500 mb-3">
+                Original: {localPuv.toLocaleString()} RWF
+              </p>
+            )}
+            <button
+              onClick={() => setShowCurrencyModal(false)}
+              className="border px-4 py-2 rounded-lg text-sm w-full"
+            >
+              {t("cancel")}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Confirmation Modal */}
       <ConfirmationModal
         isOpen={confirmSubmitOpen}
@@ -581,6 +663,23 @@ export default function CheckInWalkIn() {
         onConfirm={confirmSubmit}
         onCancel={() => setConfirmSubmitOpen(false)}
       />
+
+      {/* Success Confirmation Dialog */}
+      {successMsg && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md text-center space-y-4">
+            <CheckCircle2 size={40} className="text-green-500 mx-auto" />
+            <h3 className="text-lg font-semibold text-gray-800">Check-In Complete</h3>
+            <p className="text-sm text-gray-600">{successMsg}</p>
+            <button
+              onClick={() => setSuccessMsg("")}
+              className="bg-green-500 text-white px-6 py-2 rounded-lg text-sm hover:bg-green-600"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Error Dialog */}
       {errorMsg && (

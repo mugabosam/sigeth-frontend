@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Search, Save, Trash2, AlertTriangle } from "lucide-react";
 import { useLang } from "../../hooks/useLang";
 import { useHotelData } from "../../context/HotelDataContext";
@@ -42,6 +42,7 @@ export default function GroupMemberReservation({
   const [showGroupSuggestions, setShowGroupSuggestions] = useState(false);
   const [confirmSaveOpen, setConfirmSaveOpen] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [localPuv, setLocalPuv] = useState(0);
   const [errors, setErrors] = useState<ValidationResult>({
     isValid: true,
     errors: [],
@@ -79,6 +80,11 @@ export default function GroupMemberReservation({
     const fieldError = errors.errors.find((e) => e.field === field);
     return fieldError ? t(fieldError.message as any) : "";
   };
+
+  const currencyOptions = useMemo(() => [
+    { code: "RWF", label: "Rwandan Franc", exchange_rate: 1 },
+    ...currencies,
+  ], [currencies]);
 
   const titles = {
     "1113": t("groupMemberReservation"),
@@ -141,11 +147,12 @@ export default function GroupMemberReservation({
 
   const handleSelectMember = (r: RCS) => {
     setSelected({ ...r });
+    setLocalPuv(r.current_mon === "RWF" ? r.puv : 0);
     setIsNew(false);
   };
   const handleNewMember = () => {
     if (!groupFound) return;
-    setSelected({
+    const newMember = {
       ...blank,
       code_p: groupFound.code_g,
       groupe_name: groupFound.groupe_name,
@@ -155,7 +162,9 @@ export default function GroupMemberReservation({
       current_mon: groupFound.current_mon,
       payt_mode: groupFound.payt_mode,
       discount: groupFound.discount,
-    });
+    };
+    setSelected(newMember);
+    setLocalPuv(groupFound.current_mon === "RWF" ? groupFound.puv : 0);
     setIsNew(true);
   };
 
@@ -430,7 +439,7 @@ export default function GroupMemberReservation({
                     <td className="px-4 py-2">{r.arrival_date}</td>
                     <td className="px-4 py-2">{r.depart_date}</td>
                     <td className="px-4 py-2">
-                      {r.stay_cost.toLocaleString()}
+                      {r.stay_cost.toLocaleString()} {r.current_mon}
                     </td>
                   </tr>
                 ))}
@@ -691,11 +700,12 @@ export default function GroupMemberReservation({
                           className="border-b hover:bg-amber-50 cursor-pointer"
                           onClick={() => {
                             if (!selected) return;
+                            setLocalPuv(r.price_1);
                             const updated = calc({
                               ...selected,
                               room_num: r.room_num,
                               puv: r.price_1,
-                              current_mon: r.current_mon || "RWF",
+                              current_mon: "RWF",
                             });
                             setSelected(updated);
                           }}
@@ -744,7 +754,7 @@ export default function GroupMemberReservation({
           </div>
         </div>
       )}
-      {/* Monnaies.dat currency lookup modal */}
+      {/* Currency lookup modal */}
       {showCurrencyModal && selected && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
@@ -759,28 +769,40 @@ export default function GroupMemberReservation({
                 </tr>
               </thead>
               <tbody>
-                {currencies.map((c) => (
+                {currencyOptions.map((c) => (
                   <tr
                     key={c.code}
-                    className="border-b hover:bg-amber-50 cursor-pointer"
+                    className={`border-b hover:bg-amber-50 cursor-pointer ${selected.current_mon === c.code ? "bg-amber-100" : ""}`}
                     onClick={() => {
-                      handleChange("current_mon", c.code);
-                      if (c.code !== "RWF") {
-                        handleChange("puv", c.exchange_rate);
+                      if (c.code === "RWF") {
+                        if (localPuv > 0) handleChange("puv", localPuv);
+                        handleChange("current_mon", "RWF");
+                      } else if (c.exchange_rate > 0 && localPuv > 0) {
+                        const converted = Math.round(localPuv / c.exchange_rate);
+                        handleChange("current_mon", c.code);
+                        handleChange("puv", converted);
+                      } else {
+                        handleChange("current_mon", c.code);
                       }
                       setShowCurrencyModal(false);
                     }}
                   >
                     <td className="px-3 py-2 font-medium">
                       {c.code} — {c.label}
+                      {c.code === "RWF" && <span className="text-xs text-gray-400 ml-1">(default)</span>}
                     </td>
                     <td className="px-3 py-2">
-                      {c.exchange_rate.toLocaleString()} RWF
+                      {c.code === "RWF" ? "—" : `${c.exchange_rate.toLocaleString()} RWF`}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+            {selected.current_mon !== "RWF" && localPuv > 0 && (
+              <p className="text-xs text-gray-500 mb-3">
+                Original: {localPuv.toLocaleString()} RWF
+              </p>
+            )}
             <button
               onClick={() => setShowCurrencyModal(false)}
               className="border px-4 py-2 rounded-lg text-sm w-full"

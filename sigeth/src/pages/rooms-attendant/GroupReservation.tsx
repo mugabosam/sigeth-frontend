@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Search, Plus, Save, Trash2, AlertTriangle } from "lucide-react";
 import { useLang } from "../../hooks/useLang";
 import { useHotelData } from "../../context/HotelDataContext";
@@ -25,6 +25,7 @@ export default function GroupReservation() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [confirmSaveOpen, setConfirmSaveOpen] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [localPuv, setLocalPuv] = useState(0);
   const [errors, setErrors] = useState<ValidationResult>({
     isValid: true,
     errors: [],
@@ -56,6 +57,11 @@ export default function GroupReservation() {
     return fieldError ? t(fieldError.message as any) : "";
   };
 
+  const currencyOptions = useMemo(() => [
+    { code: "RWF", label: "Rwandan Franc", exchange_rate: 1 },
+    ...currencies,
+  ], [currencies]);
+
   const handleQueryChange = (value: string) => {
     setQuery(value);
     if (!value.trim()) {
@@ -77,6 +83,7 @@ export default function GroupReservation() {
 
   const handleSelectSuggestion = (g: GRC) => {
     setSelected({ ...g });
+    setLocalPuv(g.current_mon === "RWF" ? g.puv : 0);
     setIsNew(false);
     setQuery(g.groupe_name);
     setSuggestions([]);
@@ -91,9 +98,11 @@ export default function GroupReservation() {
     );
     if (found) {
       setSelected({ ...found });
+      setLocalPuv(found.current_mon === "RWF" ? found.puv : 0);
       setIsNew(false);
     } else {
       setSelected({ ...blank, groupe_name: query });
+      setLocalPuv(0);
       setIsNew(true);
     }
     setSuggestions([]);
@@ -468,6 +477,7 @@ export default function GroupReservation() {
                 className="border-b hover:bg-gray-50 cursor-pointer"
                 onClick={() => {
                   setSelected({ ...g });
+                  setLocalPuv(g.current_mon === "RWF" ? g.puv : 0);
                   setIsNew(false);
                 }}
               >
@@ -492,7 +502,7 @@ export default function GroupReservation() {
           </tbody>
         </table>
       </div>
-      {/* Monnaies.dat currency lookup modal */}
+      {/* Currency lookup modal */}
       {showCurrencyModal && selected && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
@@ -507,28 +517,42 @@ export default function GroupReservation() {
                 </tr>
               </thead>
               <tbody>
-                {currencies.map((c) => (
+                {currencyOptions.map((c) => (
                   <tr
                     key={c.code}
-                    className="border-b hover:bg-amber-50 cursor-pointer"
+                    className={`border-b hover:bg-amber-50 cursor-pointer ${selected.current_mon === c.code ? "bg-amber-100" : ""}`}
                     onClick={() => {
-                      handleChange("current_mon", c.code);
-                      if (c.code !== "RWF") {
-                        handleChange("puv", c.exchange_rate);
+                      if (c.code === "RWF") {
+                        if (localPuv > 0) handleChange("puv", localPuv);
+                        handleChange("current_mon", "RWF");
+                        handleChange("exchange", 1);
+                      } else if (c.exchange_rate > 0 && localPuv > 0) {
+                        const converted = Math.round(localPuv / c.exchange_rate);
+                        handleChange("current_mon", c.code);
+                        handleChange("puv", converted);
+                        handleChange("exchange", c.exchange_rate);
+                      } else {
+                        handleChange("current_mon", c.code);
                       }
                       setShowCurrencyModal(false);
                     }}
                   >
                     <td className="px-3 py-2 font-medium">
                       {c.code} — {c.label}
+                      {c.code === "RWF" && <span className="text-xs text-gray-400 ml-1">(default)</span>}
                     </td>
                     <td className="px-3 py-2">
-                      {c.exchange_rate.toLocaleString()} RWF
+                      {c.code === "RWF" ? "—" : `${c.exchange_rate.toLocaleString()} RWF`}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+            {selected.current_mon !== "RWF" && localPuv > 0 && (
+              <p className="text-xs text-gray-500 mb-3">
+                Original: {localPuv.toLocaleString()} RWF
+              </p>
+            )}
             <button
               onClick={() => setShowCurrencyModal(false)}
               className="border px-4 py-2 rounded-lg text-sm w-full"
