@@ -3,12 +3,13 @@ import { UserPlus, Check, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { useLang } from "../../hooks/useLang";
 import { useHotelData } from "../../context/HotelDataContext";
 import ConfirmationModal from "../../components/common/ConfirmationModal";
+import SearchableCountrySelect from "../../components/ui/SearchableCountrySelect";
 import {
   validateCheckInWalkIn,
   type ValidationResult,
 } from "../../utils/roomsAttendantValidation";
 import { createErrorNotification } from "../../utils/errorFormatter";
-import { COUNTRIES, getPhoneCodeByNationality } from "../../utils/countries";
+import { getPhoneCodeByNationality } from "../../utils/countries";
 import type { RCS } from "../../types";
 import { frontOfficeApi } from "../../services/sigethApi";
 
@@ -17,8 +18,14 @@ const today = () => new Date().toISOString().slice(0, 10);
 
 export default function CheckInWalkIn() {
   const { t } = useLang();
-  const { setReservations, rooms, setRooms, paymentModes, catrooms, currencies } =
-    useHotelData();
+  const {
+    setReservations,
+    rooms,
+    setRooms,
+    paymentModes,
+    catrooms,
+    currencies,
+  } = useHotelData();
 
   const blank: RCS = {
     code_p: "",
@@ -60,10 +67,13 @@ export default function CheckInWalkIn() {
     errors: [],
   });
 
-  const currencyOptions = useMemo(() => [
-    { code: "RWF", label: "Rwandan Franc", exchange_rate: 1 },
-    ...currencies,
-  ], [currencies]);
+  const currencyOptions = useMemo(
+    () => [
+      { code: "RWF", label: "Rwandan Franc", exchange_rate: 1 },
+      ...currencies,
+    ],
+    [currencies],
+  );
 
   /* Vacant rooms with search */
   const vacantRooms = useMemo(
@@ -158,7 +168,9 @@ export default function CheckInWalkIn() {
       const response = await frontOfficeApi.walkin(form);
       setReservations((prev) => [...prev, response.reservation]);
       setRooms((prev) =>
-        prev.map((room) => (room.id === response.room.id ? response.room : room)),
+        prev.map((room) =>
+          room.id === response.room.id ? response.room : room,
+        ),
       );
       setSuccessMsg(
         `${form.guest_name} has been checked in to room ${form.room_num} successfully.`,
@@ -235,7 +247,10 @@ export default function CheckInWalkIn() {
                   t("phone"),
                   "tel",
                   true,
-                  { pattern: "^\\+[1-9]\\d{1,14}$", placeholder: "+250..." },
+                  {
+                    pattern: "^(\\+[1-9]\\d{1,14}|\\d{5,15})$",
+                    placeholder: "+250...",
+                  },
                 ],
                 ["email", t("email"), "email", false, {}],
                 ["city", t("city"), "text", false, {}],
@@ -252,33 +267,17 @@ export default function CheckInWalkIn() {
                       {label}{" "}
                       {required && <span className="text-hotel-danger">*</span>}
                     </label>
-                    <select
+                    <SearchableCountrySelect
                       value={String(form[field] ?? "")}
-                      onChange={(e) => handleChange(field, e.target.value)}
-                      required={required}
-                      title={label}
-                      className={`w-full border rounded px-3 py-2 text-sm focus:ring-1 focus:ring-hotel-gold outline-none ${
-                        errorMsg
-                          ? "border-hotel-danger"
-                          : "border-hotel-border"
-                      }`}
-                    >
-                      <option value="">{t("select")}</option>
-                      {field === "nationality" &&
-                        COUNTRIES.map((c) => (
-                          <option key={c.code} value={c.nationality}>
-                            {c.flag} {c.name} ({c.phoneCode})
-                          </option>
-                        ))}
-                      {field === "country" &&
-                        COUNTRIES.map((c) => (
-                          <option key={c.code} value={c.name}>
-                            {c.flag} {c.name}
-                          </option>
-                        ))}
-                    </select>
+                      onChange={(value) => handleChange(field, value)}
+                      placeholder={t("select")}
+                      type={field === "nationality" ? "nationality" : "country"}
+                      className={errorMsg ? "ring-1 ring-hotel-danger" : ""}
+                    />
                     {errorMsg && (
-                      <p className="text-xs text-hotel-danger mt-1">{errorMsg}</p>
+                      <p className="text-xs text-hotel-danger mt-1">
+                        {errorMsg}
+                      </p>
                     )}
                   </div>
                 );
@@ -318,14 +317,21 @@ export default function CheckInWalkIn() {
                     <input
                       type={type}
                       title={label}
-                      value={type === "number" && form[field] === 0 ? "" : String(form[field] ?? "")}
+                      placeholder={
+                        field === "phone"
+                          ? "788 123 456 or +250788123456"
+                          : undefined
+                      }
+                      value={
+                        type === "number" && form[field] === 0
+                          ? ""
+                          : String(form[field] ?? "")
+                      }
                       required={required}
                       onChange={(e) => handleChange(field, e.target.value)}
                       {...attrs}
                       className={`w-full border rounded px-3 py-2 text-sm focus:ring-1 focus:ring-hotel-gold outline-none ${
-                        errorMsg
-                          ? "border-hotel-danger"
-                          : "border-hotel-border"
+                        errorMsg ? "border-hotel-danger" : "border-hotel-border"
                       }`}
                     />
                   )}
@@ -500,7 +506,9 @@ export default function CheckInWalkIn() {
                   }
                   handleChange("current_mon", "RWF");
                 } else {
-                  const rate = currencyOptions.find(c => c.code === code)?.exchange_rate || 1;
+                  const rate =
+                    currencyOptions.find((c) => c.code === code)
+                      ?.exchange_rate || 1;
                   if (localPuv > 0) {
                     const converted = Math.round(localPuv / rate);
                     handleChange("puv", converted);
@@ -510,9 +518,12 @@ export default function CheckInWalkIn() {
               }}
               className="w-full border rounded px-3 py-2 text-sm border-hotel-border"
             >
-              {currencyOptions.map(c => (
+              {currencyOptions.map((c) => (
                 <option key={c.code} value={c.code}>
-                  {c.code} — {c.label} {c.code !== "RWF" ? `(1 = ${c.exchange_rate.toLocaleString()} RWF)` : "(local)"}
+                  {c.code} — {c.label}{" "}
+                  {c.code !== "RWF"
+                    ? `(1 = ${c.exchange_rate.toLocaleString()} RWF)`
+                    : "(local)"}
                 </option>
               ))}
             </select>
@@ -583,7 +594,9 @@ export default function CheckInWalkIn() {
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-bold text-hotel-text-primary">{room.room_num}</p>
+                      <p className="font-bold text-hotel-text-primary">
+                        {room.room_num}
+                      </p>
                       <p className="text-xs text-hotel-text-secondary">
                         {getCatName(room.categorie)}
                       </p>
@@ -612,7 +625,6 @@ export default function CheckInWalkIn() {
         </div>
       </div>
 
-
       {/* Confirmation Modal */}
       <ConfirmationModal
         isOpen={confirmSubmitOpen}
@@ -630,7 +642,9 @@ export default function CheckInWalkIn() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded p-4 w-full max-w-md text-center space-y-4 border border-hotel-border">
             <CheckCircle2 size={40} className="text-hotel-gold mx-auto" />
-            <h3 className="text-base font-semibold text-hotel-text-primary">Check-In Complete</h3>
+            <h3 className="text-base font-semibold text-hotel-text-primary">
+              Check-In Complete
+            </h3>
             <p className="text-sm text-hotel-text-secondary">{successMsg}</p>
             <button
               onClick={() => setSuccessMsg("")}
@@ -647,8 +661,12 @@ export default function CheckInWalkIn() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded p-4 w-full max-w-md text-center space-y-4 border border-hotel-border">
             <AlertTriangle size={40} className="text-hotel-danger mx-auto" />
-            <h3 className="text-base font-semibold text-hotel-text-primary">Error</h3>
-            <p className="text-sm text-hotel-text-secondary whitespace-pre-wrap">{errorMsg}</p>
+            <h3 className="text-base font-semibold text-hotel-text-primary">
+              Error
+            </h3>
+            <p className="text-sm text-hotel-text-secondary whitespace-pre-wrap">
+              {errorMsg}
+            </p>
             <button
               onClick={() => setErrorMsg("")}
               className="bg-hotel-danger text-white px-6 py-2 rounded text-sm hover:opacity-90"

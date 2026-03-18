@@ -3,12 +3,13 @@ import { Search, Save, Trash2, AlertTriangle } from "lucide-react";
 import { useLang } from "../../hooks/useLang";
 import { useHotelData } from "../../context/HotelDataContext";
 import ConfirmationModal from "../../components/common/ConfirmationModal";
+import SearchableCountrySelect from "../../components/ui/SearchableCountrySelect";
 import {
   validateGroupMemberReservation,
   type ValidationResult,
 } from "../../utils/roomsAttendantValidation";
 import { createErrorNotification } from "../../utils/errorFormatter";
-import { COUNTRIES, getPhoneCodeByNationality } from "../../utils/countries";
+import { getPhoneCodeByNationality } from "../../utils/countries";
 import type { RCS } from "../../types";
 import { frontOfficeApi } from "../../services/sigethApi";
 
@@ -80,10 +81,13 @@ export default function GroupMemberReservation({
     return fieldError ? t(fieldError.message as any) : "";
   };
 
-  const currencyOptions = useMemo(() => [
-    { code: "RWF", label: "Rwandan Franc", exchange_rate: 1 },
-    ...currencies,
-  ], [currencies]);
+  const currencyOptions = useMemo(
+    () => [
+      { code: "RWF", label: "Rwandan Franc", exchange_rate: 1 },
+      ...currencies,
+    ],
+    [currencies],
+  );
 
   const titles = {
     "1113": t("groupMemberReservation"),
@@ -370,19 +374,33 @@ export default function GroupMemberReservation({
           <div className="bg-hotel-cream border border-hotel-border rounded p-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
               <div>
-                <span className="text-hotel-text-secondary">{t("groupCode")}:</span>{" "}
-                <strong className="text-hotel-text-primary">{groupFound.code_g}</strong>
+                <span className="text-hotel-text-secondary">
+                  {t("groupCode")}:
+                </span>{" "}
+                <strong className="text-hotel-text-primary">
+                  {groupFound.code_g}
+                </strong>
               </div>
               <div>
-                <span className="text-hotel-text-secondary">{t("groupName")}:</span>{" "}
-                <strong className="text-hotel-text-primary">{groupFound.groupe_name}</strong>
+                <span className="text-hotel-text-secondary">
+                  {t("groupName")}:
+                </span>{" "}
+                <strong className="text-hotel-text-primary">
+                  {groupFound.groupe_name}
+                </strong>
               </div>
               <div>
-                <span className="text-hotel-text-secondary">{t("persons")}:</span>{" "}
-                <strong className="text-hotel-text-primary">{groupFound.number_pers}</strong>
+                <span className="text-hotel-text-secondary">
+                  {t("persons")}:
+                </span>{" "}
+                <strong className="text-hotel-text-primary">
+                  {groupFound.number_pers}
+                </strong>
               </div>
               <div>
-                <span className="text-hotel-text-secondary">{t("status")}:</span>{" "}
+                <span className="text-hotel-text-secondary">
+                  {t("status")}:
+                </span>{" "}
                 <strong className="text-hotel-text-primary">
                   {groupFound.status === 0
                     ? t("statusOpen")
@@ -415,10 +433,7 @@ export default function GroupMemberReservation({
                     t("departDate"),
                     t("stayCost"),
                   ].map((h) => (
-                    <th
-                      key={h}
-                      className="text-left py-2 px-2 font-medium"
-                    >
+                    <th key={h} className="text-left py-2 px-2 font-medium">
                       {h}
                     </th>
                   ))}
@@ -431,11 +446,21 @@ export default function GroupMemberReservation({
                     className="border-b border-hotel-border hover:bg-hotel-cream cursor-pointer"
                     onClick={() => handleSelectMember(r)}
                   >
-                    <td className="py-2 px-2 text-hotel-text-primary">{r.room_num}</td>
-                    <td className="py-2 px-2 text-hotel-text-primary">{r.guest_name}</td>
-                    <td className="py-2 px-2 text-hotel-text-primary">{r.phone}</td>
-                    <td className="py-2 px-2 text-hotel-text-primary">{r.arrival_date}</td>
-                    <td className="py-2 px-2 text-hotel-text-primary">{r.depart_date}</td>
+                    <td className="py-2 px-2 text-hotel-text-primary">
+                      {r.room_num}
+                    </td>
+                    <td className="py-2 px-2 text-hotel-text-primary">
+                      {r.guest_name}
+                    </td>
+                    <td className="py-2 px-2 text-hotel-text-primary">
+                      {r.phone}
+                    </td>
+                    <td className="py-2 px-2 text-hotel-text-primary">
+                      {r.arrival_date}
+                    </td>
+                    <td className="py-2 px-2 text-hotel-text-primary">
+                      {r.depart_date}
+                    </td>
                     <td className="py-2 px-2 text-hotel-text-primary">
                       {r.stay_cost.toLocaleString()} {r.current_mon}
                     </td>
@@ -483,7 +508,10 @@ export default function GroupMemberReservation({
                   t("phone"),
                   "tel",
                   true,
-                  { pattern: "^\\+[1-9]\\d{1,14}$", placeholder: "+250..." },
+                  {
+                    pattern: "^(\\+[1-9]\\d{1,14}|\\d{5,15})$",
+                    placeholder: "+250...",
+                  },
                 ],
                 ["email", t("email"), "email", false, {}],
                 ["city", t("city"), "text", false, {}],
@@ -506,42 +534,21 @@ export default function GroupMemberReservation({
                       {label}{" "}
                       {required && <span className="text-hotel-danger">*</span>}
                     </label>
-                    <select
-                      value={selected[field] ?? ""}
-                      onChange={(e) => handleChange(field, e.target.value)}
-                      required={required}
-                      title={label}
-                      className={`w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold ${
-                        errorMsg
-                          ? "border-hotel-danger"
-                          : "border-hotel-border"
-                      }`}
-                    >
-                      <option value="">Select</option>
-                      {field === "nationality" &&
-                        COUNTRIES.map((c) => (
-                          <option key={c.code} value={c.nationality}>
-                            {c.flag} {c.name} ({c.phoneCode})
-                          </option>
-                        ))}
-                      {field === "country" &&
-                        COUNTRIES.map((c) => (
-                          <option key={c.code} value={c.name}>
-                            {c.flag} {c.name}
-                          </option>
-                        ))}
-                    </select>
+                    <SearchableCountrySelect
+                      value={(selected[field] ?? "") as string}
+                      onChange={(value) => handleChange(field, value)}
+                      placeholder={t("select")}
+                      type={field === "nationality" ? "nationality" : "country"}
+                      className={errorMsg ? "ring-1 ring-hotel-danger" : ""}
+                    />
                     {errorMsg && (
-                      <p className="text-xs text-hotel-danger mt-1">{errorMsg}</p>
+                      <p className="text-xs text-hotel-danger mt-1">
+                        {errorMsg}
+                      </p>
                     )}
                   </div>
                 );
               }
-
-              const phoneCode =
-                field === "phone"
-                  ? getPhoneCodeByNationality(selected.nationality)
-                  : undefined;
 
               return (
                 <div key={field}>
@@ -549,54 +556,57 @@ export default function GroupMemberReservation({
                     {label}{" "}
                     {required && <span className="text-hotel-danger">*</span>}
                   </label>
-                  {field === "phone" && phoneCode ? (
-                    <div className="flex items-center gap-1">
-                      <span className="bg-hotel-cream border border-hotel-border rounded px-3 py-2 text-xs font-semibold text-hotel-text-primary">
-                        {phoneCode}
-                      </span>
+                  {(() => {
+                    const phoneCode =
+                      field === "phone"
+                        ? getPhoneCodeByNationality(selected.nationality)
+                        : undefined;
+                    return field === "phone" && phoneCode ? (
+                      <div className="flex items-center gap-1">
+                        <span className="bg-hotel-cream border border-hotel-border rounded-l px-3 py-2 text-xs font-semibold text-hotel-text-primary">
+                          {phoneCode}
+                        </span>
+                        <input
+                          type={type}
+                          placeholder="788 123 456"
+                          value={selected[field] ?? ""}
+                          required={required}
+                          onChange={(e) => handleChange(field, e.target.value)}
+                          title={label}
+                          className={`flex-1 border rounded-r px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold ${
+                            errorMsg
+                              ? "border-hotel-danger"
+                              : "border-hotel-border"
+                          }`}
+                        />
+                      </div>
+                    ) : (
                       <input
                         type={type}
-                        placeholder="788 123 456"
+                        placeholder={
+                          field === "phone"
+                            ? "788 123 456 or +250788123456"
+                            : undefined
+                        }
                         value={selected[field] ?? ""}
                         required={required}
                         onChange={(e) => handleChange(field, e.target.value)}
                         title={label}
-                        className={`flex-1 border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold ${
+                        className={`w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold ${
                           errorMsg
                             ? "border-hotel-danger"
                             : "border-hotel-border"
                         }`}
                       />
-                    </div>
-                  ) : (
-                    <input
-                      type={type}
-                      value={type === "number" && selected[field] === 0 ? "" : (selected[field] ?? "")}
-                      readOnly={field === "groupe_name"}
-                      required={required}
-                      onChange={(e) =>
-                        handleChange(
-                          field,
-                          type === "number"
-                            ? Number(e.target.value)
-                            : e.target.value,
-                        )
-                      }
-                      {...attrs}
-                      title={label}
-                      className={`w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold ${field === "groupe_name" ? "bg-hotel-cream" : ""} ${
-                        errorMsg
-                          ? "border-hotel-danger"
-                          : "border-hotel-border"
-                      }`}
-                    />
-                  )}
+                    );
+                  })()}
                   {errorMsg && (
                     <p className="text-xs text-hotel-danger mt-1">{errorMsg}</p>
                   )}
                 </div>
               );
             })}
+
             {/* Currency dropdown */}
             <div>
               <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
@@ -610,7 +620,9 @@ export default function GroupMemberReservation({
                     if (localPuv > 0) handleChange("puv", localPuv);
                     handleChange("current_mon", "RWF");
                   } else {
-                    const rate = currencyOptions.find(c => c.code === code)?.exchange_rate || 1;
+                    const rate =
+                      currencyOptions.find((c) => c.code === code)
+                        ?.exchange_rate || 1;
                     if (localPuv > 0) {
                       const converted = Math.round(localPuv / rate);
                       handleChange("puv", converted);
@@ -620,9 +632,12 @@ export default function GroupMemberReservation({
                 }}
                 className="w-full border border-hotel-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
               >
-                {currencyOptions.map(c => (
+                {currencyOptions.map((c) => (
                   <option key={c.code} value={c.code}>
-                    {c.code} — {c.label} {c.code !== "RWF" ? `(1 = ${c.exchange_rate.toLocaleString()} RWF)` : "(local)"}
+                    {c.code} — {c.label}{" "}
+                    {c.code !== "RWF"
+                      ? `(1 = ${c.exchange_rate.toLocaleString()} RWF)`
+                      : "(local)"}
                   </option>
                 ))}
               </select>
@@ -659,7 +674,11 @@ export default function GroupMemberReservation({
                   </label>
                   <input
                     type={type}
-                    value={type === "number" && selected[field] === 0 ? "" : (selected[field] ?? "")}
+                    value={
+                      type === "number" && selected[field] === 0
+                        ? ""
+                        : (selected[field] ?? "")
+                    }
                     readOnly={field === "stay_cost"}
                     onChange={(e) =>
                       handleChange(
@@ -671,9 +690,7 @@ export default function GroupMemberReservation({
                     }
                     title={label}
                     className={`w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold ${field === "stay_cost" ? "bg-hotel-cream" : ""} ${
-                      errorMsg
-                        ? "border-hotel-danger"
-                        : "border-hotel-border"
+                      errorMsg ? "border-hotel-danger" : "border-hotel-border"
                     }`}
                   />
                   {errorMsg && (
@@ -728,7 +745,9 @@ export default function GroupMemberReservation({
                           <td className="py-1 px-2 font-medium text-hotel-text-primary">
                             {r.room_num}
                           </td>
-                          <td className="py-1 px-2 text-hotel-text-primary">{r.designation}</td>
+                          <td className="py-1 px-2 text-hotel-text-primary">
+                            {r.designation}
+                          </td>
                           <td className="py-1 px-2 text-hotel-text-primary">
                             {r.price_1.toLocaleString()}
                           </td>
@@ -798,8 +817,12 @@ export default function GroupMemberReservation({
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white border border-hotel-border rounded p-4 w-full max-w-md text-center space-y-3">
             <AlertTriangle size={40} className="text-hotel-danger mx-auto" />
-            <h3 className="text-base font-display font-semibold text-hotel-text-primary">Error</h3>
-            <p className="text-xs text-hotel-text-secondary whitespace-pre-wrap">{errorMsg}</p>
+            <h3 className="text-base font-display font-semibold text-hotel-text-primary">
+              Error
+            </h3>
+            <p className="text-xs text-hotel-text-secondary whitespace-pre-wrap">
+              {errorMsg}
+            </p>
             <button
               onClick={() => setErrorMsg("")}
               className="bg-hotel-danger text-white px-4 py-2 rounded text-sm font-medium hover:bg-red-700 transition-colors"

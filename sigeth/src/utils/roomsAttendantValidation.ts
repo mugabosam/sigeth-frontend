@@ -9,6 +9,7 @@
  */
 
 import type { GRC, RCS } from '../types';
+import { getPhoneCodeByNationality } from './countries';
 
 export interface ValidationError {
     field: string;
@@ -28,12 +29,25 @@ function isValidEmail(email: string): boolean {
     return regex.test(email.trim());
 }
 
-// Helper: Phone validation (strict with country code)
-function isValidPhone(phone: string): boolean {
+// Helper: Phone validation
+// Accepts two formats:
+// 1. Phone with country code prefix: +250788888 (start with + followed by country code and digits)
+// 2. Phone without prefix: 788888 (just digits, country code can be from nationality badge or entered separately)
+// User can choose which format to use - if they have a phone from a different country, they can add the +code
+function isValidPhone(phone: string, countryCode?: string): boolean {
     if (!phone || phone.trim() === '') return false;
-    // Must start with + followed by country code and digits
-    const regex = /^\+[1-9]\d{1,14}$/;
-    return regex.test(phone.trim());
+
+    const trimmedPhone = phone.trim();
+
+    // Accept phone WITH country code prefix (e.g., +250788888)
+    const withCountryCodeRegex = /^\+[1-9]\d{1,14}$/;
+    if (withCountryCodeRegex.test(trimmedPhone)) return true;
+
+    // Accept phone WITHOUT country code (e.g., 788888) 
+    // This can be used with the country code from selected nationality
+    // or the user can add their own country code if they prefer
+    const withoutCountryCodeRegex = /^\d{5,15}$/;
+    return withoutCountryCodeRegex.test(trimmedPhone);
 }
 
 // Helper: ID/Passport validation (alphanumeric only, minimum 5 characters)
@@ -78,11 +92,13 @@ export function validateGroupReservation(group: GRC): ValidationResult {
 
     // code_g: NOT required — backend auto-generates it
 
-    // Phone: Required and must have country code
+    // Phone: Required and can be in format: digits only (e.g., 788888) or with country code (e.g., +250788888)
     if (!group.phone || group.phone.trim() === '') {
         errors.push({ field: 'phone', message: 'phoneRequired' });
-    } else if (!isValidPhone(group.phone)) {
-        errors.push({ field: 'phone', message: 'invalidPhoneFormatCountryCode' });
+    } else {
+        if (!isValidPhone(group.phone)) {
+            errors.push({ field: 'phone', message: 'invalidPhoneFormat' });
+        }
     }
 
     // Email: Optional but if provided must be valid
@@ -168,11 +184,13 @@ export function validateIndividualReservation(reservation: RCS): ValidationResul
         errors.push({ field: 'room_num', message: 'roomNumberRequired' });
     }
 
-    // Phone: Required and must have country code
+    // Phone: Required and can be in format: digits only (e.g., 788888) or with country code (e.g., +250788888)
     if (!reservation.phone || reservation.phone.trim() === '') {
         errors.push({ field: 'phone', message: 'phoneRequired' });
-    } else if (!isValidPhone(reservation.phone)) {
-        errors.push({ field: 'phone', message: 'invalidPhoneFormatCountryCode' });
+    } else {
+        if (!isValidPhone(reservation.phone)) {
+            errors.push({ field: 'phone', message: 'invalidPhoneFormat' });
+        }
     }
 
     // Email: Optional but if provided must be valid
@@ -271,11 +289,13 @@ export function validateGroupMemberReservation(member: RCS): ValidationResult {
         errors.push({ field: 'room_num', message: 'roomNumberRequired' });
     }
 
-    // Phone: Required and must have country code
+    // Phone: Required and can be in format: digits only (e.g., 788888) or with country code (e.g., +250788888)
     if (!member.phone || member.phone.trim() === '') {
         errors.push({ field: 'phone', message: 'phoneRequired' });
-    } else if (!isValidPhone(member.phone)) {
-        errors.push({ field: 'phone', message: 'invalidPhoneFormatCountryCode' });
+    } else {
+        if (!isValidPhone(member.phone)) {
+            errors.push({ field: 'phone', message: 'invalidPhoneFormat' });
+        }
     }
 
     // Email: Optional but if provided must be valid
@@ -316,11 +336,13 @@ export function validateCheckIn(reservation: RCS): ValidationResult {
         errors.push({ field: 'room_num', message: 'roomNumberRequired' });
     }
 
-    // Phone: Required and must have country code
+    // Phone: Required and can be in format: digits only (e.g., 788888) or with country code (e.g., +250788888)
     if (!reservation.phone || reservation.phone.trim() === '') {
         errors.push({ field: 'phone', message: 'phoneRequired' });
-    } else if (!isValidPhone(reservation.phone)) {
-        errors.push({ field: 'phone', message: 'invalidPhoneFormatCountryCode' });
+    } else {
+        if (!isValidPhone(reservation.phone)) {
+            errors.push({ field: 'phone', message: 'invalidPhoneFormat' });
+        }
     }
 
     // Adults: Required and must be at least 1
@@ -370,11 +392,13 @@ export function validateCheckInWalkIn(form: RCS): ValidationResult {
         errors.push({ field: 'room_num', message: 'roomNumberRequired' });
     }
 
-    // Phone: Required and must have country code
+    // Phone: Required and can be in format: digits only (e.g., 788888) or with country code (e.g., +250788888)
     if (!form.phone || form.phone.trim() === '') {
         errors.push({ field: 'phone', message: 'phoneRequired' });
-    } else if (!isValidPhone(form.phone)) {
-        errors.push({ field: 'phone', message: 'invalidPhoneFormatCountryCode' });
+    } else {
+        if (!isValidPhone(form.phone)) {
+            errors.push({ field: 'phone', message: 'invalidPhoneFormat' });
+        }
     }
 
     // Email: Optional but if provided must be valid

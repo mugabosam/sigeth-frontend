@@ -56,10 +56,13 @@ export default function GroupReservation() {
     return fieldError ? t(fieldError.message as any) : "";
   };
 
-  const currencyOptions = useMemo(() => [
-    { code: "RWF", label: "Rwandan Franc", exchange_rate: 1 },
-    ...currencies,
-  ], [currencies]);
+  const currencyOptions = useMemo(
+    () => [
+      { code: "RWF", label: "Rwandan Franc", exchange_rate: 1 },
+      ...currencies,
+    ],
+    [currencies],
+  );
 
   const handleQueryChange = (value: string) => {
     setQuery(value);
@@ -278,14 +281,23 @@ export default function GroupReservation() {
                   t("phone"),
                   "tel",
                   true,
-                  { pattern: "^\\+[1-9]\\d{1,14}$", placeholder: "+250..." },
+                  {
+                    pattern: "^(\\+[1-9]\\d{1,14}|\\d{5,15})$",
+                    placeholder: "+250...",
+                  },
                 ],
                 ["email", t("email"), "email", false, {}],
                 ["tin", t("tin"), "text", false, {}],
                 ["number_pers", t("persons"), "number", true, { min: "1" }],
                 ["arrival_date", t("arrivalDate"), "date", true, {}],
                 ["puv", t("rateDay"), "number", true, { min: "0" }],
-                ["discount", t("discount"), "number", false, { min: "0", max: "100" }],
+                [
+                  "discount",
+                  t("discount"),
+                  "number",
+                  false,
+                  { min: "0", max: "100" },
+                ],
                 ["stay_cost", t("stayCost"), "number", false, {}],
                 ["depart_date", t("departDate"), "date", true, {}],
                 ["qty", t("nightNum"), "number", false, {}],
@@ -332,7 +344,11 @@ export default function GroupReservation() {
                   ) : (
                     <input
                       type={type}
-                      value={type === "number" && selected[field] === 0 ? "" : (selected[field] ?? "")}
+                      value={
+                        type === "number" && selected[field] === 0
+                          ? ""
+                          : (selected[field] ?? "")
+                      }
                       readOnly={
                         (field as string) === "qty" ||
                         (field as string) === "stay_cost"
@@ -354,9 +370,7 @@ export default function GroupReservation() {
                           ? "bg-hotel-cream"
                           : ""
                       } ${
-                        errorMsg
-                          ? "border-hotel-danger"
-                          : "border-hotel-border"
+                        errorMsg ? "border-hotel-danger" : "border-hotel-border"
                       }`}
                     />
                   )}
@@ -400,7 +414,9 @@ export default function GroupReservation() {
                     if (localPuv > 0) handleChange("puv", localPuv);
                     handleChange("current_mon", "RWF");
                   } else {
-                    const rate = currencyOptions.find(c => c.code === code)?.exchange_rate || 1;
+                    const rate =
+                      currencyOptions.find((c) => c.code === code)
+                        ?.exchange_rate || 1;
                     if (localPuv > 0) {
                       const converted = Math.round(localPuv / rate);
                       handleChange("puv", converted);
@@ -410,9 +426,12 @@ export default function GroupReservation() {
                 }}
                 className="w-full border border-hotel-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
               >
-                {currencyOptions.map(c => (
+                {currencyOptions.map((c) => (
                   <option key={c.code} value={c.code}>
-                    {c.code} — {c.label} {c.code !== "RWF" ? `(1 = ${c.exchange_rate.toLocaleString()} RWF)` : "(local)"}
+                    {c.code} — {c.label}{" "}
+                    {c.code !== "RWF"
+                      ? `(1 = ${c.exchange_rate.toLocaleString()} RWF)`
+                      : "(local)"}
                   </option>
                 ))}
               </select>
@@ -477,10 +496,7 @@ export default function GroupReservation() {
                 t("stayCost"),
                 t("status"),
               ].map((h) => (
-                <th
-                  key={h}
-                  className="text-left py-2 px-2 font-medium"
-                >
+                <th key={h} className="text-left py-2 px-2 font-medium">
                   {h}
                 </th>
               ))}
@@ -497,12 +513,22 @@ export default function GroupReservation() {
                   setIsNew(false);
                 }}
               >
-                <td className="py-2 px-2 text-hotel-text-primary">{g.code_g}</td>
-                <td className="py-2 px-2 font-medium text-hotel-text-primary">{g.groupe_name}</td>
+                <td className="py-2 px-2 text-hotel-text-primary">
+                  {g.code_g}
+                </td>
+                <td className="py-2 px-2 font-medium text-hotel-text-primary">
+                  {g.groupe_name}
+                </td>
                 <td className="py-2 px-2 text-hotel-text-primary">{g.phone}</td>
-                <td className="py-2 px-2 text-hotel-text-primary">{g.arrival_date}</td>
-                <td className="py-2 px-2 text-hotel-text-primary">{g.depart_date}</td>
-                <td className="py-2 px-2 text-hotel-text-primary">{g.number_pers}</td>
+                <td className="py-2 px-2 text-hotel-text-primary">
+                  {g.arrival_date}
+                </td>
+                <td className="py-2 px-2 text-hotel-text-primary">
+                  {g.depart_date}
+                </td>
+                <td className="py-2 px-2 text-hotel-text-primary">
+                  {g.number_pers}
+                </td>
                 <td className="py-2 px-2 text-hotel-text-primary">
                   {g.stay_cost.toLocaleString()} {g.current_mon}
                 </td>
@@ -545,8 +571,12 @@ export default function GroupReservation() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white border border-hotel-border rounded p-4 w-full max-w-md text-center space-y-3">
             <AlertTriangle size={40} className="text-hotel-danger mx-auto" />
-            <h3 className="text-base font-display font-semibold text-hotel-text-primary">Error</h3>
-            <p className="text-xs text-hotel-text-secondary whitespace-pre-wrap">{errorMsg}</p>
+            <h3 className="text-base font-display font-semibold text-hotel-text-primary">
+              Error
+            </h3>
+            <p className="text-xs text-hotel-text-secondary whitespace-pre-wrap">
+              {errorMsg}
+            </p>
             <button
               onClick={() => setErrorMsg("")}
               className="bg-hotel-danger text-white px-4 py-2 rounded text-sm font-medium hover:bg-red-700 transition-colors"

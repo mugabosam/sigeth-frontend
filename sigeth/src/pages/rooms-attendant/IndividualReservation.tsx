@@ -1,14 +1,22 @@
 import { useState, useMemo } from "react";
-import { Search, Plus, Save, Trash2, CheckCircle2, AlertTriangle } from "lucide-react";
+import {
+  Search,
+  Plus,
+  Save,
+  Trash2,
+  CheckCircle2,
+  AlertTriangle,
+} from "lucide-react";
 import { useLang } from "../../hooks/useLang";
 import { useHotelData } from "../../context/HotelDataContext";
 import ConfirmationModal from "../../components/common/ConfirmationModal";
+import SearchableCountrySelect from "../../components/ui/SearchableCountrySelect";
 import {
   validateIndividualReservation,
   type ValidationResult,
 } from "../../utils/roomsAttendantValidation";
 import { createErrorNotification } from "../../utils/errorFormatter";
-import { COUNTRIES, getPhoneCodeByNationality } from "../../utils/countries";
+import { getPhoneCodeByNationality } from "../../utils/countries";
 import type { RCS } from "../../types";
 import { frontOfficeApi } from "../../services/sigethApi";
 
@@ -80,10 +88,13 @@ export default function IndividualReservation({
     return fieldError ? t(fieldError.message as any) : "";
   };
 
-  const currencyOptions = useMemo(() => [
-    { code: "RWF", label: "Rwandan Franc", exchange_rate: 1 },
-    ...currencies,
-  ], [currencies]);
+  const currencyOptions = useMemo(
+    () => [
+      { code: "RWF", label: "Rwandan Franc", exchange_rate: 1 },
+      ...currencies,
+    ],
+    [currencies],
+  );
 
   const titles: Record<Mode, string> = {
     "1112": t("individualReservation"),
@@ -203,17 +214,23 @@ export default function IndividualReservation({
           guest_name: selected.guest_name,
         });
         setReservations((prev) =>
-          prev.map((r) => (r.id === response.reservation.id ? response.reservation : r)),
+          prev.map((r) =>
+            r.id === response.reservation.id ? response.reservation : r,
+          ),
         );
         setRooms((prev) =>
-          prev.map((room) => (room.id === response.room.id ? response.room : room)),
+          prev.map((room) =>
+            room.id === response.room.id ? response.room : room,
+          ),
         );
         setSuccessMessage("Check-in successful!");
       } else if (mode === "1116") {
         const response = await frontOfficeApi.walkin(selected);
         setReservations((prev) => [...prev, response.reservation]);
         setRooms((prev) =>
-          prev.map((room) => (room.id === response.room.id ? response.room : room)),
+          prev.map((room) =>
+            room.id === response.room.id ? response.room : room,
+          ),
         );
         setSuccessMessage("Walk-in registration successful!");
       } else {
@@ -225,12 +242,16 @@ export default function IndividualReservation({
 
         if (isNew || !selected.id) {
           setReservations((prev) => [...prev, saved]);
-          setSuccessMessage(`Reservation created successfully! Reservation ID: ${saved.code_p}`);
+          setSuccessMessage(
+            `Reservation created successfully! Reservation ID: ${saved.code_p}`,
+          );
         } else {
           setReservations((prev) =>
             prev.map((r) => (r.id === saved.id ? saved : r)),
           );
-          setSuccessMessage(`Reservation updated successfully! Reservation ID: ${saved.code_p}`);
+          setSuccessMessage(
+            `Reservation updated successfully! Reservation ID: ${saved.code_p}`,
+          );
         }
       }
       setShowSuccessModal(true);
@@ -319,7 +340,9 @@ export default function IndividualReservation({
                     <div className="font-medium text-hotel-text-primary">
                       {r.room_num}
                     </div>
-                    <div className="text-xs text-hotel-text-secondary">{r.guest_name}</div>
+                    <div className="text-xs text-hotel-text-secondary">
+                      {r.guest_name}
+                    </div>
                   </button>
                 ))}
               </div>
@@ -415,7 +438,10 @@ export default function IndividualReservation({
                   t("phone"),
                   "tel",
                   true,
-                  { pattern: "^\\+[1-9]\\d{1,14}$", placeholder: "+250..." },
+                  {
+                    pattern: "^(\\+[1-9]\\d{1,14}|\\d{5,15})$",
+                    placeholder: "+250...",
+                  },
                 ],
                 ["email", t("email"), "email", false, {}],
                 ["city", t("city"), "text", false, {}],
@@ -426,7 +452,13 @@ export default function IndividualReservation({
                 ["children", t("children"), "number", false, { min: "0" }],
                 ["age", t("age"), "number", false, { min: "0" }],
                 ["puv", t("pricePerNight"), "number", false, { min: "0" }],
-                ["discount", t("discount"), "number", false, { min: "0", max: "100" }],
+                [
+                  "discount",
+                  t("discount"),
+                  "number",
+                  false,
+                  { min: "0", max: "100" },
+                ],
                 ["airport_time", t("airportTime"), "text", false, {}],
                 ["stay_cost", t("stayCost"), "number", false, {}],
                 ["deposit", t("deposit"), "number", true, { min: "0" }],
@@ -442,89 +474,71 @@ export default function IndividualReservation({
                       {label}{" "}
                       {required && <span className="text-hotel-danger">*</span>}
                     </label>
-                    <select
-                      value={selected[field] ?? ""}
-                      onChange={(e) => handleChange(field, e.target.value)}
-                      required={required}
-                      title={label}
-                      className={`w-full border rounded px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-hotel-gold ${
-                        errorMsg
-                          ? "border-hotel-danger"
-                          : "border-hotel-border"
-                      }`}
-                    >
-                      <option value="">{t("select")}</option>
-                      {field === "nationality" &&
-                        COUNTRIES.map((c) => (
-                          <option key={c.code} value={c.nationality}>
-                            {c.flag} {c.name} ({c.phoneCode})
-                          </option>
-                        ))}
-                      {field === "country" &&
-                        COUNTRIES.map((c) => (
-                          <option key={c.code} value={c.name}>
-                            {c.flag} {c.name}
-                          </option>
-                        ))}
-                    </select>
+                    <SearchableCountrySelect
+                      value={(selected[field] ?? "") as string}
+                      onChange={(value) => handleChange(field, value)}
+                      placeholder={t("select")}
+                      type={field === "nationality" ? "nationality" : "country"}
+                      className={errorMsg ? "ring-1 ring-hotel-danger" : ""}
+                    />
                     {errorMsg && (
-                      <p className="text-xs text-hotel-danger mt-1">{errorMsg}</p>
+                      <p className="text-xs text-hotel-danger mt-1">
+                        {errorMsg}
+                      </p>
                     )}
                   </div>
                 );
               }
-              const phoneCode =
-                field === "phone"
-                  ? getPhoneCodeByNationality(selected.nationality)
-                  : undefined;
-
               return (
                 <div key={field}>
                   <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
-                    {label} {required && <span className="text-hotel-danger">*</span>}
+                    {label}{" "}
+                    {required && <span className="text-hotel-danger">*</span>}
                   </label>
-                  {field === "phone" && phoneCode ? (
-                    <div className="flex items-center gap-1">
-                      <span className="bg-hotel-cream border border-hotel-border rounded-l px-2 py-2 text-xs font-semibold text-hotel-text-secondary">
-                        {phoneCode}
-                      </span>
+                  {(() => {
+                    const phoneCode =
+                      field === "phone"
+                        ? getPhoneCodeByNationality(selected.nationality)
+                        : undefined;
+                    return field === "phone" && phoneCode ? (
+                      <div className="flex items-center gap-1">
+                        <span className="bg-hotel-cream border border-hotel-border rounded-l px-2 py-2 text-xs font-semibold text-hotel-text-secondary">
+                          {phoneCode}
+                        </span>
+                        <input
+                          type={type}
+                          placeholder="788 123 456"
+                          value={selected[field] ?? ""}
+                          required={required}
+                          onChange={(e) => handleChange(field, e.target.value)}
+                          title={label}
+                          className={`flex-1 border rounded-r px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-hotel-gold ${
+                            errorMsg
+                              ? "border-hotel-danger"
+                              : "border-hotel-border"
+                          }`}
+                        />
+                      </div>
+                    ) : (
                       <input
                         type={type}
-                        placeholder="788 123 456"
+                        placeholder={
+                          field === "phone"
+                            ? "788 123 456 or +250788123456"
+                            : undefined
+                        }
                         value={selected[field] ?? ""}
                         required={required}
                         onChange={(e) => handleChange(field, e.target.value)}
                         title={label}
-                        className={`flex-1 border rounded-r px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-hotel-gold ${
+                        className={`w-full border rounded px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-hotel-gold ${
                           errorMsg
                             ? "border-hotel-danger"
                             : "border-hotel-border"
                         }`}
                       />
-                    </div>
-                  ) : (
-                    <input
-                      type={type}
-                      value={type === "number" && selected[field] === 0 ? "" : (selected[field] ?? "")}
-                      readOnly={field === "stay_cost"}
-                      required={required}
-                      onChange={(e) =>
-                        handleChange(
-                          field,
-                          type === "number"
-                            ? Number(e.target.value)
-                            : e.target.value,
-                        )
-                      }
-                      {...attrs}
-                      title={label}
-                      className={`w-full border rounded px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-hotel-gold ${field === "stay_cost" ? "bg-hotel-cream" : ""} ${
-                        errorMsg
-                          ? "border-hotel-danger"
-                          : "border-hotel-border"
-                      }`}
-                    />
-                  )}
+                    );
+                  })()}
                   {errorMsg && (
                     <p className="text-xs text-hotel-danger mt-1">{errorMsg}</p>
                   )}
@@ -548,29 +562,43 @@ export default function IndividualReservation({
                     newPuv = localPuv > 0 ? localPuv : selected.puv;
                   } else {
                     // Converting to another currency
-                    const rate = currencyOptions.find(c => c.code === code)?.exchange_rate || 1;
+                    const rate =
+                      currencyOptions.find((c) => c.code === code)
+                        ?.exchange_rate || 1;
                     if (localPuv > 0) {
                       // If we have a known base (RWF), convert from RWF
                       newPuv = Math.round(localPuv / rate);
                     } else {
                       // Otherwise convert from current puv
-                      const currentRate = currencyOptions.find(c => c.code === selected.current_mon)?.exchange_rate || 1;
-                      const rwfEquivalent = Math.round(selected.puv * currentRate);
+                      const currentRate =
+                        currencyOptions.find(
+                          (c) => c.code === selected.current_mon,
+                        )?.exchange_rate || 1;
+                      const rwfEquivalent = Math.round(
+                        selected.puv * currentRate,
+                      );
                       newPuv = Math.round(rwfEquivalent / rate);
                     }
                   }
 
                   // Update both puv and current_mon together and recalculate
-                  const updatedWithCurrency = { ...selected, puv: newPuv, current_mon: code };
+                  const updatedWithCurrency = {
+                    ...selected,
+                    puv: newPuv,
+                    current_mon: code,
+                  };
                   const updatedWithCalc = calc(updatedWithCurrency);
                   setSelected(updatedWithCalc);
                   setErrors(validateIndividualReservation(updatedWithCalc));
                 }}
                 className="w-full border border-hotel-border rounded px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-hotel-gold"
               >
-                {currencyOptions.map(c => (
+                {currencyOptions.map((c) => (
                   <option key={c.code} value={c.code}>
-                    {c.code} — {c.label} {c.code !== "RWF" ? `(1 = ${c.exchange_rate.toLocaleString()} RWF)` : "(local)"}
+                    {c.code} — {c.label}{" "}
+                    {c.code !== "RWF"
+                      ? `(1 = ${c.exchange_rate.toLocaleString()} RWF)`
+                      : "(local)"}
                   </option>
                 ))}
               </select>
@@ -642,7 +670,9 @@ export default function IndividualReservation({
                           <td className="py-2 px-2 font-medium text-hotel-text-primary">
                             {r.room_num}
                           </td>
-                          <td className="py-2 px-2 text-hotel-text-secondary">{r.designation}</td>
+                          <td className="py-2 px-2 text-hotel-text-secondary">
+                            {r.designation}
+                          </td>
                           <td className="py-2 px-2 text-right font-mono">
                             {r.price_1.toLocaleString()}
                           </td>
@@ -650,7 +680,9 @@ export default function IndividualReservation({
                             {r.price_2.toLocaleString()}
                           </td>
                           <td className="py-2 px-2">
-                            <span className="text-hotel-success font-medium">VC</span>
+                            <span className="text-hotel-success font-medium">
+                              VC
+                            </span>
                           </td>
                         </tr>
                       ))}
@@ -710,7 +742,8 @@ export default function IndividualReservation({
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
           <div className="bg-white border border-hotel-border rounded p-4 max-w-sm mx-auto">
             <div className="flex items-center gap-3 mb-4">
-              {successMessage.includes("success") || successMessage.includes("Success") ? (
+              {successMessage.includes("success") ||
+              successMessage.includes("Success") ? (
                 <div className="w-10 h-10 rounded-full bg-hotel-success/20 flex items-center justify-center">
                   <CheckCircle2 className="text-hotel-success" size={20} />
                 </div>
@@ -720,7 +753,10 @@ export default function IndividualReservation({
                 </div>
               )}
               <h3 className="text-base font-semibold text-hotel-text-primary">
-                {successMessage.includes("success") || successMessage.includes("Success") ? "Success" : "Error"}
+                {successMessage.includes("success") ||
+                successMessage.includes("Success")
+                  ? "Success"
+                  : "Error"}
               </h3>
             </div>
             <p className="text-sm text-hotel-text-secondary mb-6">
