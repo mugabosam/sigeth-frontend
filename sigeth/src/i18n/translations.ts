@@ -236,7 +236,7 @@ export const translations = {
         arrivalOff: 'Arrival Situation (OFF)',
         vacantRooms: 'Vacant Rooms',
         occupiedRooms: 'Occupied Rooms',
-        checkedOutRooms: 'Checked-Out Rooms',
+        checkedOutRooms: 'Check Out',
         dailyConsumptions: 'Daily Consumptions',
         invoiceByGuest: 'Invoice by Guest',
         invoiceByGroup: 'Invoice by Group',

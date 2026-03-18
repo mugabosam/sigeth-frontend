@@ -35,6 +35,7 @@ interface PreviewData {
   total_charges: number;
   total_paid: number;
   balance_due: number;
+  current_mon: string;
 }
 
 interface InvoiceData extends PreviewData {
@@ -55,6 +56,7 @@ interface GroupPreviewData {
   group_deposit: number;
   total_paid: number;
   balance_due: number;
+  current_mon: string;
 }
 
 interface GroupInvoiceData extends GroupPreviewData {
@@ -179,6 +181,7 @@ export default function CheckOut() {
         total_charges: data.total_charges,
         total_paid: data.total_paid,
         balance_due: data.balance_due,
+        current_mon: room.current_mon ?? "RWF",
       });
       setStep("preview");
     } catch (err) {
@@ -214,6 +217,7 @@ export default function CheckOut() {
         date: data.date ?? "",
         username: data.username ?? "",
         tax: (data.tax as InvoiceData["tax"]) ?? {},
+        current_mon: preview.current_mon,
       });
       setShowGenModal(false);
       setStep("invoice");
@@ -298,6 +302,7 @@ export default function CheckOut() {
         group_deposit: data.group_deposit ?? 0,
         total_paid: data.total_paid,
         balance_due: data.balance_due,
+        current_mon: group.current_mon ?? "RWF",
       });
       setStep("preview");
     } catch (err) {
@@ -333,6 +338,7 @@ export default function CheckOut() {
         date: data.date ?? "",
         username: data.username ?? "",
         tax: (data.tax as GroupInvoiceData["tax"]) ?? {},
+        current_mon: groupPreview.current_mon,
       });
       setShowGenModal(false);
       setStep("invoice");
@@ -828,7 +834,7 @@ export default function CheckOut() {
                       Total Charges
                     </span>
                     <span className="border-2 border-gray-400 bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
-                      {fmt(indivDisplay.total_charges)} RWF
+                      {fmt(indivDisplay.total_charges)} {indivDisplay?.current_mon ?? "RWF"}
                     </span>
                   </div>
                   <div className="flex items-center justify-end gap-3">
@@ -836,7 +842,7 @@ export default function CheckOut() {
                       Total Paid
                     </span>
                     <span className="border-2 border-gray-400 bg-gradient-to-r from-blue-50 to-cyan-50 px-3 py-1.5 w-28 text-right font-bold text-blue-700">
-                      {fmt(indivDisplay.total_paid)} RWF
+                      {fmt(indivDisplay.total_paid)} {indivDisplay?.current_mon ?? "RWF"}
                     </span>
                   </div>
                   <div className="flex items-center justify-end gap-3">
@@ -844,7 +850,7 @@ export default function CheckOut() {
                       Balance Due
                     </span>
                     <span className="border-2 border-gray-400 bg-gradient-to-r from-orange-50 to-red-50 px-3 py-1.5 w-28 text-right font-bold text-red-700">
-                      {fmt(indivDisplay.balance_due)} RWF
+                      {fmt(indivDisplay.balance_due)} {indivDisplay?.current_mon ?? "RWF"}
                     </span>
                   </div>
                   {invoice?.tax?.taux != null && (
@@ -854,7 +860,7 @@ export default function CheckOut() {
                           HTVA
                         </span>
                         <span className="border-2 border-gray-400 px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
-                          {fmt(invoice.tax.htva ?? 0)} RWF
+                          {fmt(invoice.tax.htva ?? 0)} {invoice?.current_mon ?? "RWF"}
                         </span>
                       </div>
                       <div className="flex items-center justify-end gap-3">
@@ -862,7 +868,7 @@ export default function CheckOut() {
                           TVA ({invoice.tax.taux}%)
                         </span>
                         <span className="border-2 border-gray-400 px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
-                          {fmt(invoice.tax.tva ?? 0)} RWF
+                          {fmt(invoice.tax.tva ?? 0)} {invoice?.current_mon ?? "RWF"}
                         </span>
                       </div>
                       <div className="flex items-center justify-end gap-3">
@@ -870,7 +876,7 @@ export default function CheckOut() {
                           Total TTC
                         </span>
                         <span className="border-2 border-gray-400 bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-1.5 w-28 text-right font-bold text-green-800">
-                          {fmt(invoice.tax.total_ttc ?? 0)} RWF
+                          {fmt(invoice.tax.total_ttc ?? 0)} {invoice?.current_mon ?? "RWF"}
                         </span>
                       </div>
                     </>
@@ -1014,7 +1020,7 @@ export default function CheckOut() {
                       Total Charges
                     </span>
                     <span className="border-2 border-gray-400 bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
-                      {fmt(groupDisplay.total_charges)} RWF
+                      {fmt(groupDisplay.total_charges)} {groupDisplay?.current_mon ?? "RWF"}
                     </span>
                   </div>
                   <div className="flex items-center justify-end gap-3">
@@ -1022,7 +1028,7 @@ export default function CheckOut() {
                       Group Deposit
                     </span>
                     <span className="border-2 border-gray-400 bg-gradient-to-r from-purple-50 to-violet-50 px-3 py-1.5 w-28 text-right font-bold text-purple-700">
-                      {fmt(groupDisplay.group_deposit)} RWF
+                      {fmt(groupDisplay.group_deposit)} {groupDisplay?.current_mon ?? "RWF"}
                     </span>
                   </div>
                   <div className="flex items-center justify-end gap-3">
@@ -1030,7 +1036,7 @@ export default function CheckOut() {
                       Total Paid
                     </span>
                     <span className="border-2 border-gray-400 bg-gradient-to-r from-blue-50 to-cyan-50 px-3 py-1.5 w-28 text-right font-bold text-blue-700">
-                      {fmt(groupDisplay.total_paid)} RWF
+                      {fmt(groupDisplay.total_paid)} {groupDisplay?.current_mon ?? "RWF"}
                     </span>
                   </div>
                   <div className="flex items-center justify-end gap-3">
@@ -1038,7 +1044,7 @@ export default function CheckOut() {
                       Balance Due
                     </span>
                     <span className="border-2 border-gray-400 bg-gradient-to-r from-orange-50 to-red-50 px-3 py-1.5 w-28 text-right font-bold text-red-700">
-                      {fmt(groupDisplay.balance_due)} RWF
+                      {fmt(groupDisplay.balance_due)} {groupDisplay?.current_mon ?? "RWF"}
                     </span>
                   </div>
                   {groupInvoice?.tax?.taux != null && (
@@ -1048,7 +1054,7 @@ export default function CheckOut() {
                           HTVA
                         </span>
                         <span className="border-2 border-gray-400 px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
-                          {fmt(groupInvoice.tax.htva ?? 0)} RWF
+                          {fmt(groupInvoice.tax.htva ?? 0)} {groupInvoice?.current_mon ?? "RWF"}
                         </span>
                       </div>
                       <div className="flex items-center justify-end gap-3">
@@ -1056,7 +1062,7 @@ export default function CheckOut() {
                           TVA ({groupInvoice.tax.taux}%)
                         </span>
                         <span className="border-2 border-gray-400 px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
-                          {fmt(groupInvoice.tax.tva ?? 0)} RWF
+                          {fmt(groupInvoice.tax.tva ?? 0)} {groupInvoice?.current_mon ?? "RWF"}
                         </span>
                       </div>
                       <div className="flex items-center justify-end gap-3">
@@ -1064,7 +1070,7 @@ export default function CheckOut() {
                           Total TTC
                         </span>
                         <span className="border-2 border-gray-400 bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-1.5 w-28 text-right font-bold text-green-800">
-                          {fmt(groupInvoice.tax.total_ttc ?? 0)} RWF
+                          {fmt(groupInvoice.tax.total_ttc ?? 0)} {groupInvoice?.current_mon ?? "RWF"}
                         </span>
                       </div>
                     </>

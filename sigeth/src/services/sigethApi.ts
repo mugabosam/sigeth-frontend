@@ -104,7 +104,7 @@ const normalizeRoom = (raw: ApiRecord): RDF => ({
   puv: numberValue(raw.puv),
   deposit: numberValue(raw.deposit),
   date: stringValue(raw.date),
-  groupe_name: stringValue(raw.group_name ?? raw.groupe_name),
+  groupe_name: stringValue(raw.groupe_name),
 });
 
 const normalizeReservation = (raw: ApiRecord): RCS => ({

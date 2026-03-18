@@ -7,6 +7,8 @@ import {
   X,
   CheckCircle2,
   ArrowRightLeft,
+  AlertTriangle,
+  Loader2,
 } from "lucide-react";
 import { useLang } from "../../hooks/useLang";
 import { useHotelData } from "../../context/HotelDataContext";
@@ -34,6 +36,9 @@ export default function CheckInGroup() {
   const [showGroupSuggestions, setShowGroupSuggestions] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
   const [localPuv, setLocalPuv] = useState(0);
+  const [loadingMember, setLoadingMember] = useState(false);
+  const [loadingBatch, setLoadingBatch] = useState(false);
+  const [showBatchConfirm, setShowBatchConfirm] = useState(false);
 
   const currencyOptions = useMemo(() => [
     { code: "RWF", label: "Rwandan Franc", exchange_rate: 1 },
@@ -102,7 +107,10 @@ export default function CheckInGroup() {
 
   /* ── Group members ── */
   const groupMembers = useMemo(() => {
-    if (!groupFound) return [];
+    if (!groupFound) {
+      return [];
+    }
+
     return reservations.filter(
       (r) =>
         r.code_p === groupFound.code_g ||
@@ -110,8 +118,16 @@ export default function CheckInGroup() {
     );
   }, [groupFound, reservations]);
 
-  const checkedInCount = groupMembers.filter((m) => m.status === 1).length;
-  const pendingCount = groupMembers.filter((m) => m.status === 0).length;
+  // Check-in status is determined by room status, not reservation status
+  const checkedInCount = groupMembers.filter((m) => {
+    const room = rooms.find((r) => r.room_num === m.room_num);
+    return room?.status === "OCC";
+  }).length;
+
+  const pendingCount = groupMembers.filter((m) => {
+    const room = rooms.find((r) => r.room_num === m.room_num);
+    return room?.status !== "OCC";
+  }).length;
 
   /* Vacant rooms */
   const vacantRooms = useMemo(
@@ -134,11 +150,34 @@ export default function CheckInGroup() {
       current_mon: member.current_mon,
     });
 
+    // Update reservation — always preserve group linkage fields
     setReservations((prev) =>
-      prev.map((r) => (r.id === response.reservation.id ? response.reservation : r)),
+      prev.map((r) => {
+        const isMatch =
+          (r.id && response.reservation.id && r.id === response.reservation.id) ||
+          (r.code_p === member.code_p && r.guest_name === member.guest_name);
+
+        if (!isMatch) return r;
+
+        return {
+          ...r,
+          ...response.reservation,
+          code_p: r.code_p,
+          groupe_name: r.groupe_name,
+        };
+      }),
     );
+
+    // Update room
     setRooms((prev) =>
-      prev.map((room) => (room.id === response.room.id ? response.room : room)),
+      prev.map((r) => {
+        const isMatch =
+          (r.id && response.room.id && r.id === response.room.id) ||
+          r.room_num === room_num;
+
+        if (!isMatch) return r;
+        return { ...r, ...response.room };
+      }),
     );
 
     return response.reservation;
@@ -147,29 +186,51 @@ export default function CheckInGroup() {
   /* ── Batch check-in all pending ── */
   const handleBatchCheckIn = async () => {
     const pending = groupMembers.filter((m) => m.status === 0);
-    let count = 0;
+    setLoadingBatch(true);
+    let successCount = 0;
+    let failedCount = 0;
+
     for (const member of pending) {
       try {
         await checkInMember(member);
-        count++;
-      } catch {
-        break;
+        successCount++;
+        // Small delay to allow state updates to process
+        await new Promise(resolve => setTimeout(resolve, 300));
+      } catch (err) {
+        console.error(`Failed to check in ${member.guest_name}:`, err);
+        failedCount++;
       }
     }
-    if (count > 0) {
-      setSuccessMsg(`${count} group member(s) checked in successfully.`);
+
+    setLoadingBatch(false);
+    setShowBatchConfirm(false);
+
+    if (successCount > 0) {
+      const msg = failedCount > 0
+        ? `${successCount} member(s) checked in. ${failedCount} failed.`
+        : `${successCount} group member(s) checked in successfully.`;
+      setSuccessMsg(msg);
     }
   };
 
   /* ── Single member check-in from modal ── */
   const handleConfirmMemberCheckIn = async () => {
     if (!processingMember) return;
-    await checkInMember(processingMember, swapRoom ?? undefined);
-    setSuccessMsg(
-      `${processingMember.guest_name} has been checked in to room ${swapRoom ?? processingMember.room_num} successfully.`,
-    );
-    setProcessingMember(null);
-    setSwapRoom(null);
+    setLoadingMember(true);
+    try {
+      const checkedInReservation = await checkInMember(processingMember, swapRoom ?? undefined);
+      setSuccessMsg(
+        `${checkedInReservation.guest_name} has been checked in to room ${swapRoom ?? processingMember.room_num} successfully.`,
+      );
+      // Clear modal after successful check-in
+      setProcessingMember(null);
+      setSwapRoom(null);
+    } catch (err) {
+      console.error("Check-in error:", err);
+      setSuccessMsg(`Error checking in ${processingMember.guest_name}. Please try again.`);
+    } finally {
+      setLoadingMember(false);
+    }
   };
 
   /* ── Calc nights ── */
@@ -296,15 +357,15 @@ export default function CheckInGroup() {
               </div>
 
               {/* Batch check-in button */}
-              {pendingCount > 0 && (
-                <button
-                  onClick={handleBatchCheckIn}
-                  className="bg-emerald-500 text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:bg-emerald-600 shrink-0"
-                >
-                  <UserCheck size={18} />
-                  {t("checkInAll")} ({pendingCount})
-                </button>
-              )}
+              <button
+                onClick={() => setShowBatchConfirm(true)}
+                disabled={loadingBatch || pendingCount === 0}
+                title={pendingCount === 0 ? "All members have been checked in" : "Check in all pending members"}
+                className="bg-emerald-500 text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:bg-emerald-600 disabled:bg-gray-400 disabled:cursor-not-allowed shrink-0 transition-colors"
+              >
+                {loadingBatch ? <Loader2 className="animate-spin" size={18} /> : <UserCheck size={18} />}
+                {loadingBatch ? "Checking in..." : `${t("checkInAll")} (${pendingCount})`}
+              </button>
             </div>
 
             {/* Progress bar */}
@@ -362,10 +423,13 @@ export default function CheckInGroup() {
                   </tr>
                 </thead>
                 <tbody>
-                  {groupMembers.map((m, i) => (
+                  {groupMembers.map((m, i) => {
+                    const room = rooms.find((r) => r.room_num === m.room_num);
+                    const isCheckedIn = room?.status === "OCC";
+                    return (
                     <tr
                       key={i}
-                      className={`border-b border-hotel-border ${m.status === 1 ? "bg-green-50" : "hover:bg-hotel-cream"} transition-colors duration-150`}
+                      className={`border-b border-hotel-border ${isCheckedIn ? "bg-green-50" : "hover:bg-hotel-cream"} transition-colors duration-150`}
                     >
                       <td className="px-4 py-3 font-bold text-hotel-text-primary">
                         {m.room_num}
@@ -396,34 +460,47 @@ export default function CheckInGroup() {
                         {m.stay_cost.toLocaleString()} {m.current_mon}
                       </td>
                       <td className="px-4 py-3">
-                        {m.status === 1 ? (
-                          <span className="inline-flex items-center gap-1 bg-green-100 text-hotel-text-primary text-xs font-semibold px-2.5 py-1 rounded-full">
-                            <CheckCircle2 size={12} />
-                            {t("checkedIn")}
-                          </span>
-                        ) : (
-                          <span className="bg-amber-100 text-amber-700 text-xs font-semibold px-2.5 py-1 rounded-full">
-                            {t("pendingArrival")}
-                          </span>
-                        )}
+                        {(() => {
+                          const room = rooms.find((r) => r.room_num === m.room_num);
+                          const isCheckedIn = room?.status === "OCC";
+                          return isCheckedIn ? (
+                            <span className="inline-flex items-center gap-1 bg-green-100 text-hotel-text-primary text-xs font-semibold px-2.5 py-1 rounded-full">
+                              <CheckCircle2 size={12} />
+                              {t("checkedIn")}
+                            </span>
+                          ) : (
+                            <span className="bg-amber-100 text-amber-700 text-xs font-semibold px-2.5 py-1 rounded-full">
+                              {t("pendingArrival")}
+                            </span>
+                          );
+                        })()}
                       </td>
                       <td className="px-4 py-3">
-                        {m.status === 0 && (
-                          <button
-                            onClick={() => {
-                              setProcessingMember(m);
-                              setLocalPuv(m.current_mon === "RWF" ? m.puv : 0);
-                              setSwapRoom(null);
-                            }}
-                            className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-3 py-1.5 rounded text-xs font-medium hover:shadow-lg transition-colors flex items-center gap-1"
-                          >
-                            <UserCheck size={14} />
-                            {t("checkIn")}
-                          </button>
-                        )}
+                        {(() => {
+                          const room = rooms.find((r) => r.room_num === m.room_num);
+                          const isCheckedIn = room?.status === "OCC";
+                          const isRoomOccupied = room?.status === "OCC" || room?.status === "DND";
+
+                          return isCheckedIn ? null : (
+                            <button
+                              onClick={() => {
+                                setProcessingMember(m);
+                                setLocalPuv(m.current_mon === "RWF" ? m.puv : 0);
+                                setSwapRoom(null);
+                              }}
+                              disabled={isRoomOccupied || m.status !== 0}
+                              title={isRoomOccupied ? "Room is occupied - cannot check in" : m.status !== 0 ? "Guest has checked out" : "Check in this member"}
+                              className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-3 py-1.5 rounded text-xs font-medium hover:shadow-lg transition-colors flex items-center gap-1 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:shadow-none"
+                            >
+                              <UserCheck size={14} />
+                              {t("checkIn")}
+                            </button>
+                          );
+                        })()}
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -581,16 +658,72 @@ export default function CheckInGroup() {
 
               <button
                 onClick={handleConfirmMemberCheckIn}
-                className="w-full py-3 rounded font-semibold text-sm bg-emerald-500 text-white hover:bg-emerald-600 flex items-center justify-center gap-2"
+                disabled={loadingMember}
+                className="w-full py-3 rounded font-semibold text-sm bg-emerald-500 text-white hover:bg-emerald-600 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                <UserCheck size={18} />
-                {t("confirmAndCheckIn")}
+                {loadingMember ? <Loader2 className="animate-spin" size={18} /> : <UserCheck size={18} />}
+                {loadingMember ? "Checking in..." : t("confirmAndCheckIn")}
               </button>
             </div>
           </div>
         </div>
       )}
 
+
+      {/* ════════════════════════════════════════════
+          BATCH CHECK-IN CONFIRMATION MODAL
+         ════════════════════════════════════════════ */}
+      {showBatchConfirm && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded w-full max-w-md">
+            <div className="flex items-center justify-between px-6 py-4 border-b bg-gradient-to-r from-amber-50 to-white">
+              <h2 className="text-base font-bold text-hotel-text-primary flex items-center gap-2">
+                <AlertTriangle size={20} className="text-amber-600" />
+                Confirm Batch Check-In
+              </h2>
+              <button
+                onClick={() => setShowBatchConfirm(false)}
+                disabled={loadingBatch}
+                className="text-gray-400 hover:text-hotel-text-secondary disabled:cursor-not-allowed"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <p className="text-hotel-text-primary text-sm leading-relaxed">
+                You are about to check in <strong>{pendingCount} group member{pendingCount !== 1 ? "s" : ""}</strong> from <strong>{groupFound?.groupe_name}</strong>. This action will:
+              </p>
+              <ul className="text-sm text-hotel-text-secondary space-y-2 ml-4">
+                <li>• Update their status to checked in</li>
+                <li>• Assign them to their respective rooms</li>
+                <li>• Update room occupancy records</li>
+              </ul>
+              <p className="text-sm font-medium text-amber-700 bg-amber-50 p-3 rounded">
+                This action cannot be undone individually. Members can only be unchecked in via the normal checkout process.
+              </p>
+            </div>
+
+            <div className="px-6 py-4 bg-white flex gap-3 justify-end border-t border-hotel-border">
+              <button
+                onClick={() => setShowBatchConfirm(false)}
+                disabled={loadingBatch}
+                className="px-4 py-2 rounded bg-gray-200 text-hotel-text-primary hover:bg-gray-300 transition-colors font-medium text-sm disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleBatchCheckIn}
+                disabled={loadingBatch}
+                className="px-4 py-2 rounded bg-emerald-600 text-white hover:bg-emerald-700 transition-colors font-medium text-sm flex items-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
+                {loadingBatch && <Loader2 className="animate-spin" size={16} />}
+                {loadingBatch ? "Checking in..." : "Confirm & Check-In All"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Success Confirmation Dialog */}
       {successMsg && (
