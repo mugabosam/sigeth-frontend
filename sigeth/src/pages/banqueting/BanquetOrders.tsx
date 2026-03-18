@@ -30,7 +30,7 @@ export default function BanquetOrders() {
   const { t } = useLang();
   const { groupReservations, events, jbanquet, setJbanquet } = useHotelData();
   const [selectedGroup, setSelectedGroup] = useState("");
-  const [selectedLot, setSelectedLot] = useState<number | null>(null);
+  const [selectedLot, setSelectedLot] = useState<string | null>(null);
   const [buffer, setBuffer] = useState<BufferItem[]>([]);
   const [error, setError] = useState("");
   const [confirmTransfer, setConfirmTransfer] = useState(false);
@@ -91,8 +91,11 @@ export default function BanquetOrders() {
         await banquetingApi.updateOrderBuffer(item.id!, { qty: item.qty });
       }
       await banquetingApi.confirmOrder({ groupe_name: group.groupe_name });
-      const journal = await banquetingApi.journal();
-      setJbanquet(journal as JBANQUET[]);
+      const [journal, archive] = await Promise.all([
+        banquetingApi.journal(),
+        banquetingApi.archive(),
+      ]);
+      setJbanquet(journal.concat(archive) as JBANQUET[]);
     } catch {
       return;
     }

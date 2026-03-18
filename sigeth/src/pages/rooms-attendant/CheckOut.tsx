@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { useLang } from "../../hooks/useLang";
 import { useHotelData } from "../../context/HotelDataContext";
-import { frontOfficeApi } from "../../services/sigethApi";
+import { frontOfficeApi, housekeepingApi } from "../../services/sigethApi";
 import type { RDF, GRC, TEMPO } from "../../types";
 
 type Tab = "individual" | "group";
@@ -89,6 +89,7 @@ export default function CheckOut() {
     setGroupReservations,
     setGroupArchive,
     paymentModes,
+    setJlaundry,
   } = useHotelData();
 
   const [tab, setTab] = useState<Tab>("individual");
@@ -268,6 +269,15 @@ export default function CheckOut() {
         ),
       );
 
+      // Refresh laundry data (backend archives laundry records during checkout)
+      try {
+        const [laundryJournal, laundryArchive] = await Promise.all([
+          housekeepingApi.laundryJournal(),
+          housekeepingApi.laundryArchive(),
+        ]);
+        setJlaundry(laundryJournal.concat(laundryArchive));
+      } catch { /* laundry refresh is best-effort */ }
+
       setDoneMsg(
         response.detail ??
           `Guest ${selectedRoom.guest_name} checked out from room ${selectedRoom.room_num}`,
@@ -387,6 +397,15 @@ export default function CheckOut() {
             : r,
         ),
       );
+
+      // Refresh laundry data (backend archives laundry records during checkout)
+      try {
+        const [laundryJournal, laundryArchive] = await Promise.all([
+          housekeepingApi.laundryJournal(),
+          housekeepingApi.laundryArchive(),
+        ]);
+        setJlaundry(laundryJournal.concat(laundryArchive));
+      } catch { /* laundry refresh is best-effort */ }
 
       setDoneMsg(
         response.detail ??

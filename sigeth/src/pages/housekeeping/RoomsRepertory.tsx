@@ -5,7 +5,8 @@ import { useHotelData } from "../../context/HotelDataContext";
 import ConfirmationModal from "../../components/common/ConfirmationModal";
 import { validateRoom } from "../../utils/housekeepingValidation";
 import type { RDF } from "../../types";
-import { frontOfficeApi } from "../../services/sigethApi";
+import { frontOfficeApi, housekeepingApi } from "../../services/sigethApi";
+import type { RoomStatusCode } from "../../types";
 
 // Hotel information for printing
 const HOTEL_INFO = {
@@ -18,7 +19,7 @@ const HOTEL_INFO = {
 
 export default function RoomsRepertory() {
   const { t } = useLang();
-  const { rooms, setRooms, catrooms } = useHotelData();
+  const { rooms, setRooms, catrooms, statuses } = useHotelData();
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<RDF | null>(null);
   const [isNew, setIsNew] = useState(false);
@@ -58,6 +59,22 @@ export default function RoomsRepertory() {
   const handleChange = (field: keyof RDF, value: string | number) => {
     if (!selected) return;
     setSelected({ ...selected, [field]: value });
+  };
+
+  const handleStatusChange = async (newStatus: RoomStatusCode) => {
+    if (!selected || !selected.room_num) return;
+    try {
+      const updated = await housekeepingApi.updateRoomStatus({
+        room_num: selected.room_num,
+        status_code: newStatus,
+      });
+      setSelected({ ...selected, status: newStatus });
+      setRooms((prev) =>
+        prev.map((r) => (r.id === updated.id ? updated : r)),
+      );
+    } catch {
+      // Revert on failure
+    }
   };
 
   const handleSave = () => {
@@ -260,6 +277,27 @@ export default function RoomsRepertory() {
                 />
               </div>
             ))}
+            {!isNew && (
+              <div>
+                <label className="block text-sm font-semibold text-hotel-text-primary mb-2">
+                  {t("status")}
+                </label>
+                <select
+                  value={selected.status}
+                  onChange={(e) =>
+                    handleStatusChange(e.target.value as RoomStatusCode)
+                  }
+                  title={t("status")}
+                  className="w-full border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
+                >
+                  {statuses.map((s) => (
+                    <option key={s.code} value={s.code}>
+                      {s.code} — {s.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
           <div className="flex gap-3 pt-5 border-t border-hotel-border">
             <button

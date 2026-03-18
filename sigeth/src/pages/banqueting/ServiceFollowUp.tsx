@@ -17,7 +17,7 @@ const EVENT_TYPES = [
 
 export default function ServiceFollowUp() {
   const { t } = useLang();
-  const { jbanquet } = useHotelData();
+  const { jbanquet, events } = useHotelData();
   const [groupQ, setGroupQ] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
@@ -34,10 +34,11 @@ export default function ServiceFollowUp() {
 
   const handleExport = () => {
     const header = "Date,Lot,Item,Nature,Unity,Qty,Price,Total";
-    const rows = filtered.map(
-      (j) =>
-        `${j.date},${j.lot},${j.item},${EVENT_TYPES.find((t) => t.value === j.nature)?.label || j.nature},${j.unity},${j.qty},${j.price},${j.total}`,
-    );
+    const rows = filtered.map((j) => {
+      const ev = events.find((e) => e.lot === j.lot);
+      const nature = EVENT_TYPES.find((t) => t.value === ev?.nature)?.label || ev?.nature || j.lot;
+      return `${j.date},${j.lot},${j.item},${nature},${j.unity},${j.qty},${j.price},${j.total}`;
+    });
     const blob = new Blob([header + "\n" + rows.join("\n")], {
       type: "text/csv",
     });
@@ -230,8 +231,10 @@ export default function ServiceFollowUp() {
                       {j.item}
                     </td>
                     <td className="px-4 py-3 border-r border-hotel-border print:border-black">
-                      {EVENT_TYPES.find((t) => t.value === j.nature)?.label ||
-                        j.nature}
+                      {(() => {
+                        const ev = events.find((e) => e.lot === j.lot);
+                        return EVENT_TYPES.find((t) => t.value === ev?.nature)?.label || ev?.nature || j.lot;
+                      })()}
                     </td>
                     <td className="px-4 py-3 border-r border-hotel-border print:border-black">
                       {j.unity}

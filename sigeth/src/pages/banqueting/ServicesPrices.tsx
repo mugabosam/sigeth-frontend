@@ -27,7 +27,7 @@ export default function ServicesPrices() {
   const { t } = useLang();
   const { addNotification } = useNotification();
   const { events, banquetServices, setBanquetServices } = useHotelData();
-  const [selectedLot, setSelectedLot] = useState<number | null>(null);
+  const [selectedLot, setSelectedLot] = useState<string | null>(null);
   const [selected, setSelected] = useState<BanquetService | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [errors, setErrors] = useState<ValidationResult>({
@@ -112,10 +112,10 @@ export default function ServicesPrices() {
     if (!selected) return;
     const updated: BanquetService = {
       date: field === "date" ? (value as string) : selected.date,
-      lot: field === "lot" ? (value as number) : selected.lot,
+      lot: field === "lot" ? (value as string) : selected.lot,
       nature: field === "nature" ? (value as string) : selected.nature,
       item: field === "item" ? (value as string) : selected.item,
-      unity: field === "unity" ? (value as number) : selected.unity,
+      unity: field === "unity" ? (value as string) : selected.unity,
       qty: field === "qty" ? (value as number) : selected.qty,
       puv: field === "puv" ? (value as number) : selected.puv,
     };
@@ -166,7 +166,7 @@ export default function ServicesPrices() {
                     lot: event.lot,
                     nature: event.nature,
                     item: "",
-                    unity: 1,
+                    unity: "",
                     qty: 0,
                     puv: 0,
                   });
@@ -261,13 +261,13 @@ export default function ServicesPrices() {
                         Unity <span className="text-red-500">*</span>
                       </label>
                       <input
-                        type="number"
+                        type="text"
                         value={selected.unity}
                         onChange={(e) =>
-                          handleFieldChange("unity", Number(e.target.value))
+                          handleFieldChange("unity", e.target.value)
                         }
                         title="Unity"
-                        placeholder="Unit of measure"
+                        placeholder="e.g. Pcs, Set, L"
                         className="w-full border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
                       />
                     </div>

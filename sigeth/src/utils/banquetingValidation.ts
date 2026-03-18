@@ -26,7 +26,7 @@ export function isValidName(name: string): boolean {
 export function validateEventRecord(event: EventRecord): ValidationResult {
     const errors: ValidationError[] = [];
 
-    if (!event.lot || event.lot === 0) {
+    if (!event.lot || event.lot.trim() === '') {
         errors.push({ field: 'lot', message: 'lotRequired' });
     }
 

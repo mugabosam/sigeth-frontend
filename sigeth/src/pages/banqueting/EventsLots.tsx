@@ -106,7 +106,7 @@ export default function EventsLots() {
   const handleFieldChange = (field: keyof EventRecord, value: any) => {
     if (!selected) return;
     const updated: EventRecord = {
-      lot: field === "lot" ? (value as number) : selected.lot,
+      lot: field === "lot" ? (value as string) : selected.lot,
       nature: field === "nature" ? (value as string) : selected.nature,
     };
     setSelected(updated);
@@ -125,7 +125,7 @@ export default function EventsLots() {
           </h1>
           <button
             onClick={() => {
-              setSelected({ lot: events.length + 1, nature: "" });
+              setSelected({ lot: String(events.length + 1).padStart(2, "0"), nature: "" });
               setIsNew(true);
               setErrors({ isValid: true, errors: [] });
             }}
@@ -155,10 +155,10 @@ export default function EventsLots() {
                   {t("lot")} <span className="text-red-500">*</span>
                 </label>
                 <input
-                  type="number"
+                  type="text"
                   value={selected.lot}
                   onChange={(e) =>
-                    handleFieldChange("lot", Number(e.target.value))
+                    handleFieldChange("lot", e.target.value)
                   }
                   title={t("lot")}
                   className={`w-full border-2 hover:border-hotel-border focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors ${

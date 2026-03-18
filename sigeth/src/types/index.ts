@@ -205,7 +205,7 @@ export interface REQUIS {
 // ── EVENTS.dat — Event Types (Banqueting) ──
 export interface EventRecord {
     id?: string;
-    lot: number;
+    lot: string;
     nature: string;
 }
 
@@ -213,10 +213,10 @@ export interface EventRecord {
 export interface BanquetService {
     id?: string;
     date: string;
-    lot: number;
+    lot: string;
     nature: string;
     item: string;
-    unity: number;
+    unity: string;
     qty: number;
     puv: number;
 }
@@ -227,10 +227,10 @@ export interface JBANQUET {
     date: string;
     room_num: string;
     groupe_name: string;
-    lot: number;
+    lot: string;
     nature: string;
     item: string;
-    unity: number;
+    unity: string;
     qty: number;
     price: number;
     total: number;

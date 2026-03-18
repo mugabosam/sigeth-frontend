@@ -255,17 +255,17 @@ const normalizeRequisition = (raw: ApiRecord): REQUIS => ({
 
 const normalizeEvent = (raw: ApiRecord): EventRecord => ({
   id: stringValue(raw.id),
-  lot: numberValue(raw.lot),
+  lot: stringValue(raw.lot),
   nature: stringValue(raw.nature),
 });
 
 const normalizeBanquetService = (raw: ApiRecord): BanquetService => ({
   id: stringValue(raw.id),
   date: stringValue(raw.date),
-  lot: numberValue(raw.lot),
+  lot: stringValue(raw.lot),
   nature: stringValue(raw.nature),
   item: stringValue(raw.item),
-  unity: numberValue(raw.unity),
+  unity: stringValue(raw.unity),
   qty: numberValue(raw.qty),
   puv: numberValue(raw.puv),
 });
@@ -275,10 +275,10 @@ const normalizeBanquetJournal = (raw: ApiRecord): JBANQUET => ({
   date: stringValue(raw.date),
   room_num: stringValue(raw.room_num),
   groupe_name: stringValue(raw.groupe_name),
-  lot: numberValue(raw.lot),
+  lot: stringValue(raw.code_art ?? raw.lot),
   nature: stringValue(raw.nature),
   item: stringValue(raw.designation ?? raw.item),
-  unity: numberValue(raw.unity),
+  unity: stringValue(raw.unity),
   qty: numberValue(raw.qty),
   price: numberValue(raw.puv ?? raw.price),
   total: numberValue(raw.amount ?? raw.total),
@@ -888,7 +888,7 @@ export const banquetingApi = {
     );
     return data;
   },
-  async loadBuffer(payload: { lot: number; groupe_name: string }) {
+  async loadBuffer(payload: { lot: string; groupe_name: string }) {
     const { data } = await api.post<ApiRecord[]>(
       "/v1/banqueting/orders/load-buffer/",
       payload,
