@@ -8,7 +8,7 @@ import {
   type ValidationResult,
 } from "../../utils/roomsAttendantValidation";
 import { createErrorNotification } from "../../utils/errorFormatter";
-import { COUNTRIES, getPhoneCodeByNationality } from "../../utils/countries";
+import SearchableCountrySelect from "../../components/ui/SearchableCountrySelect";
 import type { GRC } from "../../types";
 import { frontOfficeApi } from "../../services/sigethApi";
 
@@ -305,43 +305,12 @@ export default function GroupReservation() {
               ] as [keyof GRC, string, string, boolean, Record<string, any>][]
             ).map(([field, label, type, required, attrs]) => {
               const errorMsg = getErrorMessage(field as string);
-              const phoneCode =
-                field === "phone"
-                  ? getPhoneCodeByNationality(selected.nationality)
-                  : undefined;
               return (
                 <div key={field}>
                   <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                     {label}{" "}
                     {required && <span className="text-hotel-danger">*</span>}
                   </label>
-                  {field === "phone" && phoneCode ? (
-                    <div className="flex items-center gap-1">
-                      <span className="bg-hotel-cream border border-hotel-border rounded px-3 py-2 text-xs font-semibold text-hotel-text-primary whitespace-nowrap">
-                        {phoneCode}
-                      </span>
-                      <input
-                        type={type}
-                        placeholder="788 123 456"
-                        value={selected[field] ?? ""}
-                        required={required}
-                        onChange={(e) =>
-                          handleChange(
-                            field,
-                            type === "number"
-                              ? Number(e.target.value)
-                              : e.target.value,
-                          )
-                        }
-                        title={label}
-                        className={`flex-1 border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold ${
-                          errorMsg
-                            ? "border-hotel-danger"
-                            : "border-hotel-border"
-                        }`}
-                      />
-                    </div>
-                  ) : (
                     <input
                       type={type}
                       value={
@@ -373,33 +342,23 @@ export default function GroupReservation() {
                         errorMsg ? "border-hotel-danger" : "border-hotel-border"
                       }`}
                     />
-                  )}
                   {errorMsg && (
                     <p className="text-xs text-hotel-danger mt-1">{errorMsg}</p>
                   )}
                 </div>
               );
             })}
-            {/* Nationality — Country select dropdown */}
+            {/* Nationality — Searchable country select */}
             <div>
               <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                 {t("nationality")}
               </label>
-              <select
+              <SearchableCountrySelect
                 value={selected.nationality}
-                onChange={(e) => {
-                  handleChange("nationality", e.target.value);
-                }}
-                title={t("nationality")}
-                className="w-full border border-hotel-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
-              >
-                <option value="">{t("selectCountry")}</option>
-                {COUNTRIES.map((c) => (
-                  <option key={c.code} value={c.nationality}>
-                    {c.flag} {c.name} ({c.phoneCode})
-                  </option>
-                ))}
-              </select>
+                onChange={(value) => handleChange("nationality", value)}
+                placeholder={t("select")}
+                type="nationality"
+              />
             </div>
             {/* Currency dropdown */}
             <div>

@@ -9,7 +9,6 @@ import {
   type ValidationResult,
 } from "../../utils/roomsAttendantValidation";
 import { createErrorNotification } from "../../utils/errorFormatter";
-import { getPhoneCodeByNationality } from "../../utils/countries";
 import type { RCS } from "../../types";
 import { frontOfficeApi } from "../../services/sigethApi";
 
@@ -556,50 +555,23 @@ export default function GroupMemberReservation({
                     {label}{" "}
                     {required && <span className="text-hotel-danger">*</span>}
                   </label>
-                  {(() => {
-                    const phoneCode =
+                  <input
+                    type={type}
+                    placeholder={
                       field === "phone"
-                        ? getPhoneCodeByNationality(selected.nationality)
-                        : undefined;
-                    return field === "phone" && phoneCode ? (
-                      <div className="flex items-center gap-1">
-                        <span className="bg-hotel-cream border border-hotel-border rounded-l px-3 py-2 text-xs font-semibold text-hotel-text-primary">
-                          {phoneCode}
-                        </span>
-                        <input
-                          type={type}
-                          placeholder="788 123 456"
-                          value={selected[field] ?? ""}
-                          required={required}
-                          onChange={(e) => handleChange(field, e.target.value)}
-                          title={label}
-                          className={`flex-1 border rounded-r px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold ${
-                            errorMsg
-                              ? "border-hotel-danger"
-                              : "border-hotel-border"
-                          }`}
-                        />
-                      </div>
-                    ) : (
-                      <input
-                        type={type}
-                        placeholder={
-                          field === "phone"
-                            ? "788 123 456 or +250788123456"
-                            : undefined
-                        }
-                        value={selected[field] ?? ""}
-                        required={required}
-                        onChange={(e) => handleChange(field, e.target.value)}
-                        title={label}
-                        className={`w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold ${
-                          errorMsg
-                            ? "border-hotel-danger"
-                            : "border-hotel-border"
-                        }`}
-                      />
-                    );
-                  })()}
+                        ? "+250788123456"
+                        : undefined
+                    }
+                    value={selected[field] ?? ""}
+                    required={required}
+                    onChange={(e) => handleChange(field, e.target.value)}
+                    title={label}
+                    className={`w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold ${
+                      errorMsg
+                        ? "border-hotel-danger"
+                        : "border-hotel-border"
+                    }`}
+                  />
                   {errorMsg && (
                     <p className="text-xs text-hotel-danger mt-1">{errorMsg}</p>
                   )}

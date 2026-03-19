@@ -60,7 +60,12 @@ export default function ServicesPrices() {
     if (!selected || !event) return;
     setErrors({ isValid: true, errors: [] });
 
-    const record = { ...selected, lot: event.lot, nature: event.nature };
+    const record = {
+      ...selected,
+      lot: event.lot,
+      nature: event.nature,
+      date: selected.date || null,
+    };
     try {
       const saved = isNew
         ? await banquetingApi.createService(record)

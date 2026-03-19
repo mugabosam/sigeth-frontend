@@ -44,10 +44,6 @@ export function validateEventRecord(event: EventRecord): ValidationResult {
 export function validateBanquetService(service: BanquetService): ValidationResult {
     const errors: ValidationError[] = [];
 
-    if (!service.date || service.date.trim() === '') {
-        errors.push({ field: 'date', message: 'dateRequired' });
-    }
-
     if (!service.item || service.item.trim() === '') {
         errors.push({ field: 'item', message: 'itemRequired' });
     }
