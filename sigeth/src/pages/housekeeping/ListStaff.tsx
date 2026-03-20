@@ -38,9 +38,9 @@ export default function ListStaff() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50 p-4 space-y-4">
+    <div className="min-h-screen bg-gradient-to-br from-hotel-paper to-hotel-cream p-4 space-y-4">
       <div className="space-y-2">
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
+        <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
           {t("listStaff")}
         </h1>
         <p className="text-sm text-hotel-text-secondary">Complete staff directory</p>
@@ -48,24 +48,24 @@ export default function ListStaff() {
       <div className="flex gap-3">
         <button
           onClick={() => window.print()}
-          className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-colors"
+          className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-colors"
         >
           <Printer size={16} />
           {t("print")}
         </button>
         <button
           onClick={handleExport}
-          className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-colors"
+          className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-colors"
         >
           <FileSpreadsheet size={16} />
           {t("excel")}
         </button>
       </div>
-      <div className="bg-white rounded border border-emerald-100 overflow-hidden">
+      <div className="bg-white rounded border border-hotel-border overflow-hidden">
         <div className="px-6 py-4 border-b border-hotel-border">
           <div className="relative">
             <Search
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-hotel-text-secondary"
               size={18}
             />
             <input
@@ -73,12 +73,12 @@ export default function ListStaff() {
               placeholder={`${t("search")} staff by name, number, or position...`}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-10 py-2.5 border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded text-sm font-medium transition-colors"
+              className="w-full pl-10 pr-10 py-2.5 border-2 border-hotel-border hover:border-hotel-border focus:border-hotel-gold focus:outline-none rounded text-sm font-medium transition-colors"
             />
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm("")}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-hotel-text-secondary"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-hotel-text-secondary hover:text-hotel-text-secondary"
               >
                 <X size={18} />
               </button>
@@ -86,7 +86,7 @@ export default function ListStaff() {
           </div>
         </div>
         <table className="w-full text-sm">
-          <thead className="bg-white border-b-2 border-emerald-200">
+          <thead className="bg-white border-b-2 border-hotel-border">
             <tr>
               {[
                 t("number"),
@@ -107,9 +107,9 @@ export default function ListStaff() {
             {filteredStaff.map((s) => (
               <tr
                 key={s.number}
-                className="border-b hover:bg-emerald-50/50 transition-colors duration-150"
+                className="border-b hover:bg-hotel-cream/50 transition-colors duration-150"
               >
-                <td className="px-6 py-3 font-semibold text-emerald-600">
+                <td className="px-6 py-3 font-semibold text-hotel-gold">
                   {s.number}
                 </td>
                 <td className="px-6 py-3 text-hotel-text-primary">{s.first_name}</td>
@@ -132,3 +132,6 @@ export default function ListStaff() {
     </div>
   );
 }
+
+
+

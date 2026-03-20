@@ -54,7 +54,7 @@ export default function RoomsByStatus({
   return (
     <div className="space-y-4 p-4">
       {/* Toolbar */}
-      <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4 p-4 rounded border border-blue-100">
+      <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4 p-4 rounded border border-hotel-border">
         <div>
           <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
             {titles[statusFilter] ?? t("roomsByStatus")}
@@ -70,7 +70,7 @@ export default function RoomsByStatus({
           </button>
           <button
             onClick={exportCSV}
-            className="border-2 border-hotel-border text-hotel-text-primary px-6 py-3 rounded flex items-center gap-2 text-sm font-medium bg-green-50 hover:bg-green-100 hover:shadow-lg transition-colors duration-200"
+            className="border-2 border-hotel-border text-hotel-text-primary px-6 py-3 rounded flex items-center gap-2 text-sm font-medium bg-hotel-cream hover:bg-hotel-cream hover:shadow-lg transition-colors duration-200"
           >
             <FileSpreadsheet size={18} />
             Excel
@@ -92,7 +92,7 @@ export default function RoomsByStatus({
         </div>
         <table className="w-full text-sm border-collapse">
           <thead>
-            <tr className="bg-gradient-to-r from-gray-800 to-gray-700">
+            <tr className="bg-gradient-to-r from-hotel-gold to-hotel-gold-dark">
               <th className="px-4 py-3 text-left text-xs font-semibold text-white">
                 Room Num
               </th>
@@ -134,10 +134,10 @@ export default function RoomsByStatus({
                   <span
                     className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
                       r.status === "OCC"
-                        ? "bg-red-100 text-red-700"
+                        ? "bg-hotel-cream text-hotel-gold"
                         : r.status === "VC"
-                          ? "bg-green-100 text-hotel-text-primary"
-                          : "bg-gray-100 text-hotel-text-primary"
+                          ? "bg-hotel-cream text-hotel-text-primary"
+                          : "bg-hotel-cream text-hotel-text-primary"
                     }`}
                   >
                     {r.status}
@@ -149,7 +149,7 @@ export default function RoomsByStatus({
               <tr>
                 <td
                   colSpan={6}
-                  className="px-4 py-8 text-center text-gray-400 font-medium"
+                  className="px-4 py-8 text-center text-hotel-text-secondary font-medium"
                 >
                   {t("noRecords")}
                 </td>
@@ -168,3 +168,5 @@ export default function RoomsByStatus({
     </div>
   );
 }
+
+

@@ -246,9 +246,7 @@ export default function CheckOut() {
           r.guest_name === selectedRoom.guest_name,
       );
       if (archivedRes) {
-        setReservations((prev) =>
-          prev.filter((r) => r.id !== archivedRes.id),
-        );
+        setReservations((prev) => prev.filter((r) => r.id !== archivedRes.id));
         setReservationArchive((prev) => [...prev, { ...response.archive }]);
       }
       setRooms((prev) =>
@@ -276,7 +274,9 @@ export default function CheckOut() {
           housekeepingApi.laundryArchive(),
         ]);
         setJlaundry(laundryJournal.concat(laundryArchive));
-      } catch { /* laundry refresh is best-effort */ }
+      } catch {
+        /* laundry refresh is best-effort */
+      }
 
       setDoneMsg(
         response.detail ??
@@ -405,7 +405,9 @@ export default function CheckOut() {
           housekeepingApi.laundryArchive(),
         ]);
         setJlaundry(laundryJournal.concat(laundryArchive));
-      } catch { /* laundry refresh is best-effort */ }
+      } catch {
+        /* laundry refresh is best-effort */
+      }
 
       setDoneMsg(
         response.detail ??
@@ -445,7 +447,7 @@ export default function CheckOut() {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4 p-4 rounded border border-blue-100">
+      <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4 p-4 rounded border border-hotel-border">
         <div>
           <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
             Check-Out
@@ -462,7 +464,7 @@ export default function CheckOut() {
           {step !== "select" && (
             <button
               onClick={resetFlow}
-              className="px-5 py-2.5 rounded bg-gray-100 text-hotel-text-secondary hover:bg-gray-200 text-sm font-medium"
+              className="px-5 py-2.5 rounded bg-hotel-cream text-hotel-text-secondary hover:bg-hotel-paper text-sm font-medium"
             >
               Back to List
             </button>
@@ -493,7 +495,7 @@ export default function CheckOut() {
                 className={`flex items-center gap-2 px-5 py-2.5 rounded text-sm font-semibold transition-colors ${
                   tab === "individual"
                     ? "bg-hotel-gold text-white"
-                    : "bg-gray-100 text-hotel-text-secondary hover:bg-gray-200"
+                    : "bg-hotel-cream text-hotel-text-secondary hover:bg-hotel-paper"
                 }`}
               >
                 <User size={16} />
@@ -507,7 +509,7 @@ export default function CheckOut() {
                 className={`flex items-center gap-2 px-5 py-2.5 rounded text-sm font-semibold transition-colors ${
                   tab === "group"
                     ? "bg-hotel-gold text-white"
-                    : "bg-gray-100 text-hotel-text-secondary hover:bg-gray-200"
+                    : "bg-hotel-cream text-hotel-text-secondary hover:bg-hotel-paper"
                 }`}
               >
                 <Users size={16} />
@@ -517,7 +519,7 @@ export default function CheckOut() {
             <div className="relative">
               <Search
                 size={20}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500"
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-hotel-gold"
               />
               <input
                 value={search}
@@ -535,17 +537,17 @@ export default function CheckOut() {
           {/* Individual room list */}
           {isIndividual && (
             <div className="space-y-3">
-              <div className="flex items-center gap-3 bg-gradient-to-r from-red-50 to-orange-50 p-4 rounded border border-red-100">
-                <LogOut size={20} className="text-red-600" />
-                <h2 className="flex-1 text-base font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
+              <div className="flex items-center gap-3 bg-gradient-to-r from-red-50 to-orange-50 p-4 rounded border border-hotel-border">
+                <LogOut size={20} className="text-hotel-gold" />
+                <h2 className="flex-1 text-base font-bold bg-gradient-to-r from-hotel-gold to-hotel-gold-dark bg-clip-text text-transparent">
                   Occupied Rooms
                 </h2>
-                <span className="bg-red-100 text-red-700 text-sm font-bold px-3 py-1 rounded-full">
+                <span className="bg-hotel-cream text-hotel-gold text-sm font-bold px-3 py-1 rounded-full">
                   {occupiedRooms.length}
                 </span>
               </div>
               {occupiedRooms.length === 0 ? (
-                <div className="bg-white rounded border border-dashed border-hotel-border p-4 text-center text-gray-400 text-sm">
+                <div className="bg-white rounded border border-dashed border-hotel-border p-4 text-center text-hotel-text-secondary text-sm">
                   {search
                     ? `No occupied rooms match "${search}"`
                     : "No occupied rooms to check out"}
@@ -566,7 +568,7 @@ export default function CheckOut() {
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-3">
-                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-400 to-orange-500 flex items-center justify-center text-white font-bold text-sm">
+                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-amber-700 flex items-center justify-center text-white font-bold text-sm">
                               {room.guest_name
                                 .split(" ")
                                 .map((n) => n[0])
@@ -618,7 +620,7 @@ export default function CheckOut() {
                             </div>
                           </div>
                         </div>
-                        <div className="ml-4 px-4 py-2 rounded flex items-center gap-2 text-sm font-medium shrink-0 bg-gradient-to-r from-blue-500 to-indigo-500 text-white">
+                        <div className="ml-4 px-4 py-2 rounded flex items-center gap-2 text-sm font-medium shrink-0 bg-gradient-to-r from-amber-500 to-amber-700 text-white">
                           <Receipt size={16} />
                           Select
                         </div>
@@ -633,17 +635,17 @@ export default function CheckOut() {
           {/* Group list */}
           {!isIndividual && (
             <div className="space-y-3">
-              <div className="flex items-center gap-3 bg-gradient-to-r from-amber-50 to-orange-50 p-4 rounded border border-amber-100">
+              <div className="flex items-center gap-3 bg-gradient-to-r from-hotel-paper to-hotel-cream p-4 rounded border border-amber-100">
                 <Users size={20} className="text-amber-600" />
-                <h2 className="flex-1 text-base font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+                <h2 className="flex-1 text-base font-bold bg-gradient-to-r from-hotel-gold to-hotel-gold-dark bg-clip-text text-transparent">
                   Active Groups
                 </h2>
-                <span className="bg-amber-100 text-amber-700 text-sm font-bold px-3 py-1 rounded-full">
+                <span className="bg-hotel-cream text-hotel-gold text-sm font-bold px-3 py-1 rounded-full">
                   {activeGroups.length}
                 </span>
               </div>
               {activeGroups.length === 0 ? (
-                <div className="bg-white rounded border border-dashed border-hotel-border p-4 text-center text-gray-400 text-sm">
+                <div className="bg-white rounded border border-dashed border-hotel-border p-4 text-center text-hotel-text-secondary text-sm">
                   {search
                     ? `No active groups match "${search}"`
                     : "No active groups to check out"}
@@ -659,7 +661,7 @@ export default function CheckOut() {
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-3">
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white font-bold text-sm">
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-amber-700 flex items-center justify-center text-white font-bold text-sm">
                             <Users size={20} />
                           </div>
                           <div>
@@ -667,8 +669,7 @@ export default function CheckOut() {
                               {group.groupe_name}
                             </h3>
                             <p className="text-xs text-hotel-text-secondary">
-                              Code: {group.code_g} — {group.number_pers}{" "}
-                              persons
+                              Code: {group.code_g} — {group.number_pers} persons
                             </p>
                           </div>
                         </div>
@@ -709,7 +710,7 @@ export default function CheckOut() {
                           </div>
                         </div>
                       </div>
-                      <div className="ml-4 px-4 py-2 rounded flex items-center gap-2 text-sm font-medium shrink-0 bg-gradient-to-r from-blue-500 to-indigo-500 text-white">
+                      <div className="ml-4 px-4 py-2 rounded flex items-center gap-2 text-sm font-medium shrink-0 bg-gradient-to-r from-amber-500 to-amber-700 text-white">
                         <Receipt size={16} />
                         Select
                       </div>
@@ -725,7 +726,7 @@ export default function CheckOut() {
       {/* Loading overlay */}
       {loading && (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="animate-spin text-blue-500" size={32} />
+          <Loader2 className="animate-spin text-hotel-gold" size={32} />
           <span className="ml-3 text-hotel-text-secondary">Processing...</span>
         </div>
       )}
@@ -743,7 +744,7 @@ export default function CheckOut() {
                 {invoice ? "Definitive Invoice" : "Invoice Preview"}
               </p>
               {invoice && (
-                <p className="text-sm font-mono font-bold text-blue-700 mt-1">
+                <p className="text-sm font-mono font-bold text-hotel-gold mt-1">
                   {invoice.invoice_number}
                 </p>
               )}
@@ -752,8 +753,8 @@ export default function CheckOut() {
               </p>
             </div>
 
-            <div className="border-2 border-gray-800 rounded overflow-hidden mb-4">
-              <div className="bg-gradient-to-r from-gray-800 to-gray-700 px-4 py-3 flex justify-between items-center text-white">
+            <div className="border-2 border-hotel-border rounded overflow-hidden mb-4">
+              <div className="bg-gradient-to-r from-hotel-gold to-hotel-gold-dark px-4 py-3 flex justify-between items-center text-white">
                 <p className="font-bold text-sm">
                   {invoice ? "DEFINITIVE INVOICE" : "Guest Invoice Preview"}
                 </p>
@@ -780,7 +781,7 @@ export default function CheckOut() {
               {/* Items table */}
               <table className="w-full border-collapse bg-white">
                 <thead>
-                  <tr className="bg-gradient-to-r from-gray-800 to-gray-700">
+                  <tr className="bg-gradient-to-r from-hotel-gold to-hotel-gold-dark">
                     {[
                       "Date",
                       "Designation",
@@ -791,7 +792,7 @@ export default function CheckOut() {
                     ].map((h) => (
                       <th
                         key={h}
-                        className="border border-gray-800 px-2 py-2 text-left font-bold text-xs text-white"
+                        className="border border-hotel-border px-2 py-2 text-left font-bold text-xs text-white"
                       >
                         {h}
                       </th>
@@ -828,20 +829,20 @@ export default function CheckOut() {
               </table>
 
               {/* Totals */}
-              <div className="flex justify-between items-start px-4 py-4 border-t-2 border-gray-800 bg-gradient-to-r from-gray-50 to-white">
+              <div className="flex justify-between items-start px-4 py-4 border-t-2 border-hotel-border bg-gradient-to-r from-hotel-paper to-white">
                 {invoice && (
                   <div className="space-y-3 text-xs">
                     <div className="flex items-baseline gap-3">
                       <span className="font-semibold text-hotel-text-primary">
                         Company Signature
                       </span>
-                      <span className="border-b-2 border-gray-400 w-24 inline-block" />
+                      <span className="border-b-2 border-hotel-border w-24 inline-block" />
                     </div>
                     <div className="flex items-baseline gap-3">
                       <span className="font-semibold text-hotel-text-primary">
                         Username:
                       </span>
-                      <span className="font-bold text-blue-700">
+                      <span className="font-bold text-hotel-gold">
                         {invoice.username}
                       </span>
                     </div>
@@ -852,24 +853,27 @@ export default function CheckOut() {
                     <span className="font-semibold text-hotel-text-primary">
                       Total Charges
                     </span>
-                    <span className="border-2 border-gray-400 bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
-                      {fmt(indivDisplay.total_charges)} {indivDisplay?.current_mon ?? "RWF"}
+                    <span className="border-2 border-hotel-border bg-gradient-to-r from-hotel-paper to-hotel-cream px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
+                      {fmt(indivDisplay.total_charges)}{" "}
+                      {indivDisplay?.current_mon ?? "RWF"}
                     </span>
                   </div>
                   <div className="flex items-center justify-end gap-3">
                     <span className="font-semibold text-hotel-text-primary">
                       Total Paid
                     </span>
-                    <span className="border-2 border-gray-400 bg-gradient-to-r from-blue-50 to-cyan-50 px-3 py-1.5 w-28 text-right font-bold text-blue-700">
-                      {fmt(indivDisplay.total_paid)} {indivDisplay?.current_mon ?? "RWF"}
+                    <span className="border-2 border-hotel-border bg-gradient-to-r from-hotel-paper to-hotel-cream px-3 py-1.5 w-28 text-right font-bold text-hotel-gold">
+                      {fmt(indivDisplay.total_paid)}{" "}
+                      {indivDisplay?.current_mon ?? "RWF"}
                     </span>
                   </div>
                   <div className="flex items-center justify-end gap-3">
                     <span className="font-semibold text-hotel-text-primary">
                       Balance Due
                     </span>
-                    <span className="border-2 border-gray-400 bg-gradient-to-r from-orange-50 to-red-50 px-3 py-1.5 w-28 text-right font-bold text-red-700">
-                      {fmt(indivDisplay.balance_due)} {indivDisplay?.current_mon ?? "RWF"}
+                    <span className="border-2 border-hotel-border bg-gradient-to-r from-hotel-paper to-hotel-cream px-3 py-1.5 w-28 text-right font-bold text-hotel-gold">
+                      {fmt(indivDisplay.balance_due)}{" "}
+                      {indivDisplay?.current_mon ?? "RWF"}
                     </span>
                   </div>
                   {invoice?.tax?.taux != null && (
@@ -878,24 +882,27 @@ export default function CheckOut() {
                         <span className="font-semibold text-hotel-text-primary">
                           HTVA
                         </span>
-                        <span className="border-2 border-gray-400 px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
-                          {fmt(invoice.tax.htva ?? 0)} {invoice?.current_mon ?? "RWF"}
+                        <span className="border-2 border-hotel-border px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
+                          {fmt(invoice.tax.htva ?? 0)}{" "}
+                          {invoice?.current_mon ?? "RWF"}
                         </span>
                       </div>
                       <div className="flex items-center justify-end gap-3">
                         <span className="font-semibold text-hotel-text-primary">
                           TVA ({invoice.tax.taux}%)
                         </span>
-                        <span className="border-2 border-gray-400 px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
-                          {fmt(invoice.tax.tva ?? 0)} {invoice?.current_mon ?? "RWF"}
+                        <span className="border-2 border-hotel-border px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
+                          {fmt(invoice.tax.tva ?? 0)}{" "}
+                          {invoice?.current_mon ?? "RWF"}
                         </span>
                       </div>
                       <div className="flex items-center justify-end gap-3">
                         <span className="font-semibold text-hotel-text-primary">
                           Total TTC
                         </span>
-                        <span className="border-2 border-gray-400 bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-1.5 w-28 text-right font-bold text-green-800">
-                          {fmt(invoice.tax.total_ttc ?? 0)} {invoice?.current_mon ?? "RWF"}
+                        <span className="border-2 border-hotel-border bg-gradient-to-r from-hotel-paper to-hotel-cream px-3 py-1.5 w-28 text-right font-bold text-hotel-gold">
+                          {fmt(invoice.tax.total_ttc ?? 0)}{" "}
+                          {invoice?.current_mon ?? "RWF"}
                         </span>
                       </div>
                     </>
@@ -921,7 +928,7 @@ export default function CheckOut() {
                   : "Group Invoice Preview"}
               </p>
               {groupInvoice && (
-                <p className="text-sm font-mono font-bold text-blue-700 mt-1">
+                <p className="text-sm font-mono font-bold text-hotel-gold mt-1">
                   {groupInvoice.invoice_number}
                 </p>
               )}
@@ -931,8 +938,8 @@ export default function CheckOut() {
               </p>
             </div>
 
-            <div className="border-2 border-gray-800 rounded overflow-hidden mb-4">
-              <div className="bg-gradient-to-r from-gray-800 to-gray-700 px-4 py-3 flex justify-between items-center text-white">
+            <div className="border-2 border-hotel-border rounded overflow-hidden mb-4">
+              <div className="bg-gradient-to-r from-hotel-gold to-hotel-gold-dark px-4 py-3 flex justify-between items-center text-white">
                 <p className="font-bold text-sm">
                   {groupInvoice ? "GROUP INVOICE" : "GROUP INVOICE PREVIEW"}
                 </p>
@@ -954,7 +961,7 @@ export default function CheckOut() {
 
               <table className="w-full border-collapse bg-white">
                 <thead>
-                  <tr className="bg-gradient-to-r from-gray-800 to-gray-700">
+                  <tr className="bg-gradient-to-r from-hotel-gold to-hotel-gold-dark">
                     {[
                       "Date",
                       "Room",
@@ -968,7 +975,7 @@ export default function CheckOut() {
                     ].map((h) => (
                       <th
                         key={h}
-                        className="border border-gray-800 px-2 py-2 text-left font-bold text-xs text-white"
+                        className="border border-hotel-border px-2 py-2 text-left font-bold text-xs text-white"
                       >
                         {h}
                       </th>
@@ -1005,7 +1012,7 @@ export default function CheckOut() {
                       <td className="border border-hotel-border px-2 py-2 text-xs text-right font-bold text-hotel-text-primary">
                         {fmt(item.credit)}
                       </td>
-                      <td className="border border-hotel-border px-2 py-2 text-xs text-right font-bold text-red-700">
+                      <td className="border border-hotel-border px-2 py-2 text-xs text-right font-bold text-hotel-gold">
                         {fmt(item.debit)}
                       </td>
                     </tr>
@@ -1014,20 +1021,20 @@ export default function CheckOut() {
               </table>
 
               {/* Group totals */}
-              <div className="flex justify-between items-start px-4 py-4 border-t-2 border-gray-800 bg-gradient-to-r from-gray-50 to-white">
+              <div className="flex justify-between items-start px-4 py-4 border-t-2 border-hotel-border bg-gradient-to-r from-hotel-paper to-white">
                 {groupInvoice && (
                   <div className="space-y-3 text-xs">
                     <div className="flex items-baseline gap-3">
                       <span className="font-semibold text-hotel-text-primary">
                         Company Signature
                       </span>
-                      <span className="border-b-2 border-gray-400 w-24 inline-block" />
+                      <span className="border-b-2 border-hotel-border w-24 inline-block" />
                     </div>
                     <div className="flex items-baseline gap-3">
                       <span className="font-semibold text-hotel-text-primary">
                         Username:
                       </span>
-                      <span className="font-bold text-blue-700">
+                      <span className="font-bold text-hotel-gold">
                         {groupInvoice.username}
                       </span>
                     </div>
@@ -1038,32 +1045,36 @@ export default function CheckOut() {
                     <span className="font-semibold text-hotel-text-primary">
                       Total Charges
                     </span>
-                    <span className="border-2 border-gray-400 bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
-                      {fmt(groupDisplay.total_charges)} {groupDisplay?.current_mon ?? "RWF"}
+                    <span className="border-2 border-hotel-border bg-gradient-to-r from-hotel-paper to-hotel-cream px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
+                      {fmt(groupDisplay.total_charges)}{" "}
+                      {groupDisplay?.current_mon ?? "RWF"}
                     </span>
                   </div>
                   <div className="flex items-center justify-end gap-3">
                     <span className="font-semibold text-hotel-text-primary">
                       Group Deposit
                     </span>
-                    <span className="border-2 border-gray-400 bg-gradient-to-r from-purple-50 to-violet-50 px-3 py-1.5 w-28 text-right font-bold text-purple-700">
-                      {fmt(groupDisplay.group_deposit)} {groupDisplay?.current_mon ?? "RWF"}
+                    <span className="border-2 border-hotel-border bg-gradient-to-r from-hotel-paper to-hotel-cream px-3 py-1.5 w-28 text-right font-bold text-hotel-gold">
+                      {fmt(groupDisplay.group_deposit)}{" "}
+                      {groupDisplay?.current_mon ?? "RWF"}
                     </span>
                   </div>
                   <div className="flex items-center justify-end gap-3">
                     <span className="font-semibold text-hotel-text-primary">
                       Total Paid
                     </span>
-                    <span className="border-2 border-gray-400 bg-gradient-to-r from-blue-50 to-cyan-50 px-3 py-1.5 w-28 text-right font-bold text-blue-700">
-                      {fmt(groupDisplay.total_paid)} {groupDisplay?.current_mon ?? "RWF"}
+                    <span className="border-2 border-hotel-border bg-gradient-to-r from-hotel-paper to-hotel-cream px-3 py-1.5 w-28 text-right font-bold text-hotel-gold">
+                      {fmt(groupDisplay.total_paid)}{" "}
+                      {groupDisplay?.current_mon ?? "RWF"}
                     </span>
                   </div>
                   <div className="flex items-center justify-end gap-3">
                     <span className="font-semibold text-hotel-text-primary">
                       Balance Due
                     </span>
-                    <span className="border-2 border-gray-400 bg-gradient-to-r from-orange-50 to-red-50 px-3 py-1.5 w-28 text-right font-bold text-red-700">
-                      {fmt(groupDisplay.balance_due)} {groupDisplay?.current_mon ?? "RWF"}
+                    <span className="border-2 border-hotel-border bg-gradient-to-r from-hotel-paper to-hotel-cream px-3 py-1.5 w-28 text-right font-bold text-hotel-gold">
+                      {fmt(groupDisplay.balance_due)}{" "}
+                      {groupDisplay?.current_mon ?? "RWF"}
                     </span>
                   </div>
                   {groupInvoice?.tax?.taux != null && (
@@ -1072,24 +1083,27 @@ export default function CheckOut() {
                         <span className="font-semibold text-hotel-text-primary">
                           HTVA
                         </span>
-                        <span className="border-2 border-gray-400 px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
-                          {fmt(groupInvoice.tax.htva ?? 0)} {groupInvoice?.current_mon ?? "RWF"}
+                        <span className="border-2 border-hotel-border px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
+                          {fmt(groupInvoice.tax.htva ?? 0)}{" "}
+                          {groupInvoice?.current_mon ?? "RWF"}
                         </span>
                       </div>
                       <div className="flex items-center justify-end gap-3">
                         <span className="font-semibold text-hotel-text-primary">
                           TVA ({groupInvoice.tax.taux}%)
                         </span>
-                        <span className="border-2 border-gray-400 px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
-                          {fmt(groupInvoice.tax.tva ?? 0)} {groupInvoice?.current_mon ?? "RWF"}
+                        <span className="border-2 border-hotel-border px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
+                          {fmt(groupInvoice.tax.tva ?? 0)}{" "}
+                          {groupInvoice?.current_mon ?? "RWF"}
                         </span>
                       </div>
                       <div className="flex items-center justify-end gap-3">
                         <span className="font-semibold text-hotel-text-primary">
                           Total TTC
                         </span>
-                        <span className="border-2 border-gray-400 bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-1.5 w-28 text-right font-bold text-green-800">
-                          {fmt(groupInvoice.tax.total_ttc ?? 0)} {groupInvoice?.current_mon ?? "RWF"}
+                        <span className="border-2 border-hotel-border bg-gradient-to-r from-hotel-paper to-hotel-cream px-3 py-1.5 w-28 text-right font-bold text-hotel-gold">
+                          {fmt(groupInvoice.tax.total_ttc ?? 0)}{" "}
+                          {groupInvoice?.current_mon ?? "RWF"}
                         </span>
                       </div>
                     </>
@@ -1105,7 +1119,7 @@ export default function CheckOut() {
         <div className="flex justify-center">
           <button
             onClick={() => setShowGenModal(true)}
-            className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-8 py-3 rounded flex items-center gap-2 text-sm font-medium hover:shadow-lg transition-colors"
+            className="bg-gradient-to-r from-amber-500 to-amber-700 text-white px-8 py-3 rounded flex items-center gap-2 text-sm font-medium hover:shadow-lg transition-colors"
           >
             <Receipt size={18} />
             Generate Definitive Invoice
@@ -1117,7 +1131,7 @@ export default function CheckOut() {
         <div className="flex justify-center">
           <button
             onClick={() => setStep("checkout-confirm")}
-            className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-8 py-3 rounded flex items-center gap-2 text-sm font-medium hover:shadow-lg transition-colors"
+            className="bg-gradient-to-r from-amber-500 to-amber-700 text-white px-8 py-3 rounded flex items-center gap-2 text-sm font-medium hover:shadow-lg transition-colors"
           >
             <LogOut size={18} />
             Proceed to Check-Out
@@ -1129,12 +1143,12 @@ export default function CheckOut() {
       {step === "checkout-confirm" && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[9999]">
           <div className="bg-white rounded max-w-sm w-full mx-4 overflow-hidden">
-            <div className="px-6 py-4 bg-gradient-to-r from-red-50 to-orange-50 border-b border-red-100">
+            <div className="px-6 py-4 bg-gradient-to-r from-red-50 to-orange-50 border-b border-hotel-border">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
-                  <AlertTriangle size={20} className="text-red-600" />
+                <div className="w-10 h-10 rounded-full bg-hotel-cream flex items-center justify-center">
+                  <AlertTriangle size={20} className="text-hotel-gold" />
                 </div>
-                <h2 className="text-base font-bold text-red-900">
+                <h2 className="text-base font-bold text-hotel-gold">
                   Confirm Check-Out
                 </h2>
               </div>
@@ -1146,7 +1160,7 @@ export default function CheckOut() {
                   : `Are you sure you want to check out the entire group "${selectedGroup?.groupe_name}"? This will archive all member reservations and release all rooms.`}
               </p>
               {(isIndividual ? invoice : groupInvoice) && (
-                <p className="text-xs text-blue-600 mt-2 font-medium">
+                <p className="text-xs text-hotel-gold mt-2 font-medium">
                   Invoice{" "}
                   {isIndividual
                     ? invoice?.invoice_number
@@ -1159,16 +1173,14 @@ export default function CheckOut() {
               <button
                 onClick={() => setStep("invoice")}
                 disabled={loading}
-                className="px-4 py-2 rounded bg-gray-200 text-hotel-text-primary hover:bg-gray-300 transition-colors font-medium text-sm"
+                className="px-4 py-2 rounded bg-hotel-paper text-hotel-text-primary hover:bg-hotel-paper transition-colors font-medium text-sm"
               >
                 Cancel
               </button>
               <button
-                onClick={
-                  isIndividual ? handleCheckout : handleGroupCheckout
-                }
+                onClick={isIndividual ? handleCheckout : handleGroupCheckout}
                 disabled={loading}
-                className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700 transition-colors font-medium text-sm flex items-center gap-2"
+                className="px-4 py-2 rounded bg-hotel-gold-dark text-white hover:bg-hotel-gold-dark transition-colors font-medium text-sm flex items-center gap-2"
               >
                 {loading && <Loader2 className="animate-spin" size={14} />}
                 {loading ? "Checking out..." : "Check-Out"}
@@ -1180,11 +1192,11 @@ export default function CheckOut() {
 
       {/* ═══ STEP: DONE ═══ */}
       {step === "done" && (
-        <div className="max-w-lg mx-auto bg-white rounded border border-green-200 p-4 text-center space-y-4">
-          <div className="w-16 h-16 mx-auto rounded-full bg-green-100 flex items-center justify-center">
+        <div className="max-w-lg mx-auto bg-white rounded border border-hotel-border p-4 text-center space-y-4">
+          <div className="w-16 h-16 mx-auto rounded-full bg-hotel-cream flex items-center justify-center">
             <CheckCircle size={32} className="text-hotel-gold" />
           </div>
-          <h2 className="text-2xl font-bold text-green-800">
+          <h2 className="text-2xl font-bold text-hotel-gold">
             Check-Out Complete
           </h2>
           <p className="text-sm text-hotel-text-secondary">{doneMsg}</p>
@@ -1198,7 +1210,7 @@ export default function CheckOut() {
             </button>
             <button
               onClick={resetFlow}
-              className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-5 py-2.5 rounded text-sm font-medium hover:shadow-lg transition-colors"
+              className="bg-gradient-to-r from-amber-500 to-amber-700 text-white px-5 py-2.5 rounded text-sm font-medium hover:shadow-lg transition-colors"
             >
               New Check-Out
             </button>
@@ -1269,11 +1281,9 @@ export default function CheckOut() {
                     : handleGenerateGroupInvoice
                 }
                 disabled={generating}
-                className="flex-1 bg-green-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-green-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                className="flex-1 bg-hotel-gold-dark text-white px-4 py-2 rounded text-sm font-medium hover:bg-hotel-gold-dark disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                {generating && (
-                  <Loader2 className="animate-spin" size={14} />
-                )}
+                {generating && <Loader2 className="animate-spin" size={14} />}
                 Generate
               </button>
               <button
@@ -1292,15 +1302,17 @@ export default function CheckOut() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded p-4 w-full max-w-sm">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-red-100 rounded-full">
-                <AlertTriangle className="text-red-600" size={20} />
+              <div className="p-2 bg-hotel-cream rounded-full">
+                <AlertTriangle className="text-hotel-gold" size={20} />
               </div>
-              <h3 className="text-base font-semibold text-hotel-text-primary">Error</h3>
+              <h3 className="text-base font-semibold text-hotel-text-primary">
+                Error
+              </h3>
             </div>
             <p className="text-sm text-hotel-text-secondary mb-6">{errorMsg}</p>
             <button
               onClick={() => setErrorMsg("")}
-              className="w-full bg-red-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-red-700"
+              className="w-full bg-hotel-gold-dark text-white px-4 py-2 rounded text-sm font-medium hover:bg-hotel-gold-dark"
             >
               OK
             </button>

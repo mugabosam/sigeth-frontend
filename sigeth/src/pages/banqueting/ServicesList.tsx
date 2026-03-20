@@ -44,23 +44,23 @@ export default function ServicesList() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-hotel-paper to-hotel-cream p-4">
       <div className="max-w-7xl mx-auto space-y-4">
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
+          <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
             {t("servicesList")}
           </h1>
           <div className="flex gap-2">
             <button
               onClick={() => window.print()}
-              className="bg-gray-600 text-white px-4 py-2 rounded flex items-center gap-2 text-sm hover:bg-gray-700 transition-colors"
+              className="bg-hotel-gold text-white px-4 py-2 rounded flex items-center gap-2 text-sm hover:bg-hotel-gold-dark transition-colors"
             >
               <Printer size={16} />
               {t("print")}
             </button>
             <button
               onClick={handleExport}
-              className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-4 py-2 rounded flex items-center gap-2 text-sm hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-colors"
+              className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-4 py-2 rounded flex items-center gap-2 text-sm hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-colors"
             >
               <FileSpreadsheet size={16} />
               {t("excel")}
@@ -69,9 +69,9 @@ export default function ServicesList() {
         </div>
 
         {/* Master Table View - All Services */}
-        <div className="bg-white rounded border-2 border-emerald-200 overflow-hidden print:border-gray-400">
+        <div className="bg-white rounded border-2 border-hotel-border overflow-hidden print:border-hotel-border">
           {/* Header Section */}
-          <div className="p-4 border-b-2 border-emerald-200 print:border-gray-400 bg-emerald-50 print:bg-white">
+          <div className="p-4 border-b-2 border-hotel-border print:border-hotel-border bg-hotel-cream print:bg-white">
             <div className="text-sm font-semibold text-hotel-text-primary">
               <span className="inline-block w-32">{t("mPEName")}:</span>
               <span className="text-hotel-text-secondary">SIGETH Hotel Management</span>
@@ -80,24 +80,24 @@ export default function ServicesList() {
 
           {/* Services Table */}
           <table className="w-full text-sm">
-            <thead className="bg-gray-100 border-b-2 border-emerald-200 print:border-gray-400 print:bg-white">
+            <thead className="bg-hotel-cream border-b-2 border-hotel-border print:border-hotel-border print:bg-white">
               <tr>
-                <th className="text-left px-4 py-3 font-bold text-hotel-text-primary border-r border-hotel-border print:border-gray-400">
+                <th className="text-left px-4 py-3 font-bold text-hotel-text-primary border-r border-hotel-border print:border-hotel-border">
                   {t("lot")}
                 </th>
-                <th className="text-left px-4 py-3 font-bold text-hotel-text-primary border-r border-hotel-border print:border-gray-400">
+                <th className="text-left px-4 py-3 font-bold text-hotel-text-primary border-r border-hotel-border print:border-hotel-border">
                   {t("designation")}
                 </th>
-                <th className="text-left px-4 py-3 font-bold text-hotel-text-primary border-r border-hotel-border print:border-gray-400">
+                <th className="text-left px-4 py-3 font-bold text-hotel-text-primary border-r border-hotel-border print:border-hotel-border">
                   {t("nature")}
                 </th>
-                <th className="text-left px-4 py-3 font-bold text-hotel-text-primary border-r border-hotel-border print:border-gray-400">
+                <th className="text-left px-4 py-3 font-bold text-hotel-text-primary border-r border-hotel-border print:border-hotel-border">
                   {t("unity")}
                 </th>
-                <th className="text-center px-4 py-3 font-bold text-hotel-text-primary border-r border-hotel-border print:border-gray-400">
+                <th className="text-center px-4 py-3 font-bold text-hotel-text-primary border-r border-hotel-border print:border-hotel-border">
                   {t("qty")}
                 </th>
-                <th className="text-right px-4 py-3 font-bold text-hotel-text-primary border-r border-hotel-border print:border-gray-400">
+                <th className="text-right px-4 py-3 font-bold text-hotel-text-primary border-r border-hotel-border print:border-hotel-border">
                   {t("puv")}
                 </th>
                 <th className="text-right px-4 py-3 font-bold text-hotel-text-primary">
@@ -116,7 +116,7 @@ export default function ServicesList() {
                   return (
                     <tr
                       key={i}
-                      className="border-b border-hotel-border hover:bg-emerald-50/50 transition-colors print:border-hotel-border print:hover:bg-white"
+                      className="border-b border-hotel-border hover:bg-hotel-cream/50 transition-colors print:border-hotel-border print:hover:bg-white"
                     >
                       <td className="px-4 py-3 font-medium border-r border-hotel-border print:border-hotel-border">
                         {s.lot}
@@ -136,7 +136,7 @@ export default function ServicesList() {
                       <td className="px-4 py-3 text-right font-medium border-r border-hotel-border print:border-hotel-border">
                         {s.puv.toLocaleString()}
                       </td>
-                      <td className="px-4 py-3 text-right font-semibold text-emerald-700">
+                      <td className="px-4 py-3 text-right font-semibold text-hotel-gold">
                         {(s.qty * s.puv).toLocaleString()}
                       </td>
                     </tr>
@@ -146,7 +146,7 @@ export default function ServicesList() {
                 <tr>
                   <td
                     colSpan={7}
-                    className="px-4 py-3 text-gray-400 text-center"
+                    className="px-4 py-3 text-hotel-text-secondary text-center"
                   >
                     {t("noRecords")}
                   </td>
@@ -164,9 +164,9 @@ export default function ServicesList() {
           {grouped.map((g) => (
             <div
               key={g.lot}
-              className="bg-white rounded border-2 border-emerald-200 overflow-hidden"
+              className="bg-white rounded border-2 border-hotel-border overflow-hidden"
             >
-              <div className="bg-emerald-50 px-4 py-3 border-b-2 border-emerald-200">
+              <div className="bg-hotel-cream px-4 py-3 border-b-2 border-hotel-border">
                 <h3 className="font-semibold text-sm text-hotel-text-primary">
                   {t("lot")} {g.lot} —{" "}
                   {EVENT_TYPES.find((t) => t.value === g.nature)?.label ||
@@ -174,7 +174,7 @@ export default function ServicesList() {
                 </h3>
               </div>
               <table className="w-full text-sm">
-                <thead className="bg-white border-b-2 border-emerald-200">
+                <thead className="bg-white border-b-2 border-hotel-border">
                   <tr>
                     <th className="text-left px-4 py-3 font-medium text-hotel-text-secondary">
                       {t("designation")}
@@ -197,7 +197,7 @@ export default function ServicesList() {
                   {g.services.map((s, i) => (
                     <tr
                       key={i}
-                      className="border-b hover:bg-emerald-50/50 transition-colors"
+                      className="border-b hover:bg-hotel-cream/50 transition-colors"
                     >
                       <td className="px-4 py-3">{s.item}</td>
                       <td className="px-4 py-3">{s.unity}</td>
@@ -214,7 +214,7 @@ export default function ServicesList() {
                     <tr>
                       <td
                         colSpan={5}
-                        className="px-4 py-3 text-gray-400 text-center"
+                        className="px-4 py-3 text-hotel-text-secondary text-center"
                       >
                         {t("noRecords")}
                       </td>
@@ -229,3 +229,6 @@ export default function ServicesList() {
     </div>
   );
 }
+
+
+

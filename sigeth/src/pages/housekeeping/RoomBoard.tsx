@@ -204,7 +204,7 @@ function DetailModal({ room, onClose }: { room: RDF; onClose: () => void }) {
           letterSpacing: 1,
           color: "#94a3b8",
           marginBottom: 6,
-          fontFamily: "'Sora',sans-serif",
+          fontFamily: "'Source Sans 3', sans-serif",
         }}
       >
         {title}
@@ -234,7 +234,7 @@ function DetailModal({ room, onClose }: { room: RDF; onClose: () => void }) {
         style={{
           fontSize: 13,
           color: "#64748b",
-          fontFamily: "'Sora',sans-serif",
+          fontFamily: "'Source Sans 3', sans-serif",
         }}
       >
         {label}
@@ -244,7 +244,7 @@ function DetailModal({ room, onClose }: { room: RDF; onClose: () => void }) {
           fontSize: 13,
           fontWeight: 600,
           color: accent ? "#2563eb" : "#1e293b",
-          fontFamily: "'Lora',serif",
+          fontFamily: "'Playfair Display', serif",
         }}
       >
         {value || "—"}
@@ -301,7 +301,7 @@ function DetailModal({ room, onClose }: { room: RDF; onClose: () => void }) {
                   fontSize: 22,
                   fontWeight: 800,
                   color: s.text,
-                  fontFamily: "'Lora',serif",
+                  fontFamily: "'Playfair Display', serif",
                 }}
               >
                 Room {room.room_num}
@@ -448,7 +448,7 @@ function RoomCard({
           fontSize: 20,
           fontWeight: 800,
           color: s.text,
-          fontFamily: "'Lora',serif",
+          fontFamily: "'Playfair Display', serif",
         }}
       >
         {room.room_num}
@@ -523,7 +523,7 @@ function Pill({ n, l, c, bg, bc, onClick, active }: PillProps) {
           fontSize: 22,
           fontWeight: 800,
           color: c,
-          fontFamily: "'Lora',serif",
+          fontFamily: "'Playfair Display', serif",
         }}
       >
         {n}
@@ -533,7 +533,7 @@ function Pill({ n, l, c, bg, bc, onClick, active }: PillProps) {
           fontSize: 11,
           fontWeight: 600,
           color: "#475569",
-          fontFamily: "'Sora',sans-serif",
+          fontFamily: "'Source Sans 3', sans-serif",
         }}
       >
         {l}
@@ -559,7 +559,7 @@ function Sel({ lbl, val, onChange, opts }: SelProps) {
         borderRadius: 10,
         border: "1.5px solid #cbd5e1",
         fontSize: 13,
-        fontFamily: "'Sora',sans-serif",
+        fontFamily: "'Source Sans 3', sans-serif",
         color: "#334155",
         background: "#fff",
         cursor: "pointer",
@@ -642,7 +642,7 @@ export default function RoomBoard() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Sora:wght@300;400;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Sans+3:wght@300;400;600;700&display=swap');
         @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
         @keyframes modalIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
         .rb-scroll::-webkit-scrollbar{width:6px}
@@ -652,7 +652,7 @@ export default function RoomBoard() {
         style={{
           minHeight: "100vh",
           background: "#eef2f7",
-          fontFamily: "'Sora',sans-serif",
+          fontFamily: "'Source Sans 3', sans-serif",
         }}
       >
         {/* ── Header banner ── */}
@@ -684,7 +684,7 @@ export default function RoomBoard() {
               style={{
                 fontSize: 22,
                 fontWeight: 800,
-                fontFamily: "'Lora',serif",
+                fontFamily: "'Playfair Display', serif",
                 marginTop: 2,
               }}
             >
@@ -696,7 +696,7 @@ export default function RoomBoard() {
               style={{
                 fontSize: 28,
                 fontWeight: 800,
-                fontFamily: "'Lora',serif",
+                fontFamily: "'Playfair Display', serif",
               }}
             >
               {occPct}%
@@ -876,7 +876,7 @@ export default function RoomBoard() {
                       fontSize: 15,
                       fontWeight: 700,
                       color: "#1e293b",
-                      fontFamily: "'Lora',serif",
+                      fontFamily: "'Playfair Display', serif",
                     }}
                   >
                     Floor {floor}
@@ -933,3 +933,8 @@ export default function RoomBoard() {
     </>
   );
 }
+
+
+
+
+

@@ -49,24 +49,24 @@ export default function ServiceFollowUp() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-hotel-paper to-hotel-cream p-4">
       <div className="max-w-7xl mx-auto space-y-4">
         {/* Page Title */}
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
+          <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
             {t("serviceFollowUp")}
           </h1>
           <div className="flex gap-2">
             <button
               onClick={() => window.print()}
-              className="bg-gray-600 text-white px-4 py-2 rounded flex items-center gap-2 text-sm hover:bg-gray-700 transition-colors"
+              className="bg-hotel-gold text-white px-4 py-2 rounded flex items-center gap-2 text-sm hover:bg-hotel-gold-dark transition-colors"
             >
               <Printer size={16} />
               {t("print")}
             </button>
             <button
               onClick={handleExport}
-              className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-4 py-2 rounded flex items-center gap-2 text-sm hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-colors"
+              className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-4 py-2 rounded flex items-center gap-2 text-sm hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-colors"
             >
               <FileSpreadsheet size={16} />
               {t("excel")}
@@ -75,7 +75,7 @@ export default function ServiceFollowUp() {
         </div>
 
         {/* Search/Filter Section */}
-        <div className="bg-white rounded border-2 border-emerald-200 p-4">
+        <div className="bg-white rounded border-2 border-hotel-border p-4">
           <h3 className="text-sm font-semibold text-hotel-text-primary mb-4">
             {t("filters")}
           </h3>
@@ -89,7 +89,7 @@ export default function ServiceFollowUp() {
                 value={groupQ}
                 onChange={(e) => setGroupQ(e.target.value)}
                 placeholder={t("searchGroup")}
-                className="border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
+                className="border-2 border-hotel-border hover:border-hotel-border focus:border-hotel-gold focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
               />
             </div>
             <div>
@@ -101,7 +101,7 @@ export default function ServiceFollowUp() {
                 value={dateFrom}
                 onChange={(e) => setDateFrom(e.target.value)}
                 title={t("dateFrom")}
-                className="border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
+                className="border-2 border-hotel-border hover:border-hotel-border focus:border-hotel-gold focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
               />
             </div>
             <div>
@@ -113,16 +113,16 @@ export default function ServiceFollowUp() {
                 value={dateTo}
                 onChange={(e) => setDateTo(e.target.value)}
                 title={t("dateTo")}
-                className="border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
+                className="border-2 border-hotel-border hover:border-hotel-border focus:border-hotel-gold focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
               />
             </div>
           </div>
         </div>
 
         {/* Report Section */}
-        <div className="bg-white rounded border-2 border-emerald-200 overflow-hidden print:border-black print:shadow-none">
+        <div className="bg-white rounded border-2 border-hotel-border overflow-hidden print:border-black print:shadow-none">
           {/* Header Information */}
-          <div className="p-4 border-b-2 border-emerald-200 print:border-black bg-emerald-50 print:bg-white space-y-3">
+          <div className="p-4 border-b-2 border-hotel-border print:border-black bg-hotel-cream print:bg-white space-y-3">
             <div className="grid grid-cols-2 gap-3 print:grid-cols-1 text-sm">
               <div>
                 <span className="font-semibold text-hotel-text-primary">
@@ -151,8 +151,8 @@ export default function ServiceFollowUp() {
                 <span className="text-hotel-text-secondary ml-2">info@sigeth.com</span>
               </div>
             </div>
-            <div className="text-center py-3 border-y border-emerald-300 print:border-black">
-              <h2 className="text-base font-bold text-emerald-700 print:text-black">
+            <div className="text-center py-3 border-y border-hotel-border print:border-black">
+              <h2 className="text-base font-bold text-hotel-gold print:text-black">
                 {t("serviceFollowUp")}
               </h2>
             </div>
@@ -186,7 +186,7 @@ export default function ServiceFollowUp() {
 
           {/* Services Table */}
           <table className="w-full text-sm">
-            <thead className="bg-gray-100 border-b-2 border-emerald-200 print:border-black print:bg-white">
+            <thead className="bg-hotel-cream border-b-2 border-hotel-border print:border-black print:bg-white">
               <tr>
                 <th className="text-left px-4 py-3 font-bold text-hotel-text-primary border-r border-hotel-border print:border-black">
                   {t("date")}
@@ -219,7 +219,7 @@ export default function ServiceFollowUp() {
                 filtered.map((j, i) => (
                   <tr
                     key={i}
-                    className="border-b border-hotel-border hover:bg-emerald-50/50 transition-colors print:border-black print:hover:bg-white"
+                    className="border-b border-hotel-border hover:bg-hotel-cream/50 transition-colors print:border-black print:hover:bg-white"
                   >
                     <td className="px-4 py-3 border-r border-hotel-border print:border-black">
                       {j.date}
@@ -245,7 +245,7 @@ export default function ServiceFollowUp() {
                     <td className="px-4 py-3 text-right font-medium border-r border-hotel-border print:border-black">
                       {j.price.toLocaleString()}
                     </td>
-                    <td className="px-4 py-3 text-right font-semibold text-emerald-700 print:text-black">
+                    <td className="px-4 py-3 text-right font-semibold text-hotel-gold print:text-black">
                       {j.total.toLocaleString()}
                     </td>
                   </tr>
@@ -254,14 +254,14 @@ export default function ServiceFollowUp() {
                 <tr>
                   <td
                     colSpan={8}
-                    className="px-4 py-3 text-gray-400 text-center"
+                    className="px-4 py-3 text-hotel-text-secondary text-center"
                   >
                     {t("noRecords")}
                   </td>
                 </tr>
               )}
             </tbody>
-            <tfoot className="bg-emerald-50 border-t-2 border-emerald-200 print:border-black print:bg-white">
+            <tfoot className="bg-hotel-cream border-t-2 border-hotel-border print:border-black print:bg-white">
               <tr>
                 <td
                   colSpan={7}
@@ -269,7 +269,7 @@ export default function ServiceFollowUp() {
                 >
                   {t("grandTotal")}
                 </td>
-                <td className="px-4 py-3 font-bold text-emerald-700 text-right print:text-black">
+                <td className="px-4 py-3 font-bold text-hotel-gold text-right print:text-black">
                   {grandTotal.toLocaleString()}
                 </td>
               </tr>
@@ -280,3 +280,6 @@ export default function ServiceFollowUp() {
     </div>
   );
 }
+
+
+

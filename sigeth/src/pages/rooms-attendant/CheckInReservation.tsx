@@ -25,8 +25,14 @@ const today = () => {
 
 export default function CheckInReservation() {
   const { t } = useLang();
-  const { reservations, setReservations, rooms, setRooms, catrooms, currencies } =
-    useHotelData();
+  const {
+    reservations,
+    setReservations,
+    rooms,
+    setRooms,
+    catrooms,
+    currencies,
+  } = useHotelData();
 
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
@@ -38,20 +44,20 @@ export default function CheckInReservation() {
   const [checkedInMap, setCheckedInMap] = useState<Map<string, RCS>>(new Map());
   const [localPuv, setLocalPuv] = useState(0);
 
-  const currencyOptions = useMemo(() => [
-    { code: "RWF", label: "Rwandan Franc", exchange_rate: 1 },
-    ...currencies,
-  ], [currencies]);
+  const currencyOptions = useMemo(
+    () => [
+      { code: "RWF", label: "Rwandan Franc", exchange_rate: 1 },
+      ...currencies,
+    ],
+    [currencies],
+  );
 
   /* Today's arrivals = open reservations arriving today or earlier (not yet checked in)
      + recently checked-in guests kept visible via checkedInMap */
   const arrivals = useMemo(() => {
     const td = today();
     const active = reservations.filter(
-      (r) =>
-        r.status === 0 &&
-        !r.code_p &&
-        r.arrival_date <= td,
+      (r) => r.status === 0 && !r.code_p && r.arrival_date <= td,
     );
     const activeIds = new Set(active.map((r) => r.id));
     const recentCheckedIn = [...checkedInMap.values()].filter(
@@ -132,13 +138,17 @@ export default function CheckInReservation() {
       });
 
       setReservations((prev) =>
-        prev.map((r) => (r.id === response.reservation.id ? response.reservation : r)),
+        prev.map((r) =>
+          r.id === response.reservation.id ? response.reservation : r,
+        ),
       );
       setRooms((prev) =>
-        prev.map((room) => (room.id === response.room.id ? response.room : room)),
+        prev.map((room) =>
+          room.id === response.room.id ? response.room : room,
+        ),
       );
 
-      setCheckedInMap(prev => {
+      setCheckedInMap((prev) => {
         const next = new Map(prev);
         next.set(response.reservation.id!, response.reservation);
         return next;
@@ -209,8 +219,12 @@ export default function CheckInReservation() {
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs mt-3 p-2 bg-hotel-cream rounded">
               <div>
-                <span className="text-hotel-text-secondary">{t("roomNumber")}</span>
-                <p className="font-semibold text-hotel-text-primary">{res.room_num}</p>
+                <span className="text-hotel-text-secondary">
+                  {t("roomNumber")}
+                </span>
+                <p className="font-semibold text-hotel-text-primary">
+                  {res.room_num}
+                </p>
                 {room && (
                   <span className="text-hotel-text-secondary text-xs">
                     {getCatName(room.categorie)}
@@ -226,12 +240,18 @@ export default function CheckInReservation() {
                 </p>
               </div>
               <div>
-                <span className="text-hotel-text-secondary">{t("departDate")}</span>
-                <p className="font-semibold text-hotel-text-primary">{res.depart_date}</p>
+                <span className="text-hotel-text-secondary">
+                  {t("departDate")}
+                </span>
+                <p className="font-semibold text-hotel-text-primary">
+                  {res.depart_date}
+                </p>
               </div>
               <div>
                 <span className="text-hotel-text-secondary">{t("nights")}</span>
-                <p className="font-semibold text-hotel-text-primary">{nights}</p>
+                <p className="font-semibold text-hotel-text-primary">
+                  {nights}
+                </p>
               </div>
             </div>
             <div className="mt-2 p-2 bg-hotel-gold bg-opacity-10 rounded">
@@ -244,7 +264,7 @@ export default function CheckInReservation() {
             </div>
           </div>
           {isCheckedIn ? (
-            <div className="px-3 py-1 rounded flex items-center gap-1 text-xs font-medium bg-green-100 text-hotel-success shrink-0 whitespace-nowrap">
+            <div className="px-3 py-1 rounded flex items-center gap-1 text-xs font-medium bg-hotel-cream text-hotel-success shrink-0 whitespace-nowrap">
               <CheckCircle2 size={14} />
               Checked In
             </div>
@@ -258,7 +278,7 @@ export default function CheckInReservation() {
               }}
               className={`px-3 py-1 rounded flex items-center gap-1 text-xs font-medium transition-colors shrink-0 whitespace-nowrap ${
                 isUpcoming
-                  ? "bg-gray-100 text-hotel-text-secondary hover:bg-gray-200"
+                  ? "bg-hotel-cream text-hotel-text-secondary hover:bg-hotel-paper"
                   : "bg-hotel-gold text-white hover:bg-hotel-gold-dark"
               }`}
             >
@@ -274,7 +294,7 @@ export default function CheckInReservation() {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4">
-        <h1 className="text-2xl font-display font-bold text-hotel-text-primary">
+        <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
           {t("checkInWithReservation")}
         </h1>
       </div>
@@ -395,7 +415,9 @@ export default function CheckInReservation() {
                   ].map(([label, val]) => (
                     <div key={label} className="text-xs">
                       <span className="text-hotel-text-secondary">{label}</span>
-                      <p className="font-medium text-hotel-text-primary">{val}</p>
+                      <p className="font-medium text-hotel-text-primary">
+                        {val}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -449,7 +471,7 @@ export default function CheckInReservation() {
                         size={16}
                         className="text-hotel-gold shrink-0"
                       />
-                      <div className="flex-1 bg-green-50 border border-hotel-border rounded px-3 py-2">
+                      <div className="flex-1 bg-hotel-cream border border-hotel-border rounded px-3 py-2">
                         <span className="text-xs text-hotel-success">
                           {t("swapRoomTo")}
                         </span>
@@ -536,8 +558,13 @@ export default function CheckInReservation() {
                     if (code === "RWF") {
                       if (localPuv > 0) puv = localPuv;
                       mon = "RWF";
-                    } else if (currencyOptions.find(c => c.code === code)?.exchange_rate) {
-                      const rate = currencyOptions.find(c => c.code === code)!.exchange_rate;
+                    } else if (
+                      currencyOptions.find((c) => c.code === code)
+                        ?.exchange_rate
+                    ) {
+                      const rate = currencyOptions.find(
+                        (c) => c.code === code,
+                      )!.exchange_rate;
                       if (localPuv > 0) {
                         puv = Math.round(localPuv / rate);
                       }
@@ -546,18 +573,36 @@ export default function CheckInReservation() {
                       mon = code;
                     }
                     const updated = { ...processing, puv, current_mon: mon };
-                    const arr = updated.arrival_date ? new Date(updated.arrival_date) : null;
-                    const dep = updated.depart_date ? new Date(updated.depart_date) : null;
-                    const qty = arr && dep ? Math.max(Math.round((dep.getTime() - arr.getTime()) / 86400000), 0) : 0;
+                    const arr = updated.arrival_date
+                      ? new Date(updated.arrival_date)
+                      : null;
+                    const dep = updated.depart_date
+                      ? new Date(updated.depart_date)
+                      : null;
+                    const qty =
+                      arr && dep
+                        ? Math.max(
+                            Math.round(
+                              (dep.getTime() - arr.getTime()) / 86400000,
+                            ),
+                            0,
+                          )
+                        : 0;
                     const base = qty * updated.puv;
-                    updated.stay_cost = updated.discount > 0 ? base * (1 - updated.discount / 100) : base;
+                    updated.stay_cost =
+                      updated.discount > 0
+                        ? base * (1 - updated.discount / 100)
+                        : base;
                     setProcessing(updated);
                   }}
                   className="w-full border border-hotel-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
                 >
-                  {currencyOptions.map(c => (
+                  {currencyOptions.map((c) => (
                     <option key={c.code} value={c.code}>
-                      {c.code} — {c.label} {c.code !== "RWF" ? `(1 = ${c.exchange_rate.toLocaleString()} RWF)` : "(local)"}
+                      {c.code} — {c.label}{" "}
+                      {c.code !== "RWF"
+                        ? `(1 = ${c.exchange_rate.toLocaleString()} RWF)`
+                        : "(local)"}
                     </option>
                   ))}
                 </select>
@@ -570,7 +615,7 @@ export default function CheckInReservation() {
                 className={`w-full py-2 rounded font-medium text-sm flex items-center justify-center gap-2 transition-colors ${
                   idVerified
                     ? "bg-hotel-gold text-white hover:bg-hotel-gold-dark"
-                    : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                    : "bg-hotel-paper text-hotel-text-secondary cursor-not-allowed"
                 }`}
               >
                 <UserCheck size={16} />
@@ -580,7 +625,6 @@ export default function CheckInReservation() {
           </div>
         </div>
       )}
-
 
       {/* Confirmation Modal */}
       <ConfirmationModal
@@ -599,7 +643,9 @@ export default function CheckInReservation() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white border border-hotel-border rounded p-4 w-full max-w-md text-center space-y-3">
             <CheckCircle2 size={40} className="text-hotel-success mx-auto" />
-            <h3 className="text-base font-display font-semibold text-hotel-text-primary">Check-In Complete</h3>
+            <h3 className="text-base font-display font-semibold text-hotel-text-primary">
+              Check-In Complete
+            </h3>
             <p className="text-xs text-hotel-text-secondary">{successMsg}</p>
             <button
               onClick={() => setSuccessMsg("")}
@@ -616,11 +662,15 @@ export default function CheckInReservation() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white border border-hotel-border rounded p-4 w-full max-w-md text-center space-y-3">
             <AlertTriangle size={40} className="text-hotel-danger mx-auto" />
-            <h3 className="text-base font-display font-semibold text-hotel-text-primary">Error</h3>
-            <p className="text-xs text-hotel-text-secondary whitespace-pre-wrap">{errorMsg}</p>
+            <h3 className="text-base font-display font-semibold text-hotel-text-primary">
+              Error
+            </h3>
+            <p className="text-xs text-hotel-text-secondary whitespace-pre-wrap">
+              {errorMsg}
+            </p>
             <button
               onClick={() => setErrorMsg("")}
-              className="bg-hotel-danger text-white px-4 py-2 rounded text-sm font-medium hover:bg-red-700 transition-colors"
+              className="bg-hotel-danger text-white px-4 py-2 rounded text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
             >
               OK
             </button>
@@ -630,3 +680,5 @@ export default function CheckInReservation() {
     </div>
   );
 }
+
+

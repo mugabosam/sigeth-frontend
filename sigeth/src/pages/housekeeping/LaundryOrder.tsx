@@ -101,14 +101,14 @@ export default function LaundryOrder() {
   const totalOrder = items.reduce((s, i) => s + i.orderQty * i.puv, 0);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50 p-4 space-y-4">
+    <div className="min-h-screen bg-gradient-to-br from-hotel-paper to-hotel-cream p-4 space-y-4">
       <div className="space-y-2">
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
+        <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
           {t("laundryOrder")}
         </h1>
         <p className="text-sm text-hotel-text-secondary">{t("placeLaundryOrderDesc")}</p>
       </div>
-      <div className="bg-white rounded border border-emerald-100 p-7 space-y-4">
+      <div className="bg-white rounded border border-hotel-border p-7 space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           <div>
             <label className="block text-sm font-semibold text-hotel-text-primary mb-2">
@@ -128,12 +128,12 @@ export default function LaundryOrder() {
               title={t("date")}
               className={`w-full border-2 rounded px-4 py-2.5 text-sm font-medium transition-colors focus:outline-none ${
                 errors["orderDate"]
-                  ? "border-red-400 bg-red-50 focus:border-red-500"
-                  : "border-hotel-border hover:border-hotel-border focus:border-emerald-500"
+                  ? "border-hotel-gold bg-hotel-cream focus:border-hotel-gold"
+                  : "border-hotel-border hover:border-hotel-border focus:border-hotel-gold"
               }`}
             />
             {errors["orderDate"] && (
-              <p className="text-red-600 text-xs mt-2 font-medium">
+              <p className="text-hotel-gold text-xs mt-2 font-medium">
                 {errors["orderDate"]}
               </p>
             )}
@@ -157,12 +157,12 @@ export default function LaundryOrder() {
               title={t("roomNumber")}
               className={`w-full border-2 rounded px-4 py-2.5 text-sm font-medium transition-colors focus:outline-none ${
                 errors["roomNum"]
-                  ? "border-red-400 bg-red-50 focus:border-red-500"
-                  : "border-hotel-border hover:border-hotel-border focus:border-emerald-500"
+                  ? "border-hotel-gold bg-hotel-cream focus:border-hotel-gold"
+                  : "border-hotel-border hover:border-hotel-border focus:border-hotel-gold"
               }`}
             />
             {errors["roomNum"] && (
-              <p className="text-red-600 text-xs mt-2 font-medium">
+              <p className="text-hotel-gold text-xs mt-2 font-medium">
                 {errors["roomNum"]}
               </p>
             )}
@@ -175,7 +175,7 @@ export default function LaundryOrder() {
               value={selectedCat}
               onChange={(e) => handleSelectCategory(e.target.value)}
               title={t("laundryCategory")}
-              className="w-full border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
+              className="w-full border-2 border-hotel-border hover:border-hotel-border focus:border-hotel-gold focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
             >
               <option value="">{t("selectCategory")}</option>
               {catlaundry.map((c) => (
@@ -187,13 +187,13 @@ export default function LaundryOrder() {
           </div>
         </div>
         {errors["items"] && (
-          <p className="text-red-500 text-sm">{errors["items"]}</p>
+          <p className="text-hotel-gold text-sm">{errors["items"]}</p>
         )}
       </div>
       {items.length > 0 && (
-        <div className="bg-white rounded border border-emerald-100 overflow-hidden">
+        <div className="bg-white rounded border border-hotel-border overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-white border-b-2 border-emerald-200">
+            <thead className="bg-white border-b-2 border-hotel-border">
               <tr>
                 {[
                   t("designation"),
@@ -215,7 +215,7 @@ export default function LaundryOrder() {
               {items.map((item, i) => (
                 <tr
                   key={i}
-                  className="border-b hover:bg-emerald-50/50 transition-colors duration-150"
+                  className="border-b hover:bg-hotel-cream/50 transition-colors duration-150"
                 >
                   <td className="px-6 py-3 text-hotel-text-primary">
                     {item.designation}
@@ -233,27 +233,27 @@ export default function LaundryOrder() {
                         handleQtyChange(i, Number(e.target.value))
                       }
                       title={t("qty")}
-                      className="w-20 border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded px-2 py-1.5 text-sm font-medium transition-colors"
+                      className="w-20 border-2 border-hotel-border hover:border-hotel-border focus:border-hotel-gold focus:outline-none rounded px-2 py-1.5 text-sm font-medium transition-colors"
                     />
                   </td>
-                  <td className="px-6 py-3 font-semibold text-emerald-700">
+                  <td className="px-6 py-3 font-semibold text-hotel-gold">
                     {(item.orderQty * item.puv).toLocaleString()}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-          <div className="px-6 py-4 bg-gradient-to-r from-emerald-50 to-green-50 border-t-2 border-emerald-200 flex justify-between items-center">
+          <div className="px-6 py-4 bg-gradient-to-r from-hotel-paper to-hotel-cream border-t-2 border-hotel-border flex justify-between items-center">
             <span className="font-bold text-hotel-text-primary">
               {t("total")}:{" "}
-              <span className="text-emerald-700">
+              <span className="text-hotel-gold">
                 {totalOrder.toLocaleString()}
               </span>
             </span>
             <div className="flex gap-2">
               <button
                 onClick={handleSave}
-                className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-6 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-colors duration-200"
+                className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-colors duration-200"
               >
                 <Save size={16} />
                 {t("save")}
@@ -265,3 +265,6 @@ export default function LaundryOrder() {
     </div>
   );
 }
+
+
+

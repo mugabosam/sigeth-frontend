@@ -208,7 +208,7 @@ export default function GroupReservation() {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4">
-        <h1 className="text-2xl font-display font-bold text-hotel-text-primary">
+        <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
           {t("groupReservation")}
         </h1>
       </div>
@@ -311,37 +311,37 @@ export default function GroupReservation() {
                     {label}{" "}
                     {required && <span className="text-hotel-danger">*</span>}
                   </label>
-                    <input
-                      type={type}
-                      value={
-                        type === "number" && selected[field] === 0
-                          ? ""
-                          : (selected[field] ?? "")
-                      }
-                      readOnly={
-                        (field as string) === "qty" ||
-                        (field as string) === "stay_cost"
-                      }
-                      required={required}
-                      onChange={(e) =>
-                        handleChange(
-                          field,
-                          type === "number"
-                            ? Number(e.target.value)
-                            : e.target.value,
-                        )
-                      }
-                      {...attrs}
-                      title={label}
-                      className={`w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold ${
-                        (field as string) === "qty" ||
-                        (field as string) === "stay_cost"
-                          ? "bg-hotel-cream"
-                          : ""
-                      } ${
-                        errorMsg ? "border-hotel-danger" : "border-hotel-border"
-                      }`}
-                    />
+                  <input
+                    type={type}
+                    value={
+                      type === "number" && selected[field] === 0
+                        ? ""
+                        : (selected[field] ?? "")
+                    }
+                    readOnly={
+                      (field as string) === "qty" ||
+                      (field as string) === "stay_cost"
+                    }
+                    required={required}
+                    onChange={(e) =>
+                      handleChange(
+                        field,
+                        type === "number"
+                          ? Number(e.target.value)
+                          : e.target.value,
+                      )
+                    }
+                    {...attrs}
+                    title={label}
+                    className={`w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold ${
+                      (field as string) === "qty" ||
+                      (field as string) === "stay_cost"
+                        ? "bg-hotel-cream"
+                        : ""
+                    } ${
+                      errorMsg ? "border-hotel-danger" : "border-hotel-border"
+                    }`}
+                  />
                   {errorMsg && (
                     <p className="text-xs text-hotel-danger mt-1">{errorMsg}</p>
                   )}
@@ -425,7 +425,7 @@ export default function GroupReservation() {
             {!isNew && (
               <button
                 onClick={handleDelete}
-                className="bg-hotel-danger text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium hover:bg-red-700 transition-colors"
+                className="bg-hotel-danger text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
               >
                 <Trash2 size={16} />
                 {t("delete")}
@@ -493,7 +493,7 @@ export default function GroupReservation() {
                 </td>
                 <td className="py-2 px-2">
                   <span
-                    className={`px-2 py-1 rounded text-xs font-medium ${g.status === 0 ? "bg-green-100 text-hotel-success" : "bg-gray-100 text-gray-600"}`}
+                    className={`px-2 py-1 rounded text-xs font-medium ${g.status === 0 ? "bg-hotel-cream text-hotel-success" : "bg-hotel-cream text-hotel-text-secondary"}`}
                   >
                     {g.status === 0 ? t("statusOpen") : t("statusClosed")}
                   </span>
@@ -538,7 +538,7 @@ export default function GroupReservation() {
             </p>
             <button
               onClick={() => setErrorMsg("")}
-              className="bg-hotel-danger text-white px-4 py-2 rounded text-sm font-medium hover:bg-red-700 transition-colors"
+              className="bg-hotel-danger text-white px-4 py-2 rounded text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
             >
               OK
             </button>
@@ -548,3 +548,5 @@ export default function GroupReservation() {
     </div>
   );
 }
+
+

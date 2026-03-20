@@ -68,7 +68,7 @@ export default function ArrivalOff() {
   return (
     <div className="space-y-4 p-4">
       {/* Toolbar */}
-      <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4 p-4 rounded border border-blue-100">
+      <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4 p-4 rounded border border-hotel-border">
         <div>
           <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
             {t("arrivalOff")}
@@ -84,7 +84,7 @@ export default function ArrivalOff() {
           </button>
           <button
             onClick={exportCSV}
-            className="border-2 border-hotel-border text-hotel-text-primary px-6 py-3 rounded flex items-center gap-2 text-sm font-medium bg-green-50 hover:bg-green-100 hover:shadow-lg transition-colors duration-200"
+            className="border-2 border-hotel-border text-hotel-text-primary px-6 py-3 rounded flex items-center gap-2 text-sm font-medium bg-hotel-cream hover:bg-hotel-cream hover:shadow-lg transition-colors duration-200"
           >
             <FileSpreadsheet size={18} />
             Excel
@@ -95,7 +95,7 @@ export default function ArrivalOff() {
       {/* Filters */}
       <div className="bg-white rounded border border-hotel-border p-4">
         <h3 className="text-base font-bold text-hotel-text-primary mb-4 flex items-center gap-2">
-          <span className="w-1 h-6 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full" />
+          <span className="w-1 h-6 bg-gradient-to-b from-amber-500 to-amber-700 rounded-full" />
           {t("filters")}
         </h3>
         <div className="flex flex-wrap gap-3">
@@ -153,7 +153,7 @@ export default function ArrivalOff() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm border-collapse">
             <thead>
-              <tr className="bg-gradient-to-r from-gray-800 to-gray-700">
+              <tr className="bg-gradient-to-r from-hotel-gold to-hotel-gold-dark">
                 {[
                   "Room",
                   "Guest Name",
@@ -168,7 +168,7 @@ export default function ArrivalOff() {
                 ].map((h) => (
                   <th
                     key={h}
-                    className="border border-gray-800 px-3 py-2 text-left font-bold text-xs text-white"
+                    className="border border-hotel-border px-3 py-2 text-left font-bold text-xs text-white"
                   >
                     {h}
                   </th>
@@ -208,7 +208,7 @@ export default function ArrivalOff() {
                   <td className="border border-hotel-border px-3 py-2 text-right font-semibold text-hotel-text-primary">
                     {r.puv.toLocaleString()}
                   </td>
-                  <td className="border border-hotel-border px-3 py-2 text-center font-bold text-blue-700">
+                  <td className="border border-hotel-border px-3 py-2 text-center font-bold text-hotel-gold">
                     {calcNightNum(r.arrival_date, r.departure_date)}
                   </td>
                 </tr>
@@ -228,3 +228,5 @@ export default function ArrivalOff() {
     </div>
   );
 }
+
+

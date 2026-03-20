@@ -92,11 +92,11 @@ export default function LaundryCategories() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50 p-4 space-y-4">
+    <div className="min-h-screen bg-gradient-to-br from-hotel-paper to-hotel-cream p-4 space-y-4">
       {/* Header Section */}
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent mb-1">
+          <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent mb-1">
             {t("laundryCategories")}
           </h1>
           <p className="text-sm text-hotel-text-secondary">
@@ -109,14 +109,14 @@ export default function LaundryCategories() {
             setIsNew(true);
             setErrors({ isValid: true, errors: [] });
           }}
-          className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-colors duration-200"
+          className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-colors duration-200"
         >
           <Plus size={18} />
           {t("newRecord")}
         </button>
       </div>
       {selected && (
-        <div className="bg-white rounded border border-emerald-100 p-7 space-y-3">
+        <div className="bg-white rounded border border-hotel-border p-7 space-y-3">
           <div>
             <h3 className="text-base font-bold text-hotel-text-primary">
               {isNew ? t("newCategory") : t("editCategory")}
@@ -137,14 +137,14 @@ export default function LaundryCategories() {
                   setSelected({ ...selected, code: e.target.value })
                 }
                 title={t("code")}
-                className={`w-full border-2 rounded px-4 py-2.5 text-sm font-medium focus:outline-none focus:border-emerald-500 transition-colors ${
+                className={`w-full border-2 rounded px-4 py-2.5 text-sm font-medium focus:outline-none focus:border-hotel-gold transition-colors ${
                   getErrorMessage("code")
-                    ? "border-red-400 bg-red-50"
+                    ? "border-hotel-gold bg-hotel-cream"
                     : "border-hotel-border hover:border-hotel-border"
                 }`}
               />
               {getErrorMessage("code") && (
-                <p className="text-xs text-red-600 mt-2 font-medium">
+                <p className="text-xs text-hotel-gold mt-2 font-medium">
                   {getErrorMessage("code")}
                 </p>
               )}
@@ -160,14 +160,14 @@ export default function LaundryCategories() {
                   setSelected({ ...selected, name: e.target.value })
                 }
                 title={t("categoryName")}
-                className={`w-full border-2 rounded px-4 py-2.5 text-sm font-medium focus:outline-none focus:border-emerald-500 transition-colors ${
+                className={`w-full border-2 rounded px-4 py-2.5 text-sm font-medium focus:outline-none focus:border-hotel-gold transition-colors ${
                   getErrorMessage("name")
-                    ? "border-red-400 bg-red-50"
+                    ? "border-hotel-gold bg-hotel-cream"
                     : "border-hotel-border hover:border-hotel-border"
                 }`}
               />
               {getErrorMessage("name") && (
-                <p className="text-xs text-red-600 mt-2 font-medium">
+                <p className="text-xs text-hotel-gold mt-2 font-medium">
                   {getErrorMessage("name")}
                 </p>
               )}
@@ -176,7 +176,7 @@ export default function LaundryCategories() {
           <div className="flex gap-3 pt-5 border-t border-hotel-border">
             <button
               onClick={handleSave}
-              className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-6 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-colors duration-200"
+              className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-colors duration-200"
             >
               <Save size={16} />
               {t("save")}
@@ -184,7 +184,7 @@ export default function LaundryCategories() {
             {!isNew && (
               <button
                 onClick={() => setShowDeleteConfirm(true)}
-                className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-red-600 hover:to-red-700 transition-colors duration-200"
+                className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-colors duration-200"
               >
                 <Trash2 size={16} />
                 {t("delete")}
@@ -228,14 +228,14 @@ export default function LaundryCategories() {
       />
 
       {/* Categories Table */}
-      <div className="bg-white rounded border border-emerald-100 overflow-hidden">
-        <div className="bg-gradient-to-r from-emerald-50 to-green-50 px-6 py-4 border-b border-emerald-100">
+      <div className="bg-white rounded border border-hotel-border overflow-hidden">
+        <div className="bg-gradient-to-r from-hotel-paper to-hotel-cream px-6 py-4 border-b border-hotel-border">
           <h2 className="text-base font-bold text-hotel-text-primary">
             {t("laundryCategoriesDirectory")}
           </h2>
         </div>
         <table className="w-full text-sm">
-          <thead className="bg-white border-b-2 border-emerald-200">
+          <thead className="bg-white border-b-2 border-hotel-border">
             <tr>
               <th className="text-left px-6 py-3 font-bold text-hotel-text-primary">
                 {t("code")}
@@ -249,14 +249,14 @@ export default function LaundryCategories() {
             {catlaundry.map((c) => (
               <tr
                 key={c.code}
-                className="border-b hover:bg-emerald-50/50 cursor-pointer transition-colors duration-150"
+                className="border-b hover:bg-hotel-cream/50 cursor-pointer transition-colors duration-150"
                 onClick={() => {
                   setSelected({ ...c });
                   setIsNew(false);
                   setErrors({ isValid: true, errors: [] });
                 }}
               >
-                <td className="px-6 py-3 font-semibold text-emerald-600">
+                <td className="px-6 py-3 font-semibold text-hotel-gold">
                   {c.code}
                 </td>
                 <td className="px-6 py-3 text-hotel-text-primary">{c.name}</td>
@@ -273,3 +273,6 @@ export default function LaundryCategories() {
     </div>
   );
 }
+
+
+

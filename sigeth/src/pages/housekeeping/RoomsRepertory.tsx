@@ -69,9 +69,7 @@ export default function RoomsRepertory() {
         status_code: newStatus,
       });
       setSelected({ ...selected, status: newStatus });
-      setRooms((prev) =>
-        prev.map((r) => (r.id === updated.id ? updated : r)),
-      );
+      setRooms((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
     } catch {
       // Revert on failure
     }
@@ -152,27 +150,31 @@ export default function RoomsRepertory() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50 p-4 space-y-4">
+    <div className="min-h-screen bg-gradient-to-br from-hotel-paper to-hotel-cream p-4 space-y-4">
       <div className="space-y-2">
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
+        <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
           {t("roomsRepertory")}
         </h1>
-        <p className="text-sm text-hotel-text-secondary">{t("manageRoomsDesc")}</p>
+        <p className="text-sm text-hotel-text-secondary">
+          {t("manageRoomsDesc")}
+        </p>
       </div>
       <div className="flex gap-3 flex-wrap print:hidden">
         <button
           onClick={handlePrint}
-          className="bg-gradient-to-r from-slate-600 to-slate-700 text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-slate-700 hover:to-slate-800 transition-colors duration-200"
+          className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-colors duration-200"
         >
           <Printer size={16} />
           {t("print")}
         </button>
       </div>
       {/* Print Header Section */}
-      <div className="hidden print:block bg-white p-4 mb-6 border-b-2 border-gray-800">
+      <div className="hidden print:block bg-white p-4 mb-6 border-b-2 border-hotel-border">
         <div className="text-center space-y-1 mb-6">
           <h2 className="text-base font-bold">{HOTEL_INFO.name}</h2>
-          <p className="text-sm text-hotel-text-primary">{HOTEL_INFO.address}</p>
+          <p className="text-sm text-hotel-text-primary">
+            {HOTEL_INFO.address}
+          </p>
           <div className="flex justify-center gap-4 text-sm text-hotel-text-secondary">
             <span>
               {t("phone")}: {HOTEL_INFO.phone}
@@ -190,8 +192,8 @@ export default function RoomsRepertory() {
           </p>
         </div>
       </div>
-      <div className="bg-white rounded border border-emerald-100 p-4 print:border-none print:shadow-none print:p-0">
-        <h3 className="text-sm font-semibold text-emerald-700 mb-4 flex items-center gap-2 print:hidden">
+      <div className="bg-white rounded border border-hotel-border p-4 print:border-none print:shadow-none print:p-0">
+        <h3 className="text-sm font-semibold text-hotel-gold mb-4 flex items-center gap-2 print:hidden">
           <Search size={16} />
           {t("queryWindow")}
         </h3>
@@ -200,12 +202,12 @@ export default function RoomsRepertory() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t("roomNumber")}
-            className="border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded px-4 py-2.5 text-sm font-medium w-40 transition-colors"
+            className="border-2 border-hotel-border hover:border-hotel-border focus:border-hotel-gold focus:outline-none rounded px-4 py-2.5 text-sm font-medium w-40 transition-colors"
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
           />
           <button
             onClick={handleSearch}
-            className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-colors duration-200"
+            className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-colors duration-200"
           >
             <Search size={16} />
             {t("search")}
@@ -215,7 +217,7 @@ export default function RoomsRepertory() {
               setSelected({ ...blank });
               setIsNew(true);
             }}
-            className="border-2 border-emerald-300 text-emerald-700 px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:bg-emerald-50 transition-colors"
+            className="border-2 border-hotel-border text-hotel-gold px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:bg-hotel-cream transition-colors"
           >
             <Plus size={16} />
             {t("newRecord")}
@@ -223,8 +225,8 @@ export default function RoomsRepertory() {
         </div>
       </div>
       {selected && (
-        <div className="bg-white rounded border border-emerald-100 p-7 space-y-4 print:hidden">
-          <h3 className="text-base font-bold text-emerald-700">
+        <div className="bg-white rounded border border-hotel-border p-7 space-y-4 print:hidden">
+          <h3 className="text-base font-bold text-hotel-gold">
             {isNew ? t("newRoom") : t("editRoom")}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -238,7 +240,7 @@ export default function RoomsRepertory() {
                   handleChange("categorie", Number(e.target.value))
                 }
                 title={t("category")}
-                className="w-full border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
+                className="w-full border-2 border-hotel-border hover:border-hotel-border focus:border-hotel-gold focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
               >
                 {catrooms.map((c) => (
                   <option key={c.code} value={c.code}>
@@ -273,7 +275,7 @@ export default function RoomsRepertory() {
                     )
                   }
                   title={label}
-                  className="w-full border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
+                  className="w-full border-2 border-hotel-border hover:border-hotel-border focus:border-hotel-gold focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
                 />
               </div>
             ))}
@@ -288,7 +290,7 @@ export default function RoomsRepertory() {
                     handleStatusChange(e.target.value as RoomStatusCode)
                   }
                   title={t("status")}
-                  className="w-full border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
+                  className="w-full border-2 border-hotel-border hover:border-hotel-border focus:border-hotel-gold focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
                 >
                   {statuses.map((s) => (
                     <option key={s.code} value={s.code}>
@@ -302,7 +304,7 @@ export default function RoomsRepertory() {
           <div className="flex gap-3 pt-5 border-t border-hotel-border">
             <button
               onClick={handleSave}
-              className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-6 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-colors duration-200"
+              className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-colors duration-200"
             >
               <Save size={16} />
               {t("save")}
@@ -310,7 +312,7 @@ export default function RoomsRepertory() {
             {!isNew && (
               <button
                 onClick={() => setShowDeleteConfirm(true)}
-                className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-red-600 hover:to-red-700 transition-colors duration-200"
+                className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-colors duration-200"
               >
                 <Trash2 size={16} />
                 {t("delete")}
@@ -325,14 +327,14 @@ export default function RoomsRepertory() {
           </div>
         </div>
       )}
-      <div className="bg-white rounded border border-emerald-100 overflow-hidden print:border-0 print:shadow-none print:rounded-none">
-        <div className="bg-gradient-to-r from-emerald-50 to-green-50 px-6 py-4 border-b border-emerald-100 print:hidden">
+      <div className="bg-white rounded border border-hotel-border overflow-hidden print:border-0 print:shadow-none print:rounded-none">
+        <div className="bg-gradient-to-r from-hotel-paper to-hotel-cream px-6 py-4 border-b border-hotel-border print:hidden">
           <h2 className="text-base font-bold text-hotel-text-primary">
             {t("roomsDirectory")}
           </h2>
         </div>
         <table className="w-full text-sm print:text-xs">
-          <thead className="bg-white border-b-2 border-emerald-200 print:border-b-4 print:border-black">
+          <thead className="bg-white border-b-2 border-hotel-border print:border-b-4 print:border-black">
             <tr>
               {[
                 t("roomNumber"),
@@ -356,16 +358,18 @@ export default function RoomsRepertory() {
             {rooms.map((r) => (
               <tr
                 key={r.room_num}
-                className="border-b hover:bg-emerald-50/50 cursor-pointer transition-colors duration-150 print:border-b print:hover:bg-white"
+                className="border-b hover:bg-hotel-cream/50 cursor-pointer transition-colors duration-150 print:border-b print:hover:bg-white"
                 onClick={() => {
                   setSelected({ ...r });
                   setIsNew(false);
                 }}
               >
-                <td className="px-6 py-3 font-semibold text-emerald-600 print:text-black">
+                <td className="px-6 py-3 font-semibold text-hotel-gold print:text-black">
                   {r.room_num}
                 </td>
-                <td className="px-6 py-3 text-hotel-text-primary">{r.designation}</td>
+                <td className="px-6 py-3 text-hotel-text-primary">
+                  {r.designation}
+                </td>
                 <td className="px-6 py-3 text-hotel-text-primary">
                   {catrooms.find((c) => c.code === r.categorie)?.name ??
                     r.categorie}
@@ -376,9 +380,11 @@ export default function RoomsRepertory() {
                 <td className="px-6 py-3 text-hotel-text-primary">
                   {r.price_2.toLocaleString()}
                 </td>
-                <td className="px-6 py-3 text-hotel-text-primary">{r.current_mon}</td>
+                <td className="px-6 py-3 text-hotel-text-primary">
+                  {r.current_mon}
+                </td>
                 <td className="px-6 py-3 print:text-black">
-                  <span className="px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 print:bg-transparent print:border print:border-hotel-border">
+                  <span className="px-3 py-1.5 rounded-full text-xs font-semibold bg-hotel-cream text-hotel-gold print:bg-transparent print:border print:border-hotel-border">
                     {r.status}
                   </span>
                 </td>
@@ -419,3 +425,5 @@ export default function RoomsRepertory() {
     </div>
   );
 }
+
+

@@ -138,7 +138,7 @@ export default function InvoiceByGroup() {
   return (
     <div className="space-y-4 p-4">
       {/* Toolbar */}
-      <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4 p-4 rounded border border-blue-100">
+      <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4 p-4 rounded border border-hotel-border">
         <div>
           <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
             {t("invoiceByGroup")}
@@ -151,7 +151,7 @@ export default function InvoiceByGroup() {
           {displayData && !invoice && (
             <button
               onClick={() => setShowGenerateModal(true)}
-              className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded flex items-center gap-2 text-sm font-medium hover:shadow-lg transition-colors duration-200"
+              className="bg-gradient-to-r from-amber-500 to-amber-700 text-white px-6 py-3 rounded flex items-center gap-2 text-sm font-medium hover:shadow-lg transition-colors duration-200"
             >
               <Receipt size={18} />
               Generate Invoice
@@ -172,14 +172,14 @@ export default function InvoiceByGroup() {
       {/* Group selection */}
       <div className="bg-white rounded border border-hotel-border p-4">
         <h3 className="text-base font-bold text-hotel-text-primary mb-4 flex items-center gap-2">
-          <span className="w-1 h-6 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full" />
+          <span className="w-1 h-6 bg-gradient-to-b from-amber-500 to-amber-700 rounded-full" />
           Active Groups
         </h3>
         <input
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search by group name or code..."
-          className="w-full border-2 border-hotel-border rounded px-4 py-3 text-sm mb-4 focus:outline-none focus:border-blue-500 focus:shadow-md transition-colors"
+          className="w-full border-2 border-hotel-border rounded px-4 py-3 text-sm mb-4 focus:outline-none focus:border-hotel-gold focus:shadow-md transition-colors"
         />
         {activeGroups.length === 0 ? (
           <p className="text-sm text-hotel-text-secondary py-4 text-center">
@@ -191,7 +191,7 @@ export default function InvoiceByGroup() {
               <button
                 key={group.id ?? group.code_g}
                 onClick={() => handleSelectGroup(group)}
-                className="w-full text-left px-4 py-4 text-sm border-b border-hotel-border last:border-b-0 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-colors duration-150"
+                className="w-full text-left px-4 py-4 text-sm border-b border-hotel-border last:border-b-0 hover:bg-gradient-to-r hover:from-hotel-paper hover:to-hotel-cream transition-colors duration-150"
               >
                 <div className="flex items-center justify-between">
                   <div>
@@ -216,7 +216,7 @@ export default function InvoiceByGroup() {
       {/* Loading */}
       {loading && (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="animate-spin text-blue-500" size={32} />
+          <Loader2 className="animate-spin text-hotel-gold" size={32} />
           <span className="ml-3 text-hotel-text-secondary">
             Loading group invoice data...
           </span>
@@ -234,7 +234,7 @@ export default function InvoiceByGroup() {
               {invoice ? "Definitive Group Invoice" : "Group Invoice Preview"}
             </p>
             {invoice && (
-              <p className="text-sm font-mono font-bold text-blue-700 mt-1">
+              <p className="text-sm font-mono font-bold text-hotel-gold mt-1">
                 {invoice.invoice_number}
               </p>
             )}
@@ -244,10 +244,10 @@ export default function InvoiceByGroup() {
             </p>
           </div>
 
-          <div className="border-2 border-gray-800 rounded overflow-hidden">
+          <div className="border-2 border-hotel-border rounded overflow-hidden">
             {/* Header */}
-            <div className="flex border-b-2 border-gray-800 bg-gradient-to-r from-gray-50 to-white">
-              <div className="p-4 w-44 shrink-0 space-y-1 text-xs border-r-2 border-gray-800 bg-gray-100">
+            <div className="flex border-b-2 border-hotel-border bg-gradient-to-r from-hotel-paper to-white">
+              <div className="p-4 w-44 shrink-0 space-y-1 text-xs border-r-2 border-hotel-border bg-hotel-cream">
                 <p className="font-bold text-sm text-hotel-text-primary">
                   Hotel de la Front Office
                 </p>
@@ -259,7 +259,7 @@ export default function InvoiceByGroup() {
                 </p>
               </div>
               <div className="flex-1 p-4 flex flex-col justify-center">
-                <h2 className="text-sm font-bold text-center mb-3 text-hotel-text-primary border-b-2 border-gray-400 pb-2">
+                <h2 className="text-sm font-bold text-center mb-3 text-hotel-text-primary border-b-2 border-hotel-border pb-2">
                   {invoice ? "GROUP INVOICE" : "GROUP INVOICE PREVIEW"}
                 </h2>
                 <div className="space-y-2 self-end w-full max-w-sm">
@@ -308,7 +308,7 @@ export default function InvoiceByGroup() {
                       <span className="text-xs font-semibold text-hotel-text-primary">
                         Invoice:
                       </span>
-                      <span className="text-xs font-mono font-bold text-blue-700">
+                      <span className="text-xs font-mono font-bold text-hotel-gold">
                         {invoice.invoice_number}
                       </span>
                     </div>
@@ -321,7 +321,7 @@ export default function InvoiceByGroup() {
             <div className="relative overflow-hidden bg-white">
               <table className="w-full border-collapse">
                 <thead>
-                  <tr className="bg-gradient-to-r from-gray-800 to-gray-700">
+                  <tr className="bg-gradient-to-r from-hotel-gold to-hotel-gold-dark">
                     {[
                       "Date",
                       "Room",
@@ -335,7 +335,7 @@ export default function InvoiceByGroup() {
                     ].map((h) => (
                       <th
                         key={h}
-                        className="border border-gray-800 px-2 py-2 text-left font-bold text-xs text-white"
+                        className="border border-hotel-border px-2 py-2 text-left font-bold text-xs text-white"
                       >
                         {h}
                       </th>
@@ -372,7 +372,7 @@ export default function InvoiceByGroup() {
                       <td className="border border-hotel-border px-2 py-2 text-xs text-right font-bold text-hotel-text-primary">
                         {fmt(item.credit)}
                       </td>
-                      <td className="border border-hotel-border px-2 py-2 text-xs text-right font-bold text-red-700">
+                      <td className="border border-hotel-border px-2 py-2 text-xs text-right font-bold text-hotel-gold">
                         {fmt(item.debit)}
                       </td>
                     </tr>
@@ -382,20 +382,20 @@ export default function InvoiceByGroup() {
             </div>
 
             {/* Footer */}
-            <div className="flex justify-between items-start px-4 py-4 border-t-2 border-gray-800 bg-gradient-to-r from-gray-50 to-white">
+            <div className="flex justify-between items-start px-4 py-4 border-t-2 border-hotel-border bg-gradient-to-r from-hotel-paper to-white">
               {invoice && (
                 <div className="space-y-3 text-xs">
                   <div className="flex items-baseline gap-3">
                     <span className="font-semibold text-hotel-text-primary">
                       Company Signature
                     </span>
-                    <span className="border-b-2 border-gray-400 w-24 inline-block" />
+                    <span className="border-b-2 border-hotel-border w-24 inline-block" />
                   </div>
                   <div className="flex items-baseline gap-3">
                     <span className="font-semibold text-hotel-text-primary">
                       Username:
                     </span>
-                    <span className="font-bold text-blue-700">
+                    <span className="font-bold text-hotel-gold">
                       {invoice.username}
                     </span>
                   </div>
@@ -406,7 +406,7 @@ export default function InvoiceByGroup() {
                   <span className="font-semibold text-hotel-text-primary">
                     Total Charges
                   </span>
-                  <span className="border-2 border-gray-400 bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
+                  <span className="border-2 border-hotel-border bg-gradient-to-r from-hotel-paper to-hotel-cream px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
                     {fmt(displayData.total_charges)} RWF
                   </span>
                 </div>
@@ -414,7 +414,7 @@ export default function InvoiceByGroup() {
                   <span className="font-semibold text-hotel-text-primary">
                     Group Deposit
                   </span>
-                  <span className="border-2 border-gray-400 bg-gradient-to-r from-purple-50 to-violet-50 px-3 py-1.5 w-28 text-right font-bold text-purple-700">
+                  <span className="border-2 border-hotel-border bg-gradient-to-r from-hotel-paper to-hotel-cream px-3 py-1.5 w-28 text-right font-bold text-hotel-gold">
                     {fmt(displayData.group_deposit)} RWF
                   </span>
                 </div>
@@ -422,7 +422,7 @@ export default function InvoiceByGroup() {
                   <span className="font-semibold text-hotel-text-primary">
                     Total Paid
                   </span>
-                  <span className="border-2 border-gray-400 bg-gradient-to-r from-blue-50 to-cyan-50 px-3 py-1.5 w-28 text-right font-bold text-blue-700">
+                  <span className="border-2 border-hotel-border bg-gradient-to-r from-hotel-paper to-hotel-cream px-3 py-1.5 w-28 text-right font-bold text-hotel-gold">
                     {fmt(displayData.total_paid)} RWF
                   </span>
                 </div>
@@ -430,7 +430,7 @@ export default function InvoiceByGroup() {
                   <span className="font-semibold text-hotel-text-primary">
                     Balance Due
                   </span>
-                  <span className="border-2 border-gray-400 bg-gradient-to-r from-orange-50 to-red-50 px-3 py-1.5 w-28 text-right font-bold text-red-700">
+                  <span className="border-2 border-hotel-border bg-gradient-to-r from-hotel-paper to-hotel-cream px-3 py-1.5 w-28 text-right font-bold text-hotel-gold">
                     {fmt(displayData.balance_due)} RWF
                   </span>
                 </div>
@@ -438,7 +438,7 @@ export default function InvoiceByGroup() {
                   <>
                     <div className="flex items-center justify-end gap-3 pt-2 border-t border-hotel-border">
                       <span className="font-semibold text-hotel-text-primary">HTVA</span>
-                      <span className="border-2 border-gray-400 px-3 py-1.5 w-28 text-right font-bold text-blue-700">
+                      <span className="border-2 border-hotel-border px-3 py-1.5 w-28 text-right font-bold text-hotel-gold">
                         {fmt(invoice.tax.htva ?? 0)} RWF
                       </span>
                     </div>
@@ -446,7 +446,7 @@ export default function InvoiceByGroup() {
                       <span className="font-semibold text-hotel-text-primary">
                         TVA ({invoice.tax.taux}%)
                       </span>
-                      <span className="border-2 border-gray-400 px-3 py-1.5 w-28 text-right font-bold text-red-700">
+                      <span className="border-2 border-hotel-border px-3 py-1.5 w-28 text-right font-bold text-hotel-gold">
                         {fmt(invoice.tax.tva ?? 0)} RWF
                       </span>
                     </div>
@@ -454,7 +454,7 @@ export default function InvoiceByGroup() {
                       <span className="font-semibold text-hotel-text-primary">
                         Total TTC
                       </span>
-                      <span className="border-2 border-gray-400 bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-1.5 w-28 text-right font-bold text-green-800">
+                      <span className="border-2 border-hotel-border bg-gradient-to-r from-hotel-paper to-hotel-cream px-3 py-1.5 w-28 text-right font-bold text-hotel-gold">
                         {fmt(invoice.tax.total_ttc ?? 0)} RWF
                       </span>
                     </div>
@@ -464,7 +464,7 @@ export default function InvoiceByGroup() {
             </div>
           </div>
 
-          <p className="text-center text-gray-400 mt-4 text-xs font-light tracking-widest">
+          <p className="text-center text-hotel-text-secondary mt-4 text-xs font-light tracking-widest">
             --
           </p>
         </div>
@@ -528,7 +528,7 @@ export default function InvoiceByGroup() {
               <button
                 onClick={handleGenerate}
                 disabled={generating}
-                className="flex-1 bg-green-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-green-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                className="flex-1 bg-hotel-gold-dark text-white px-4 py-2 rounded text-sm font-medium hover:bg-hotel-gold-dark disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {generating && (
                   <Loader2 className="animate-spin" size={14} />
@@ -551,15 +551,15 @@ export default function InvoiceByGroup() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded p-4 w-full max-w-sm">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-red-100 rounded-full">
-                <AlertTriangle className="text-red-600" size={20} />
+              <div className="p-2 bg-hotel-cream rounded-full">
+                <AlertTriangle className="text-hotel-gold" size={20} />
               </div>
               <h3 className="text-base font-semibold text-hotel-text-primary">Error</h3>
             </div>
             <p className="text-sm text-hotel-text-secondary mb-6">{errorMsg}</p>
             <button
               onClick={() => setErrorMsg("")}
-              className="w-full bg-red-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-red-700"
+              className="w-full bg-hotel-gold-dark text-white px-4 py-2 rounded text-sm font-medium hover:bg-hotel-gold-dark"
             >
               OK
             </button>
@@ -577,3 +577,5 @@ export default function InvoiceByGroup() {
     </div>
   );
 }
+
+

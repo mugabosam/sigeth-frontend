@@ -126,7 +126,7 @@ export default function InvoicePreview() {
   return (
     <div className="space-y-4 p-4">
       {/* Toolbar */}
-      <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4 p-4 rounded border border-blue-100">
+      <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4 p-4 rounded border border-hotel-border">
         <div>
           <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
             {t("invoicePreview")}
@@ -139,7 +139,7 @@ export default function InvoicePreview() {
           {displayData && !invoice && (
             <button
               onClick={() => setShowGenerateModal(true)}
-              className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded flex items-center gap-2 text-sm font-medium hover:shadow-lg transition-colors duration-200"
+              className="bg-gradient-to-r from-amber-500 to-amber-700 text-white px-6 py-3 rounded flex items-center gap-2 text-sm font-medium hover:shadow-lg transition-colors duration-200"
             >
               <Receipt size={18} />
               Generate Invoice
@@ -160,7 +160,7 @@ export default function InvoicePreview() {
       {/* Occupied rooms list */}
       <div className="bg-white rounded border border-hotel-border p-4">
         <h3 className="text-base font-bold text-hotel-text-primary mb-4 flex items-center gap-2">
-          <span className="w-1 h-6 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full" />
+          <span className="w-1 h-6 bg-gradient-to-b from-amber-500 to-amber-700 rounded-full" />
           Occupied Rooms
         </h3>
         {occupiedRooms.length === 0 ? (
@@ -173,7 +173,7 @@ export default function InvoicePreview() {
               <button
                 key={room.room_num}
                 onClick={() => handleSelectGuest(room)}
-                className="w-full text-left px-4 py-4 text-sm border-b border-hotel-border last:border-b-0 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-colors duration-150"
+                className="w-full text-left px-4 py-4 text-sm border-b border-hotel-border last:border-b-0 hover:bg-gradient-to-r hover:from-hotel-paper hover:to-hotel-cream transition-colors duration-150"
               >
                 <div className="flex items-center justify-between">
                   <div>
@@ -198,7 +198,7 @@ export default function InvoicePreview() {
       {/* Loading */}
       {loading && (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="animate-spin text-blue-500" size={32} />
+          <Loader2 className="animate-spin text-hotel-gold" size={32} />
           <span className="ml-3 text-hotel-text-secondary">Loading preview...</span>
         </div>
       )}
@@ -214,7 +214,7 @@ export default function InvoicePreview() {
               {invoice ? "Definitive Invoice" : "Invoice Preview"}
             </p>
             {invoice && (
-              <p className="text-sm font-mono font-bold text-blue-700 mt-1">
+              <p className="text-sm font-mono font-bold text-hotel-gold mt-1">
                 {invoice.invoice_number}
               </p>
             )}
@@ -224,8 +224,8 @@ export default function InvoicePreview() {
           </div>
 
           {/* Header Info */}
-          <div className="border-2 border-gray-800 rounded overflow-hidden mb-4">
-            <div className="bg-gradient-to-r from-gray-800 to-gray-700 px-4 py-3 flex justify-between items-center text-white">
+          <div className="border-2 border-hotel-border rounded overflow-hidden mb-4">
+            <div className="bg-gradient-to-r from-hotel-gold to-hotel-gold-dark px-4 py-3 flex justify-between items-center text-white">
               <p className="font-bold text-sm">
                 {invoice ? "DEFINITIVE INVOICE" : "Guest Invoice Preview"}
               </p>
@@ -253,7 +253,7 @@ export default function InvoicePreview() {
             <div className="relative overflow-hidden bg-white">
               <table className="w-full border-collapse">
                 <thead>
-                  <tr className="bg-gradient-to-r from-gray-800 to-gray-700">
+                  <tr className="bg-gradient-to-r from-hotel-gold to-hotel-gold-dark">
                     {[
                       "Date",
                       "Designation",
@@ -264,7 +264,7 @@ export default function InvoicePreview() {
                     ].map((h) => (
                       <th
                         key={h}
-                        className="border border-gray-800 px-2 py-2 text-left font-bold text-xs text-white"
+                        className="border border-hotel-border px-2 py-2 text-left font-bold text-xs text-white"
                       >
                         {h}
                       </th>
@@ -302,20 +302,20 @@ export default function InvoicePreview() {
             </div>
 
             {/* Totals Footer */}
-            <div className="flex justify-between items-start px-4 py-4 border-t-2 border-gray-800 bg-gradient-to-r from-gray-50 to-white">
+            <div className="flex justify-between items-start px-4 py-4 border-t-2 border-hotel-border bg-gradient-to-r from-hotel-paper to-white">
               {invoice && (
                 <div className="space-y-3 text-xs">
                   <div className="flex items-baseline gap-3">
                     <span className="font-semibold text-hotel-text-primary">
                       Company Signature
                     </span>
-                    <span className="border-b-2 border-gray-400 w-24 inline-block" />
+                    <span className="border-b-2 border-hotel-border w-24 inline-block" />
                   </div>
                   <div className="flex items-baseline gap-3">
                     <span className="font-semibold text-hotel-text-primary">
                       Username:
                     </span>
-                    <span className="font-bold text-blue-700">
+                    <span className="font-bold text-hotel-gold">
                       {invoice.username}
                     </span>
                   </div>
@@ -326,7 +326,7 @@ export default function InvoicePreview() {
                   <span className="font-semibold text-hotel-text-primary">
                     Total Charges
                   </span>
-                  <span className="border-2 border-gray-400 bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
+                  <span className="border-2 border-hotel-border bg-gradient-to-r from-hotel-paper to-hotel-cream px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
                     {fmt(displayData.total_charges)} RWF
                   </span>
                 </div>
@@ -334,7 +334,7 @@ export default function InvoicePreview() {
                   <span className="font-semibold text-hotel-text-primary">
                     Total Paid
                   </span>
-                  <span className="border-2 border-gray-400 bg-gradient-to-r from-blue-50 to-cyan-50 px-3 py-1.5 w-28 text-right font-bold text-blue-700">
+                  <span className="border-2 border-hotel-border bg-gradient-to-r from-hotel-paper to-hotel-cream px-3 py-1.5 w-28 text-right font-bold text-hotel-gold">
                     {fmt(displayData.total_paid)} RWF
                   </span>
                 </div>
@@ -342,7 +342,7 @@ export default function InvoicePreview() {
                   <span className="font-semibold text-hotel-text-primary">
                     Balance Due
                   </span>
-                  <span className="border-2 border-gray-400 bg-gradient-to-r from-orange-50 to-red-50 px-3 py-1.5 w-28 text-right font-bold text-red-700">
+                  <span className="border-2 border-hotel-border bg-gradient-to-r from-hotel-paper to-hotel-cream px-3 py-1.5 w-28 text-right font-bold text-hotel-gold">
                     {fmt(displayData.balance_due)} RWF
                   </span>
                 </div>
@@ -350,7 +350,7 @@ export default function InvoicePreview() {
                   <>
                     <div className="flex items-center justify-end gap-3 pt-2 border-t border-hotel-border">
                       <span className="font-semibold text-hotel-text-primary">HTVA</span>
-                      <span className="border-2 border-gray-400 px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
+                      <span className="border-2 border-hotel-border px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
                         {fmt(invoice.tax.htva ?? 0)} RWF
                       </span>
                     </div>
@@ -358,7 +358,7 @@ export default function InvoicePreview() {
                       <span className="font-semibold text-hotel-text-primary">
                         TVA ({invoice.tax.taux}%)
                       </span>
-                      <span className="border-2 border-gray-400 px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
+                      <span className="border-2 border-hotel-border px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
                         {fmt(invoice.tax.tva ?? 0)} RWF
                       </span>
                     </div>
@@ -366,7 +366,7 @@ export default function InvoicePreview() {
                       <span className="font-semibold text-hotel-text-primary">
                         Total TTC
                       </span>
-                      <span className="border-2 border-gray-400 bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-1.5 w-28 text-right font-bold text-green-800">
+                      <span className="border-2 border-hotel-border bg-gradient-to-r from-hotel-paper to-hotel-cream px-3 py-1.5 w-28 text-right font-bold text-hotel-gold">
                         {fmt(invoice.tax.total_ttc ?? 0)} RWF
                       </span>
                     </div>
@@ -376,7 +376,7 @@ export default function InvoicePreview() {
             </div>
           </div>
 
-          <p className="text-center text-gray-400 mt-4 text-xs font-light tracking-widest">
+          <p className="text-center text-hotel-text-secondary mt-4 text-xs font-light tracking-widest">
             --
           </p>
         </div>
@@ -439,7 +439,7 @@ export default function InvoicePreview() {
               <button
                 onClick={handleGenerate}
                 disabled={generating}
-                className="flex-1 bg-green-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-green-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                className="flex-1 bg-hotel-gold-dark text-white px-4 py-2 rounded text-sm font-medium hover:bg-hotel-gold-dark disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {generating && (
                   <Loader2 className="animate-spin" size={14} />
@@ -462,15 +462,15 @@ export default function InvoicePreview() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded p-4 w-full max-w-sm">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-red-100 rounded-full">
-                <AlertTriangle className="text-red-600" size={20} />
+              <div className="p-2 bg-hotel-cream rounded-full">
+                <AlertTriangle className="text-hotel-gold" size={20} />
               </div>
               <h3 className="text-base font-semibold text-hotel-text-primary">Error</h3>
             </div>
             <p className="text-sm text-hotel-text-secondary mb-6">{errorMsg}</p>
             <button
               onClick={() => setErrorMsg("")}
-              className="w-full bg-red-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-red-700"
+              className="w-full bg-hotel-gold-dark text-white px-4 py-2 rounded text-sm font-medium hover:bg-hotel-gold-dark"
             >
               OK
             </button>
@@ -488,3 +488,5 @@ export default function InvoicePreview() {
     </div>
   );
 }
+
+
