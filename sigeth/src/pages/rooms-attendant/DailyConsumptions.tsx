@@ -54,7 +54,7 @@ export default function DailyConsumptions() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4 p-4 rounded border border-blue-100">
+      <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4 p-4 rounded border border-hotel-border">
         <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
           {t("dailyConsumptions")}
         </h1>
@@ -68,7 +68,7 @@ export default function DailyConsumptions() {
           </button>
           <button
             onClick={exportCSV}
-            className="border-2 border-hotel-border text-hotel-text-primary px-6 py-3 rounded flex items-center gap-2 text-sm font-medium bg-green-50 hover:bg-green-100 hover:shadow-lg transition-colors duration-200"
+            className="border-2 border-hotel-border text-hotel-text-primary px-6 py-3 rounded flex items-center gap-2 text-sm font-medium bg-hotel-cream hover:bg-hotel-cream hover:shadow-lg transition-colors duration-200"
           >
             <FileSpreadsheet size={18} />
             Excel
@@ -77,7 +77,7 @@ export default function DailyConsumptions() {
       </div>
       <div className="bg-white rounded border border-hotel-border p-4">
         <h3 className="text-base font-bold text-hotel-text-primary mb-4 flex items-center gap-2">
-          <span className="w-1 h-6 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full" />
+          <span className="w-1 h-6 bg-gradient-to-b from-amber-500 to-amber-700 rounded-full" />
           Filters
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -111,7 +111,7 @@ export default function DailyConsumptions() {
                 setFilterRoom("");
                 setFilterDate("");
               }}
-              className="w-full bg-gray-100 hover:bg-gray-200 text-hotel-text-primary px-4 py-2 rounded text-sm font-medium transition-colors duration-150"
+              className="w-full bg-hotel-cream hover:bg-hotel-paper text-hotel-text-primary px-4 py-2 rounded text-sm font-medium transition-colors duration-150"
             >
               {t("clearFilters")}
             </button>
@@ -133,7 +133,7 @@ export default function DailyConsumptions() {
         </div>
         <table className="w-full text-sm border-collapse">
           <thead>
-            <tr className="bg-gradient-to-r from-gray-800 to-gray-700">
+            <tr className="bg-gradient-to-r from-hotel-gold to-hotel-gold-dark">
               <th className="px-4 py-3 text-left text-xs font-semibold text-white">
                 Date
               </th>
@@ -192,7 +192,7 @@ export default function DailyConsumptions() {
               <tr>
                 <td
                   colSpan={9}
-                  className="px-4 py-8 text-center text-gray-400 font-medium"
+                  className="px-4 py-8 text-center text-hotel-text-secondary font-medium"
                 >
                   No records found
                 </td>
@@ -200,18 +200,18 @@ export default function DailyConsumptions() {
             )}
           </tbody>
         </table>
-        <div className="flex justify-end items-center gap-3 px-6 py-4 border-t border-hotel-border bg-gradient-to-r from-gray-50 to-gray-100">
+        <div className="flex justify-end items-center gap-3 px-6 py-4 border-t border-hotel-border bg-gradient-to-r from-hotel-paper to-hotel-cream">
           <span className="font-semibold text-hotel-text-primary">Totaux</span>
           <div className="flex gap-3">
             <div className="flex flex-col items-end">
               <span className="text-xs text-hotel-text-secondary mb-1">Debit</span>
-              <span className="bg-hotel-cream border border-blue-200 px-4 py-2 rounded min-w-[120px] text-right font-bold text-hotel-text-primary">
+              <span className="bg-hotel-cream border border-hotel-border px-4 py-2 rounded min-w-[120px] text-right font-bold text-hotel-text-primary">
                 {totalDebit.toLocaleString()}
               </span>
             </div>
             <div className="flex flex-col items-end">
               <span className="text-xs text-hotel-text-secondary mb-1">Credit</span>
-              <span className="bg-green-50 border border-green-200 px-4 py-2 rounded min-w-[120px] text-right font-bold text-hotel-text-primary">
+              <span className="bg-hotel-cream border border-hotel-border px-4 py-2 rounded min-w-[120px] text-right font-bold text-hotel-text-primary">
                 {totalCredit.toLocaleString()}
               </span>
             </div>
@@ -228,3 +228,5 @@ export default function DailyConsumptions() {
     </div>
   );
 }
+
+

@@ -203,7 +203,7 @@ export default function CheckInWalkIn() {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4">
-        <h1 className="text-2xl font-bold text-hotel-text-primary">
+        <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
           {t("checkInWithoutReservation")}
         </h1>
       </div>
@@ -211,7 +211,8 @@ export default function CheckInWalkIn() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         {/* ── Left: Quick Registration Form ── */}
         <div className="lg:col-span-2 bg-white border border-hotel-border rounded p-4 space-y-3">
-          <h2 className="text-base font-semibold text-hotel-text-primary mb-3 flex items-center gap-2">
+          <h2 className="text-base font-bold text-hotel-text-primary mb-3 flex items-center gap-2">
+            <span className="w-1 h-6 bg-gradient-to-b from-amber-500 to-amber-700 rounded-full" />
             <UserPlus size={20} className="text-hotel-gold" />
             {t("quickRegistration")}
           </h2>
@@ -292,9 +293,7 @@ export default function CheckInWalkIn() {
                     type={type}
                     title={label}
                     placeholder={
-                      field === "phone"
-                        ? "+250788123456"
-                        : undefined
+                      field === "phone" ? "+250788123456" : undefined
                     }
                     value={
                       type === "number" && form[field] === 0
@@ -470,6 +469,7 @@ export default function CheckInWalkIn() {
               {t("currency")}
             </label>
             <select
+              title={t("currency")}
               value={form.current_mon || "RWF"}
               onChange={(e) => {
                 const code = e.target.value;
@@ -527,7 +527,7 @@ export default function CheckInWalkIn() {
             onClick={handleSubmit}
             className={`w-full py-2 rounded font-semibold text-sm flex items-center justify-center gap-2 transition-colors ${
               canSubmit
-                ? "bg-hotel-gold text-white hover:bg-hotel-gold-dark"
+                ? "bg-gradient-to-r from-amber-500 to-amber-600 text-white hover:from-amber-600 hover:to-amber-700"
                 : "bg-white border border-hotel-border text-hotel-text-secondary cursor-not-allowed"
             }`}
           >
@@ -538,7 +538,8 @@ export default function CheckInWalkIn() {
 
         {/* ── Right: Available Rooms Grid ── */}
         <div className="bg-white border border-hotel-border rounded p-4">
-          <h3 className="font-semibold text-hotel-text-primary mb-3 flex items-center gap-2">
+          <h3 className="text-base font-bold text-hotel-text-primary mb-3 flex items-center gap-2">
+            <span className="w-1 h-6 bg-gradient-to-b from-amber-500 to-amber-700 rounded-full" />
             {t("availableRooms")} ({filteredRooms.length}/{vacantRooms.length})
           </h3>
           <input
@@ -561,7 +562,7 @@ export default function CheckInWalkIn() {
                   onClick={() => handleSelectRoom(room.room_num)}
                   className={`border rounded px-3 py-2 cursor-pointer transition-colors ${
                     selectedRoomNum === room.room_num
-                      ? "border-hotel-gold bg-white"
+                      ? "border-hotel-gold bg-hotel-cream"
                       : "hover:bg-hotel-cream border-hotel-border"
                   }`}
                 >
@@ -652,3 +653,5 @@ export default function CheckInWalkIn() {
     </div>
   );
 }
+
+

@@ -299,14 +299,14 @@ export default function IndividualReservation({
     <div className="space-y-4">
       {/* Page title */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-display font-bold text-hotel-text-primary">
+        <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
           {titles[mode]}
         </h1>
       </div>
 
       {/* Error message */}
       {errorMsg && (
-        <div className="bg-red-50 border border-red-200 rounded p-3 text-red-700 text-sm">
+        <div className="bg-hotel-cream border border-hotel-border rounded p-3 text-hotel-gold text-sm">
           {errorMsg}
         </div>
       )}
@@ -497,18 +497,14 @@ export default function IndividualReservation({
                   <input
                     type={type}
                     placeholder={
-                      field === "phone"
-                        ? "+250788123456"
-                        : undefined
+                      field === "phone" ? "+250788123456" : undefined
                     }
                     value={selected[field] ?? ""}
                     required={required}
                     onChange={(e) => handleChange(field, e.target.value)}
                     title={label}
                     className={`w-full border rounded px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-hotel-gold ${
-                      errorMsg
-                        ? "border-hotel-danger"
-                        : "border-hotel-border"
+                      errorMsg ? "border-hotel-danger" : "border-hotel-border"
                     }`}
                   />
                   {errorMsg && (
@@ -676,7 +672,7 @@ export default function IndividualReservation({
             {!isNew && (
               <button
                 onClick={handleDelete}
-                className="bg-hotel-danger text-white px-4 py-2 rounded text-sm font-medium hover:bg-red-700 transition-colors flex items-center gap-2"
+                className="bg-hotel-danger text-white px-4 py-2 rounded text-sm font-medium hover:bg-hotel-gold-dark transition-colors flex items-center gap-2"
               >
                 <Trash2 size={14} />
                 {t("delete")}
@@ -746,3 +742,5 @@ export default function IndividualReservation({
     </div>
   );
 }
+
+

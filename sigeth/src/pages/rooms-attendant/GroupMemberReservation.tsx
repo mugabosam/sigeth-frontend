@@ -303,7 +303,7 @@ export default function GroupMemberReservation({
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4">
-        <h1 className="text-2xl font-display font-bold text-hotel-text-primary">
+        <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
           {titles[mode]}
         </h1>
       </div>
@@ -558,18 +558,14 @@ export default function GroupMemberReservation({
                   <input
                     type={type}
                     placeholder={
-                      field === "phone"
-                        ? "+250788123456"
-                        : undefined
+                      field === "phone" ? "+250788123456" : undefined
                     }
                     value={selected[field] ?? ""}
                     required={required}
                     onChange={(e) => handleChange(field, e.target.value)}
                     title={label}
                     className={`w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold ${
-                      errorMsg
-                        ? "border-hotel-danger"
-                        : "border-hotel-border"
+                      errorMsg ? "border-hotel-danger" : "border-hotel-border"
                     }`}
                   />
                   {errorMsg && (
@@ -748,7 +744,7 @@ export default function GroupMemberReservation({
             {!isNew && (
               <button
                 onClick={handleDelete}
-                className="bg-hotel-danger text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium hover:bg-red-700 transition-colors"
+                className="bg-hotel-danger text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
               >
                 <Trash2 size={16} />
                 {t("delete")}
@@ -800,7 +796,7 @@ export default function GroupMemberReservation({
             </p>
             <button
               onClick={() => setErrorMsg("")}
-              className="bg-hotel-danger text-white px-4 py-2 rounded text-sm font-medium hover:bg-red-700 transition-colors"
+              className="bg-hotel-danger text-white px-4 py-2 rounded text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
             >
               OK
             </button>
@@ -810,3 +806,5 @@ export default function GroupMemberReservation({
     </div>
   );
 }
+
+

@@ -32,30 +32,30 @@ export default function BanquetRequestFollowUp() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-hotel-paper to-hotel-cream p-4">
       <div className="max-w-6xl mx-auto space-y-4">
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
+          <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
             {t("banquetRequestFollowUp")}
           </h1>
           <div className="flex gap-2">
             <button
               onClick={() => window.print()}
-              className="bg-gray-600 text-white px-4 py-2 rounded flex items-center gap-2 text-sm hover:bg-gray-700 transition-colors"
+              className="bg-hotel-gold text-white px-4 py-2 rounded flex items-center gap-2 text-sm hover:bg-hotel-gold-dark transition-colors"
             >
               <Printer size={16} />
               {t("print")}
             </button>
             <button
               onClick={handleExport}
-              className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-4 py-2 rounded flex items-center gap-2 text-sm hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-colors"
+              className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-4 py-2 rounded flex items-center gap-2 text-sm hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-colors"
             >
               <FileSpreadsheet size={16} />
               {t("excel")}
             </button>
           </div>
         </div>
-        <div className="bg-white rounded border-2 border-emerald-200 p-4 flex gap-3">
+        <div className="bg-white rounded border-2 border-hotel-border p-4 flex gap-3">
           <div>
             <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
               {t("dateFrom")}
@@ -65,7 +65,7 @@ export default function BanquetRequestFollowUp() {
               value={dateFrom}
               onChange={(e) => setDateFrom(e.target.value)}
               title={t("dateFrom")}
-              className="border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
+              className="border-2 border-hotel-border hover:border-hotel-border focus:border-hotel-gold focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
             />
           </div>
           <div>
@@ -77,13 +77,13 @@ export default function BanquetRequestFollowUp() {
               value={dateTo}
               onChange={(e) => setDateTo(e.target.value)}
               title={t("dateTo")}
-              className="border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
+              className="border-2 border-hotel-border hover:border-hotel-border focus:border-hotel-gold focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
             />
           </div>
         </div>
-        <div className="bg-white rounded border-2 border-emerald-200 overflow-hidden">
+        <div className="bg-white rounded border-2 border-hotel-border overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-white border-b-2 border-emerald-200">
+            <thead className="bg-white border-b-2 border-hotel-border">
               <tr>
                 {[
                   t("dateD"),
@@ -107,7 +107,7 @@ export default function BanquetRequestFollowUp() {
               {filtered.map((r, i) => (
                 <tr
                   key={i}
-                  className="border-b hover:bg-emerald-50/50 transition-colors"
+                  className="border-b hover:bg-hotel-cream/50 transition-colors"
                 >
                   <td className="px-4 py-3">{r.date_d}</td>
                   <td className="px-4 py-3">{r.libelle}</td>
@@ -117,7 +117,7 @@ export default function BanquetRequestFollowUp() {
                   <td className="px-4 py-3">{r.date_r || "—"}</td>
                   <td className="px-4 py-3">
                     <span
-                      className={`px-2 py-1 rounded-full text-xs font-semibold ${r.statut === "Approved" ? "bg-emerald-100 text-emerald-700" : r.statut === "Rejected" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}
+                      className={`px-2 py-1 rounded-full text-xs font-semibold ${r.statut === "Approved" ? "bg-hotel-cream text-hotel-gold" : r.statut === "Rejected" ? "bg-hotel-cream text-hotel-gold" : "bg-hotel-cream text-hotel-gold"}`}
                     >
                       {r.statut}
                     </span>
@@ -131,3 +131,6 @@ export default function BanquetRequestFollowUp() {
     </div>
   );
 }
+
+
+

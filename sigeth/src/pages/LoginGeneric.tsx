@@ -96,7 +96,7 @@ export default function Login() {
         className={`hidden lg:flex lg:w-5/12 flex-col justify-between p-12 relative overflow-hidden ${
           dark
             ? "from-slate-900 via-slate-800 to-slate-900"
-            : "from-slate-50 via-blue-50/30 to-white"
+            : "from-hotel-paper via-hotel-cream to-white"
         } bg-gradient-to-br`}
       >
         {/* Decorative elements */}
@@ -105,14 +105,14 @@ export default function Login() {
             animate={{ float: [0, 20, 0] }}
             transition={{ duration: 8, repeat: Infinity }}
             className={`absolute top-20 right-20 w-64 h-64 rounded-full blur-3xl opacity-20 ${
-              dark ? "bg-blue-500" : "bg-blue-300"
+              dark ? "bg-blue-500" : "bg-amber-300"
             }`}
           />
           <motion.div
             animate={{ float: [0, -20, 0] }}
             transition={{ duration: 10, repeat: Infinity, delay: 1 }}
             className={`absolute bottom-0 left-10 w-96 h-96 rounded-full blur-3xl opacity-10 ${
-              dark ? "bg-slate-400" : "bg-slate-300"
+              dark ? "bg-slate-400" : "bg-amber-200"
             }`}
           />
         </div>
@@ -141,12 +141,12 @@ export default function Login() {
             </motion.div>
             <div>
               <h1
-                className={`text-2xl font-semibold mb-1 ${dark ? "text-white" : "text-slate-900"}`}
+                className={`text-2xl font-display font-semibold mb-1 ${dark ? "text-white" : "text-hotel-text-primary"}`}
               >
                 SIGETH
               </h1>
               <p
-                className={`text-xs tracking-widest uppercase ${dark ? "text-slate-400" : "text-slate-600"}`}
+                className={`text-xs tracking-widest uppercase ${dark ? "text-slate-400" : "text-hotel-text-secondary"}`}
               >
                 Hotel Management Suite
               </p>
@@ -159,14 +159,14 @@ export default function Login() {
               className={`text-4xl font-bold mb-6 leading-tight ${
                 dark
                   ? "text-white"
-                  : "bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent"
+                  : "bg-gradient-to-r from-hotel-gold to-hotel-gold-dark bg-clip-text text-transparent"
               }`}
             >
               Welcome to Excellence
             </h2>
             <p
               className={`text-lg leading-relaxed ${
-                dark ? "text-slate-300" : "text-slate-600"
+                dark ? "text-slate-300" : "text-hotel-text-secondary"
               }`}
             >
               Streamline your hotel operations with our comprehensive management
@@ -191,10 +191,14 @@ export default function Login() {
               >
                 <div
                   className={`w-2 h-2 rounded-full ${
-                    dark ? "bg-blue-400" : "bg-blue-500"
+                    dark ? "bg-blue-400" : "bg-hotel-gold"
                   }`}
                 />
-                <span className={dark ? "text-slate-300" : "text-slate-700"}>
+                <span
+                  className={
+                    dark ? "text-slate-300" : "text-hotel-text-primary"
+                  }
+                >
                   {feature}
                 </span>
               </motion.div>
@@ -207,7 +211,7 @@ export default function Login() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1 }}
-          className={`text-sm ${dark ? "text-slate-500" : "text-slate-400"}`}
+          className={`text-sm ${dark ? "text-slate-500" : "text-hotel-text-secondary"}`}
         >
           © 2026 SIGETH. Excellence in hospitality management.
         </motion.p>
@@ -221,14 +225,14 @@ export default function Login() {
         className={`w-full lg:w-7/12 flex flex-col justify-between ${
           dark
             ? "from-white/5 to-white/5"
-            : "from-white via-blue-50/20 to-white"
+            : "from-white via-hotel-paper to-white"
         } bg-gradient-to-br backdrop-blur-md relative overflow-hidden`}
       >
         {/* Mobile Logo */}
         <div className="lg:hidden absolute top-6 left-6 flex items-center gap-2 z-10">
           <img src="/logo.jpeg" alt="SIGETH" className="w-10 h-10 rounded-lg" />
           <span
-            className={`font-semibold ${dark ? "text-white" : "text-slate-900"}`}
+            className={`font-semibold ${dark ? "text-white" : "text-hotel-text-primary"}`}
           >
             SIGETH
           </span>
@@ -240,7 +244,7 @@ export default function Login() {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.3 }}
           className={`flex justify-end items-center gap-3 p-6 ${
-            dark ? "border-slate-700/50" : "border-slate-200/50"
+            dark ? "border-slate-700/50" : "border-hotel-border"
           } border-b backdrop-blur-sm`}
         >
           {/* Dark Mode Toggle */}
@@ -251,8 +255,8 @@ export default function Login() {
             className={`p-2.5 rounded-lg transition-all ${
               dark
                 ? "bg-slate-800 text-yellow-400 hover:bg-slate-700"
-                : "bg-blue-100/50 text-amber-600 hover:bg-blue-100"
-            } backdrop-blur border ${dark ? "border-slate-700/50" : "border-blue-200/50"}`}
+                : "bg-hotel-cream text-hotel-gold hover:bg-hotel-paper"
+            } backdrop-blur border ${dark ? "border-slate-700/50" : "border-hotel-border"}`}
           >
             {dark ? <Sun size={18} /> : <Moon size={18} />}
           </motion.button>
@@ -265,7 +269,7 @@ export default function Login() {
             className={`px-3 py-2 rounded-lg transition-all flex items-center gap-1.5 text-xs font-semibold backdrop-blur border ${
               dark
                 ? "bg-slate-800 text-slate-300 border-slate-700/50 hover:bg-slate-700"
-                : "bg-white/50 text-blue-700 border-blue-200/50 hover:bg-white/70"
+                : "bg-white text-hotel-text-primary border-hotel-border hover:bg-hotel-paper"
             }`}
           >
             {lang === "en" ? (
@@ -309,7 +313,7 @@ export default function Login() {
                   className={`text-xs font-semibold px-3 py-1 rounded-full backdrop-blur border ${
                     dark
                       ? "bg-blue-900/40 text-blue-300 border-blue-700/50"
-                      : "bg-blue-100/60 text-blue-700 border-blue-200/80"
+                      : "bg-hotel-cream text-hotel-gold border-hotel-border"
                   }`}
                 >
                   ✨ Welcome Back
@@ -319,13 +323,13 @@ export default function Login() {
                 className={`text-3xl font-bold mb-2 ${
                   dark
                     ? "text-white"
-                    : "bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent"
+                    : "bg-gradient-to-r from-hotel-gold to-hotel-gold-dark bg-clip-text text-transparent"
                 }`}
               >
                 Login
               </h1>
               <p
-                className={`text-sm ${dark ? "text-slate-400" : "text-slate-600"}`}
+                className={`text-sm ${dark ? "text-slate-400" : "text-hotel-text-secondary"}`}
               >
                 Access your hotel management dashboard
               </p>
@@ -356,7 +360,7 @@ export default function Login() {
               <motion.div variants={itemVariants}>
                 <label
                   className={`block text-sm font-semibold mb-2 ${
-                    dark ? "text-slate-300" : "text-slate-700"
+                    dark ? "text-slate-300" : "text-hotel-text-primary"
                   }`}
                 >
                   Username
@@ -374,16 +378,16 @@ export default function Login() {
                       ${
                         dark
                           ? "bg-slate-800/50 text-white placeholder:text-slate-500"
-                          : "bg-white/70 text-slate-900 placeholder:text-slate-400"
+                          : "bg-white text-hotel-text-primary placeholder:text-hotel-text-secondary"
                       }
                       ${
                         isFocused === "username"
                           ? dark
                             ? "border-blue-500 ring-2 ring-blue-500/30"
-                            : "border-blue-400 ring-2 ring-blue-400/30"
+                            : "border-hotel-gold ring-2 ring-hotel-gold/30"
                           : dark
                             ? "border-slate-700 hover:border-slate-600"
-                            : "border-slate-200 hover:border-slate-300"
+                            : "border-hotel-border hover:border-hotel-gold"
                       }
                       backdrop-blur focus:outline-none`}
                   />
@@ -394,7 +398,7 @@ export default function Login() {
               <motion.div variants={itemVariants}>
                 <label
                   className={`block text-sm font-semibold mb-2 ${
-                    dark ? "text-slate-300" : "text-slate-700"
+                    dark ? "text-slate-300" : "text-hotel-text-primary"
                   }`}
                 >
                   Password
@@ -412,16 +416,16 @@ export default function Login() {
                       ${
                         dark
                           ? "bg-slate-800/50 text-white placeholder:text-slate-500"
-                          : "bg-white/70 text-slate-900 placeholder:text-slate-400"
+                          : "bg-white text-hotel-text-primary placeholder:text-hotel-text-secondary"
                       }
                       ${
                         isFocused === "password"
                           ? dark
                             ? "border-blue-500 ring-2 ring-blue-500/30"
-                            : "border-blue-400 ring-2 ring-blue-400/30"
+                            : "border-hotel-gold ring-2 ring-hotel-gold/30"
                           : dark
                             ? "border-slate-700 hover:border-slate-600"
-                            : "border-slate-200 hover:border-slate-300"
+                            : "border-hotel-border hover:border-hotel-gold"
                       }
                       backdrop-blur focus:outline-none`}
                   />
@@ -451,7 +455,7 @@ export default function Login() {
                 className={`w-full py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 mt-6 backdrop-blur border ${
                   dark
                     ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white border-blue-500/50 hover:from-blue-500 hover:to-blue-400 disabled:opacity-50"
-                    : "bg-gradient-to-r from-blue-500 to-blue-600 text-white border-blue-400/50 hover:from-blue-600 hover:to-blue-700 disabled:opacity-50"
+                    : "bg-gradient-to-r from-hotel-gold to-hotel-gold-dark text-white border-hotel-gold hover:from-hotel-gold-dark hover:to-hotel-gold disabled:opacity-50"
                 }`}
               >
                 <motion.div
@@ -469,18 +473,22 @@ export default function Login() {
               variants={itemVariants}
               whileHover={{ scale: 1.01 }}
               className={`p-4 rounded-lg text-xs text-center ${
-                dark ? "bg-slate-800/50" : "bg-blue-50/60"
-              } backdrop-blur border ${dark ? "border-slate-700/50" : "border-blue-200/50"}`}
+                dark ? "bg-slate-800/50" : "bg-hotel-cream"
+              } backdrop-blur border ${dark ? "border-slate-700/50" : "border-hotel-border"}`}
             >
               <p
-                className={dark ? "text-slate-400 mb-3" : "text-slate-600 mb-3"}
+                className={
+                  dark
+                    ? "text-slate-400 mb-3"
+                    : "text-hotel-text-secondary mb-3"
+                }
               >
                 Demo Account Available
               </p>
               <button
                 type="button"
                 onClick={fillDemoCredentials}
-                className="text-blue-600 dark:text-blue-400 hover:underline font-semibold"
+                className="text-hotel-gold dark:text-amber-400 hover:underline font-semibold"
               >
                 Click here to auto-fill demo credentials
               </button>
@@ -494,8 +502,8 @@ export default function Login() {
           animate={{ opacity: 1 }}
           transition={{ delay: 1 }}
           className={`text-center py-4 text-xs ${
-            dark ? "text-slate-500" : "text-slate-400"
-          } border-t ${dark ? "border-slate-700/50" : "border-slate-200/50"}`}
+            dark ? "text-slate-500" : "text-hotel-text-secondary"
+          } border-t ${dark ? "border-slate-700/50" : "border-hotel-border"}`}
         >
           © 2026 SIGETH. All rights reserved.
         </motion.div>

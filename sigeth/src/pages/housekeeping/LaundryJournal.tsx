@@ -33,9 +33,9 @@ export default function LaundryJournal() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50 p-4 space-y-4">
+    <div className="min-h-screen bg-gradient-to-br from-hotel-paper to-hotel-cream p-4 space-y-4">
       <div className="space-y-2">
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
+        <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
           {t("laundryJournal")}
         </h1>
         <p className="text-sm text-hotel-text-secondary">
@@ -45,20 +45,20 @@ export default function LaundryJournal() {
       <div className="flex gap-3 flex-wrap">
         <button
           onClick={() => window.print()}
-          className="bg-gradient-to-r from-gray-600 to-gray-700 text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-gray-700 hover:to-gray-800 transition-colors duration-200"
+          className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-colors duration-200"
         >
           <Printer size={16} />
           {t("print")}
         </button>
         <button
           onClick={handleExport}
-          className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-colors duration-200"
+          className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-colors duration-200"
         >
           <FileSpreadsheet size={16} />
           {t("excel")}
         </button>
       </div>
-      <div className="bg-white rounded border border-emerald-100 p-5 flex gap-3 flex-wrap">
+      <div className="bg-white rounded border border-hotel-border p-5 flex gap-3 flex-wrap">
         <div>
           <label className="block text-sm font-semibold text-hotel-text-primary mb-2">
             {t("dateFrom")}
@@ -68,7 +68,7 @@ export default function LaundryJournal() {
             value={dateFrom}
             onChange={(e) => setDateFrom(e.target.value)}
             title={t("dateFrom")}
-            className="border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
+            className="border-2 border-hotel-border hover:border-hotel-border focus:border-hotel-gold focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
           />
         </div>
         <div>
@@ -80,18 +80,18 @@ export default function LaundryJournal() {
             value={dateTo}
             onChange={(e) => setDateTo(e.target.value)}
             title={t("dateTo")}
-            className="border-2 border-hotel-border hover:border-hotel-border focus:border-emerald-500 focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
+            className="border-2 border-hotel-border hover:border-hotel-border focus:border-hotel-gold focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
           />
         </div>
       </div>
-      <div className="bg-white rounded border border-emerald-100 overflow-hidden">
-        <div className="bg-gradient-to-r from-emerald-50 to-green-50 px-6 py-4 border-b border-emerald-100">
+      <div className="bg-white rounded border border-hotel-border overflow-hidden">
+        <div className="bg-gradient-to-r from-hotel-paper to-hotel-cream px-6 py-4 border-b border-hotel-border">
           <h2 className="text-base font-bold text-hotel-text-primary">
             Transaction Details
           </h2>
         </div>
         <table className="w-full text-sm">
-          <thead className="bg-white border-b-2 border-emerald-200">
+          <thead className="bg-white border-b-2 border-hotel-border">
             <tr>
               {[
                 t("date"),
@@ -115,25 +115,27 @@ export default function LaundryJournal() {
             {filtered.map((j, i) => (
               <tr
                 key={i}
-                className="border-b hover:bg-emerald-50/50 transition-colors duration-150"
+                className="border-b hover:bg-hotel-cream/50 transition-colors duration-150"
               >
                 <td className="px-6 py-3 text-hotel-text-primary">{j.date}</td>
-                <td className="px-6 py-3 font-mono text-emerald-600">
+                <td className="px-6 py-3 font-mono text-hotel-gold">
                   {j.room_num}
                 </td>
-                <td className="px-6 py-3 text-hotel-text-primary">{j.designation}</td>
+                <td className="px-6 py-3 text-hotel-text-primary">
+                  {j.designation}
+                </td>
                 <td className="px-6 py-3 text-hotel-text-primary">{j.unity}</td>
                 <td className="px-6 py-3 text-hotel-text-primary">{j.qty}</td>
                 <td className="px-6 py-3 text-hotel-text-primary">
                   {j.price.toLocaleString()}
                 </td>
-                <td className="px-6 py-3 font-semibold text-emerald-700">
+                <td className="px-6 py-3 font-semibold text-hotel-gold">
                   {j.total.toLocaleString()}
                 </td>
               </tr>
             ))}
           </tbody>
-          <tfoot className="bg-gradient-to-r from-emerald-50 to-green-50 border-t-2 border-emerald-200">
+          <tfoot className="bg-gradient-to-r from-hotel-paper to-hotel-cream border-t-2 border-hotel-border">
             <tr>
               <td
                 colSpan={6}
@@ -141,7 +143,7 @@ export default function LaundryJournal() {
               >
                 {t("grandTotal")}
               </td>
-              <td className="px-6 py-3 font-bold text-emerald-700">
+              <td className="px-6 py-3 font-bold text-hotel-gold">
                 {grandTotal.toLocaleString()}
               </td>
             </tr>
@@ -151,3 +153,5 @@ export default function LaundryJournal() {
     </div>
   );
 }
+
+

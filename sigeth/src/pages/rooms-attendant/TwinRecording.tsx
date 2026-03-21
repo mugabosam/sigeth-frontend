@@ -86,14 +86,14 @@ export default function TwinRecording() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4 p-4 rounded border border-blue-100">
+      <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4 p-4 rounded border border-hotel-border">
         <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
           {t("twinRecording")}
         </h1>
       </div>
       <div className="bg-white rounded border border-hotel-border p-4">
         <h3 className="text-base font-bold text-hotel-text-primary mb-4 flex items-center gap-2">
-          <span className="w-1 h-6 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full" />
+          <span className="w-1 h-6 bg-gradient-to-b from-amber-500 to-amber-700 rounded-full" />
           {t("queryWindow")}
         </h3>
         <div className="flex gap-3 relative">
@@ -232,3 +232,5 @@ export default function TwinRecording() {
     </div>
   );
 }
+
+

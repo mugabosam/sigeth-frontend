@@ -163,7 +163,7 @@ export default function MoveGuest() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4 p-4 rounded border border-blue-100">
+      <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4 p-4 rounded border border-hotel-border">
         <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
           {t("moveGuest")}
         </h1>
@@ -173,26 +173,26 @@ export default function MoveGuest() {
         <div
           className={`rounded border-l-4 p-4 flex items-start justify-between ${
             errorType === "search"
-              ? "bg-red-50 border-l-red-500 border border-red-200"
+              ? "bg-hotel-cream border-l-red-500 border border-hotel-border"
               : errorType === "move"
-                ? "bg-orange-50 border-l-orange-500 border border-orange-200"
-                : "bg-yellow-50 border-l-yellow-500 border border-yellow-200"
+                ? "bg-hotel-cream border-l-hotel-gold border border-hotel-border"
+                : "bg-hotel-cream border-l-hotel-gold border border-hotel-border"
           }`}
         >
           <div className="flex items-start gap-3">
             {errorType === "search" ? (
-              <AlertCircle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
+              <AlertCircle className="w-6 h-6 text-hotel-gold flex-shrink-0 mt-0.5" />
             ) : (
-              <XCircle className="w-6 h-6 text-orange-600 flex-shrink-0 mt-0.5" />
+              <XCircle className="w-6 h-6 text-hotel-gold flex-shrink-0 mt-0.5" />
             )}
             <div>
               <h4
                 className={`font-bold text-base mb-1 ${
                   errorType === "search"
-                    ? "text-red-800"
+                    ? "text-hotel-gold"
                     : errorType === "move"
-                      ? "text-orange-800"
-                      : "text-yellow-800"
+                      ? "text-hotel-gold"
+                      : "text-hotel-gold"
                 }`}
               >
                 {errorType === "search"
@@ -204,10 +204,10 @@ export default function MoveGuest() {
               <p
                 className={`text-sm ${
                   errorType === "search"
-                    ? "text-red-700"
+                    ? "text-hotel-gold"
                     : errorType === "move"
-                      ? "text-orange-700"
-                      : "text-yellow-700"
+                      ? "text-hotel-gold"
+                      : "text-hotel-gold"
                 }`}
               >
                 {error}
@@ -222,10 +222,10 @@ export default function MoveGuest() {
             title="Close error message"
             className={`flex-shrink-0 p-1 rounded transition-colors ${
               errorType === "search"
-                ? "hover:bg-red-200 text-red-600"
+                ? "hover:bg-hotel-paper text-hotel-gold"
                 : errorType === "move"
-                  ? "hover:bg-orange-200 text-orange-600"
-                  : "hover:bg-yellow-200 text-yellow-600"
+                  ? "hover:bg-hotel-paper text-hotel-gold"
+                  : "hover:bg-hotel-paper text-hotel-gold"
             }`}
           >
             <X size={20} />
@@ -235,7 +235,7 @@ export default function MoveGuest() {
 
       <div className="bg-white rounded border border-hotel-border p-4">
         <h3 className="text-base font-bold text-hotel-text-primary mb-4 flex items-center gap-2">
-          <span className="w-1 h-6 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full" />
+          <span className="w-1 h-6 bg-gradient-to-b from-amber-500 to-amber-700 rounded-full" />
           {t("queryWindow")}
         </h3>
         <div className="flex gap-3">
@@ -281,8 +281,8 @@ export default function MoveGuest() {
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Source room */}
-            <div className="bg-red-50 border border-red-200 rounded p-4">
-              <h4 className="text-sm font-semibold text-red-700 mb-2">
+            <div className="bg-hotel-cream border border-hotel-border rounded p-4">
+              <h4 className="text-sm font-semibold text-hotel-gold mb-2">
                 {t("currentRoom")}
               </h4>
               <div className="space-y-1 text-sm">
@@ -309,7 +309,7 @@ export default function MoveGuest() {
               </div>
             </div>
             {/* Target room selection */}
-            <div className="bg-green-50 border border-green-200 rounded p-4">
+            <div className="bg-hotel-cream border border-hotel-border rounded p-4">
               <h4 className="text-sm font-semibold text-hotel-text-primary mb-2">
                 {t("newRoom")}
               </h4>
@@ -320,7 +320,7 @@ export default function MoveGuest() {
                   onChange={(e) => handleNewRoomChange(e.target.value)}
                   placeholder={t("selectRoom")}
                   title={t("selectRoom")}
-                  className="w-full border border-hotel-border rounded px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full border border-hotel-border rounded px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-hotel-gold"
                 />
                 {showNewRoomSuggestions && newRoomSuggestions.length > 0 && (
                   <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-hotel-border rounded z-50 max-h-48 overflow-y-auto">
@@ -328,7 +328,7 @@ export default function MoveGuest() {
                       <button
                         key={r.room_num}
                         onClick={() => handleSelectNewRoom(r)}
-                        className="w-full text-left px-4 py-2 hover:bg-green-50 transition-colors border-b last:border-b-0 text-sm"
+                        className="w-full text-left px-4 py-2 hover:bg-hotel-cream transition-colors border-b last:border-b-0 text-sm"
                       >
                         <div className="font-medium text-hotel-text-primary">
                           {r.room_num}
@@ -380,7 +380,7 @@ export default function MoveGuest() {
       {showConfirmation && sourceRoom && targetRoom && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white rounded max-w-md w-full mx-4 p-4 space-y-4">
-            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-amber-100 mx-auto">
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-hotel-cream mx-auto">
               <AlertCircle className="w-6 h-6 text-amber-600" />
             </div>
             <div className="text-center space-y-1">
@@ -426,7 +426,7 @@ export default function MoveGuest() {
               </button>
               <button
                 onClick={confirmMove}
-                className="flex-1 px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded font-medium hover:shadow-lg transition-colors"
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-700 text-white rounded font-medium hover:shadow-lg transition-colors"
               >
                 Confirm
               </button>
@@ -437,3 +437,5 @@ export default function MoveGuest() {
     </div>
   );
 }
+
+
