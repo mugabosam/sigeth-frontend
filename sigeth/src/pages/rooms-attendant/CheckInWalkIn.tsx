@@ -202,15 +202,9 @@ export default function CheckInWalkIn() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4">
-        <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
-          {t("checkInWithoutReservation")}
-        </h1>
-      </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         {/* ── Left: Quick Registration Form ── */}
-        <div className="lg:col-span-2 bg-white border border-hotel-border rounded p-4 space-y-3">
+        <div className="lg:col-span-2 bg-white rounded p-4 space-y-3">
           <h2 className="text-base font-bold text-hotel-text-primary mb-3 flex items-center gap-2">
             <span className="w-1 h-6 bg-gradient-to-b from-amber-500 to-amber-700 rounded-full" />
             <UserPlus size={20} className="text-hotel-gold" />
@@ -392,7 +386,7 @@ export default function CheckInWalkIn() {
                 title="Payment mode"
                 value={form.payt_mode}
                 onChange={(e) => handleChange("payt_mode", e.target.value)}
-                className="w-full border border-hotel-border rounded px-3 py-2 text-sm"
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
               >
                 {paymentModes.map((m) => (
                   <option key={m.id} value={m.id}>
@@ -406,12 +400,12 @@ export default function CheckInWalkIn() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div>
               <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
-                {t("discount")} (%)
+                {t("discount")}
               </label>
               <input
                 type="number"
                 title="Discount percentage"
-                value={form.discount}
+                value={form.discount || ""}
                 min={0}
                 max={100}
                 onChange={(e) =>
@@ -436,7 +430,7 @@ export default function CheckInWalkIn() {
               <input
                 type="number"
                 title="Deposit amount"
-                value={form.deposit}
+                value={form.deposit || ""}
                 min={0}
                 onChange={(e) =>
                   handleChange("deposit", Number(e.target.value))
@@ -457,7 +451,7 @@ export default function CheckInWalkIn() {
               <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                 {t("stayCost")}
               </label>
-              <div className="w-full border border-hotel-border rounded px-3 py-2 text-sm bg-white font-semibold">
+              <div className="w-full rounded px-3 py-2 text-sm bg-white font-semibold">
                 {form.stay_cost.toLocaleString()} {form.current_mon}
               </div>
             </div>
@@ -504,7 +498,7 @@ export default function CheckInWalkIn() {
 
           {/* Selected room summary */}
           {selectedRoomNum && (
-            <div className="bg-white border border-hotel-border rounded p-4 flex items-center justify-between">
+            <div className="bg-white rounded p-4 flex items-center justify-between">
               <div>
                 <span className="text-xs text-hotel-gold">
                   {t("assignedRoom")}
@@ -528,7 +522,7 @@ export default function CheckInWalkIn() {
             className={`w-full py-2 rounded font-semibold text-sm flex items-center justify-center gap-2 transition-colors ${
               canSubmit
                 ? "bg-gradient-to-r from-amber-500 to-amber-600 text-white hover:from-amber-600 hover:to-amber-700"
-                : "bg-white border border-hotel-border text-hotel-text-secondary cursor-not-allowed"
+                : "bg-white text-hotel-text-secondary cursor-not-allowed"
             }`}
           >
             <UserPlus size={18} />
@@ -537,7 +531,7 @@ export default function CheckInWalkIn() {
         </div>
 
         {/* ── Right: Available Rooms Grid ── */}
-        <div className="bg-white border border-hotel-border rounded p-4">
+        <div className="bg-white rounded p-4">
           <h3 className="text-base font-bold text-hotel-text-primary mb-3 flex items-center gap-2">
             <span className="w-1 h-6 bg-gradient-to-b from-amber-500 to-amber-700 rounded-full" />
             {t("availableRooms")} ({filteredRooms.length}/{vacantRooms.length})
@@ -548,7 +542,7 @@ export default function CheckInWalkIn() {
             onChange={(e) => setRoomSearch(e.target.value)}
             placeholder={`${t("search")} ${t("room")}...`}
             title={`${t("search")} ${t("room")}...`}
-            className="w-full border border-hotel-border rounded px-3 py-2 text-sm mb-3 focus:outline-none focus:ring-1 focus:ring-hotel-gold"
+            className="w-full border border-gray-300 rounded px-3 py-2 text-sm mb-3 focus:outline-none focus:ring-1 focus:ring-hotel-gold"
           />
           <div className="space-y-2 max-h-[60vh] overflow-y-auto pr-1">
             {filteredRooms.length === 0 ? (
@@ -614,7 +608,7 @@ export default function CheckInWalkIn() {
       {/* Success Confirmation Dialog */}
       {successMsg && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded p-4 w-full max-w-md text-center space-y-4 border border-hotel-border">
+          <div className="bg-white rounded p-4 w-full max-w-md text-center space-y-4">
             <CheckCircle2 size={40} className="text-hotel-gold mx-auto" />
             <h3 className="text-base font-semibold text-hotel-text-primary">
               Check-In Complete
@@ -633,7 +627,7 @@ export default function CheckInWalkIn() {
       {/* Error Dialog */}
       {errorMsg && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded p-4 w-full max-w-md text-center space-y-4 border border-hotel-border">
+          <div className="bg-white rounded p-4 w-full max-w-md text-center space-y-4">
             <AlertTriangle size={40} className="text-hotel-danger mx-auto" />
             <h3 className="text-base font-semibold text-hotel-text-primary">
               Error

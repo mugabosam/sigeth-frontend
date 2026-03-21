@@ -1,7 +1,6 @@
 import { useState, useMemo } from "react";
 import {
   Search,
-  Plus,
   Save,
   Trash2,
   CheckCircle2,
@@ -297,22 +296,15 @@ export default function IndividualReservation({
 
   return (
     <div className="space-y-4">
-      {/* Page title */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
-          {titles[mode]}
-        </h1>
-      </div>
-
       {/* Error message */}
       {errorMsg && (
-        <div className="bg-hotel-cream border border-hotel-border rounded p-3 text-hotel-gold text-sm">
+        <div className="bg-hotel-cream rounded p-3 text-hotel-gold text-sm">
           {errorMsg}
         </div>
       )}
 
       {/* Query window */}
-      <div className="bg-white border border-hotel-border rounded p-4">
+      <div className="bg-white rounded p-4">
         <h3 className="text-sm font-semibold text-hotel-text-primary mb-3 uppercase tracking-wide">
           {t("queryWindow")}
         </h3>
@@ -326,10 +318,10 @@ export default function IndividualReservation({
               onChange={(e) => handleRoomChange(e.target.value)}
               placeholder={t("roomNumber")}
               title={t("roomNumber")}
-              className="w-full border border-hotel-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
             />
             {showRoomSuggestions && roomSuggestions.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-hotel-border rounded shadow z-50 max-h-32 overflow-y-auto">
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded shadow z-50 max-h-32 overflow-y-auto">
                 {roomSuggestions.map((r, i) => (
                   <button
                     key={`room-${i}`}
@@ -356,11 +348,11 @@ export default function IndividualReservation({
               onChange={(e) => handleGuestChange(e.target.value)}
               placeholder={t("guestName")}
               title={t("guestName")}
-              className="w-full border border-hotel-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             />
             {showGuestSuggestions && guestSuggestions.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-hotel-border rounded shadow z-50 max-h-32 overflow-y-auto">
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded shadow z-50 max-h-32 overflow-y-auto">
                 {guestSuggestions.map((r, i) => (
                   <button
                     key={`guest-${i}`}
@@ -380,10 +372,9 @@ export default function IndividualReservation({
           </div>
           <button
             onClick={handleSearch}
-            className="self-end bg-hotel-gold text-white px-4 py-2 rounded text-sm font-medium hover:bg-hotel-gold-dark transition-colors flex items-center justify-center gap-2"
+            className="self-end bg-hotel-gold text-white p-2.5 rounded hover:bg-hotel-gold-dark transition-colors flex items-center justify-center"
           >
             <Search size={14} />
-            {t("search")}
           </button>
           <button
             onClick={() => {
@@ -393,15 +384,14 @@ export default function IndividualReservation({
             }}
             className="self-end border border-hotel-gold text-hotel-gold px-4 py-2 rounded text-sm font-medium hover:bg-hotel-cream transition-colors flex items-center justify-center gap-2"
           >
-            <Plus size={14} />
-            {t("newRecord")}
+            + New
           </button>
         </div>
       </div>
 
       {/* Form section */}
       {selected && (
-        <div className="bg-white border border-hotel-border rounded p-4 space-y-4">
+        <div className="bg-white rounded p-4 space-y-4">
           <h3 className="text-sm font-semibold text-hotel-text-primary uppercase tracking-wide">
             {isNew ? t("newReservation") : t("editReservation")}
           </h3>
@@ -458,7 +448,7 @@ export default function IndividualReservation({
                   false,
                   { min: "0", max: "100" },
                 ],
-                ["airport_time", t("airportTime"), "text", false, {}],
+                ["airport_time", t("airportTime"), "time", false, {}],
                 ["stay_cost", t("stayCost"), "number", false, {}],
                 ["deposit", t("deposit"), "number", true, { min: "0" }],
               ] as [keyof RCS, string, string, boolean, Record<string, any>][]
@@ -499,7 +489,11 @@ export default function IndividualReservation({
                     placeholder={
                       field === "phone" ? "+250788123456" : undefined
                     }
-                    value={selected[field] ?? ""}
+                    value={
+                      type === "number" && selected[field] === 0 && field !== "adulte"
+                        ? ""
+                        : (selected[field] ?? "")
+                    }
                     required={required}
                     onChange={(e) => handleChange(field, e.target.value)}
                     title={label}
@@ -559,7 +553,7 @@ export default function IndividualReservation({
                   setSelected(updatedWithCalc);
                   setErrors(validateIndividualReservation(updatedWithCalc));
                 }}
-                className="w-full border border-hotel-border rounded px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-hotel-gold"
+                className="w-full border border-gray-300 rounded px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-hotel-gold"
               >
                 {currencyOptions.map((c) => (
                   <option key={c.code} value={c.code}>
@@ -581,7 +575,7 @@ export default function IndividualReservation({
                 value={selected.payt_mode}
                 onChange={(e) => handleChange("payt_mode", e.target.value)}
                 title={t("paymentMode")}
-                className="w-full border border-hotel-border rounded px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-hotel-gold"
+                className="w-full border border-gray-300 rounded px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-hotel-gold"
               >
                 <option value="">-- {t("select")} --</option>
                 {paymentModes.map((m) => (
@@ -708,7 +702,7 @@ export default function IndividualReservation({
       {/* Success/Failure Modal */}
       {showSuccessModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
-          <div className="bg-white border border-hotel-border rounded p-4 max-w-sm mx-auto">
+          <div className="bg-white rounded p-4 max-w-sm mx-auto">
             <div className="flex items-center gap-3 mb-4">
               {successMessage.includes("success") ||
               successMessage.includes("Success") ? (

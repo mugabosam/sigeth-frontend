@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Save, CheckCircle2, AlertTriangle, ArrowRight } from "lucide-react";
+import { Search, Save, CheckCircle2, AlertTriangle, ArrowRight, AlertCircle } from "lucide-react";
 import { useLang } from "../../hooks/useLang";
 import { useHotelData } from "../../context/HotelDataContext";
 import { frontOfficeApi } from "../../services/sigethApi";
@@ -28,6 +28,7 @@ export default function TwinRecording() {
   const [resultModal, setResultModal] = useState<TwinResult | null>(null);
   const [errorModal, setErrorModal] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const handleQueryChange = (value: string) => {
     setQuery(value);
@@ -110,14 +111,8 @@ export default function TwinRecording() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4">
-        <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
-          {t("twinRecording")}
-        </h1>
-      </div>
-
       {/* Search */}
-      <div className="bg-white rounded border border-hotel-border p-4">
+      <div className="bg-white rounded p-4">
         <h3 className="text-base font-bold text-hotel-text-primary mb-4 flex items-center gap-2">
           <span className="w-1 h-6 bg-gradient-to-b from-amber-500 to-amber-700 rounded-full" />
           {t("queryWindow")}
@@ -129,11 +124,11 @@ export default function TwinRecording() {
               onChange={(e) => handleQueryChange(e.target.value)}
               placeholder={t("roomNumber")}
               title={t("roomNumber")}
-              className="w-full border border-hotel-border rounded px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
+              className="w-full border border-gray-300 rounded px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             />
             {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-hotel-border rounded z-50 max-h-32 overflow-y-auto">
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded z-50 max-h-32 overflow-y-auto">
                 {suggestions.map((r) => (
                   <button
                     key={r.room_num}
@@ -151,17 +146,16 @@ export default function TwinRecording() {
           </div>
           <button
             onClick={handleSearch}
-            className="bg-hotel-gold text-white px-6 py-2 rounded flex items-center gap-2 text-sm font-medium hover:shadow-lg transition-colors"
+            className="bg-hotel-gold text-white p-2.5 rounded flex items-center justify-center hover:bg-hotel-gold-dark transition-colors"
           >
             <Search size={16} />
-            {t("search")}
           </button>
         </div>
       </div>
 
       {/* Room details + twin name form */}
       {selectedRoom && (
-        <div className="bg-white rounded border border-hotel-border p-4 space-y-4">
+        <div className="bg-white rounded p-4 space-y-4">
           <h3 className="text-base font-semibold text-hotel-text-primary">
             {t("twinRecording")} — {t("room")} {selectedRoom.room_num}
           </h3>
@@ -208,12 +202,12 @@ export default function TwinRecording() {
           </div>
           <div className="flex gap-3 pt-4 border-t">
             <button
-              onClick={handleSave}
+              onClick={() => setShowConfirm(true)}
               disabled={!twinName.trim() || saving}
               className="bg-hotel-gold text-white px-6 py-2 rounded flex items-center gap-2 text-sm hover:bg-hotel-gold-dark disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Save size={16} />
-              {saving ? "..." : t("save")}
+              {t("save")}
             </button>
             <button
               onClick={() => { setSelectedRoom(null); setTwinName(""); }}
@@ -221,6 +215,43 @@ export default function TwinRecording() {
             >
               {t("cancel")}
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal */}
+      {showConfirm && selectedRoom && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded max-w-md w-full mx-4 p-4 space-y-4">
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-hotel-cream mx-auto">
+              <AlertCircle className="w-6 h-6 text-amber-600" />
+            </div>
+            <div className="text-center space-y-1">
+              <h2 className="text-base font-bold text-hotel-text-primary">Are you sure?</h2>
+              <p className="text-sm text-hotel-text-secondary">
+                Add <strong>{twinName}</strong> as twin guest to
+                room <strong>{selectedRoom.room_num}</strong> ({selectedRoom.guest_name})?
+              </p>
+            </div>
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={() => setShowConfirm(false)}
+                disabled={saving}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded text-hotel-text-primary font-medium hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  setShowConfirm(false);
+                  await handleSave();
+                }}
+                disabled={saving}
+                className="flex-1 px-4 py-2 bg-hotel-gold text-white rounded font-medium hover:bg-hotel-gold-dark transition-colors disabled:opacity-50"
+              >
+                {saving ? "Saving..." : "Confirm"}
+              </button>
+            </div>
           </div>
         </div>
       )}

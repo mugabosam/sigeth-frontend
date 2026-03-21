@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Printer, FileSpreadsheet } from "lucide-react";
+
 import { useLang } from "../../hooks/useLang";
 import { useHotelData } from "../../context/HotelDataContext";
 
@@ -29,71 +29,10 @@ export default function ArrivalOff() {
     return Math.max(Math.round((d.getTime() - a.getTime()) / 86400000), 0);
   };
 
-  const exportCSV = () => {
-    const headers = [
-      "room_num",
-      "guest_name",
-      "phone",
-      "email",
-      "arrival_date",
-      "departure_date",
-      "adulte",
-      "children",
-      "puv",
-      "night_num",
-    ];
-    const rows = filtered.map((r) =>
-      [
-        r.room_num,
-        r.guest_name,
-        r.phone,
-        r.email,
-        r.arrival_date,
-        r.departure_date,
-        r.adulte,
-        r.children,
-        r.puv,
-        calcNightNum(r.arrival_date, r.departure_date),
-      ].join(","),
-    );
-    const blob = new Blob([headers.join(",") + "\n" + rows.join("\n")], {
-      type: "text/csv",
-    });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "Larrival_off.csv";
-    a.click();
-  };
-
   return (
     <div className="space-y-4 p-4">
-      {/* Toolbar */}
-      <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4 p-4 rounded border border-hotel-border">
-        <div>
-          <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
-            {t("arrivalOff")}
-          </h1>
-        </div>
-        <div className="flex gap-3">
-          <button
-            onClick={() => window.print()}
-            className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-3 rounded flex items-center gap-2 text-sm font-medium hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-colors duration-200"
-          >
-            <Printer size={18} />
-            {t("print")}
-          </button>
-          <button
-            onClick={exportCSV}
-            className="border-2 border-hotel-border text-hotel-text-primary px-6 py-3 rounded flex items-center gap-2 text-sm font-medium bg-hotel-cream hover:bg-hotel-cream hover:shadow-lg transition-colors duration-200"
-          >
-            <FileSpreadsheet size={18} />
-            Excel
-          </button>
-        </div>
-      </div>
-
       {/* Filters */}
-      <div className="bg-white rounded border border-hotel-border p-4">
+      <div className="bg-white rounded p-4">
         <h3 className="text-base font-bold text-hotel-text-primary mb-4 flex items-center gap-2">
           <span className="w-1 h-6 bg-gradient-to-b from-amber-500 to-amber-700 rounded-full" />
           {t("filters")}
@@ -139,9 +78,9 @@ export default function ArrivalOff() {
 
       <div
         id="report-output"
-        className="bg-white rounded border border-hotel-border overflow-hidden"
+        className="bg-white rounded overflow-hidden"
       >
-        <div className="px-6 py-4 border-b-2 border-hotel-border bg-white border border-hotel-border rounded p-4">
+        <div className="px-6 py-4 border-b-2 border-hotel-border bg-white rounded p-4">
           <h2 className="text-base font-bold text-hotel-text-primary">
             Checked-Out Guests Report
           </h2>

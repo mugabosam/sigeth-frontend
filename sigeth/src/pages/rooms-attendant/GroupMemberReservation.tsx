@@ -302,13 +302,8 @@ export default function GroupMemberReservation({
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4">
-        <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
-          {titles[mode]}
-        </h1>
-      </div>
       {/* Group query */}
-      <div className="bg-white border border-hotel-border rounded p-4">
+      <div className="bg-white rounded p-4">
         <h3 className="text-sm font-semibold text-hotel-text-primary mb-3 uppercase tracking-wide">
           {t("searchGroup")}
         </h3>
@@ -322,7 +317,7 @@ export default function GroupMemberReservation({
               onChange={(e) => handleGroupInputChange(e.target.value, true)}
               placeholder={t("groupCode")}
               title={t("groupCode")}
-              className="w-full border border-hotel-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
             />
           </div>
           <div className="relative">
@@ -334,11 +329,11 @@ export default function GroupMemberReservation({
               onChange={(e) => handleGroupInputChange(e.target.value, false)}
               placeholder={t("groupName")}
               title={t("groupName")}
-              className="w-full border border-hotel-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
               onKeyDown={(e) => e.key === "Enter" && handleSearchGroup()}
             />
             {showGroupSuggestions && groupSuggestions.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-hotel-border rounded z-50 max-h-48 overflow-y-auto">
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded z-50 max-h-48 overflow-y-auto">
                 {groupSuggestions.map((g) => (
                   <button
                     key={g.code_g}
@@ -359,10 +354,9 @@ export default function GroupMemberReservation({
           <div className="flex items-end">
             <button
               onClick={handleSearchGroup}
-              className="w-full bg-hotel-gold text-white px-4 py-2 rounded flex items-center justify-center gap-2 text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
+              className="w-full bg-hotel-gold text-white p-2.5 rounded flex items-center justify-center hover:bg-hotel-gold-dark transition-colors"
             >
               <Search size={16} />
-              {t("search")}
             </button>
           </div>
         </div>
@@ -370,7 +364,7 @@ export default function GroupMemberReservation({
       {/* Group info + members browser */}
       {groupFound && (
         <>
-          <div className="bg-hotel-cream border border-hotel-border rounded p-4">
+          <div className="bg-hotel-cream rounded p-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
               <div>
                 <span className="text-hotel-text-secondary">
@@ -409,7 +403,7 @@ export default function GroupMemberReservation({
             </div>
           </div>
           {/* Members list */}
-          <div className="bg-white border border-hotel-border rounded overflow-hidden">
+          <div className="bg-white rounded overflow-hidden">
             <div className="flex justify-between items-center px-4 py-2 border-b border-hotel-border">
               <h3 className="text-sm font-semibold text-hotel-text-primary">
                 {t("groupMembers")} ({groupMembers.length})
@@ -472,7 +466,7 @@ export default function GroupMemberReservation({
       )}
       {/* Gindiv_form */}
       {selected && (
-        <div className="bg-white border border-hotel-border rounded p-4 space-y-3">
+        <div className="bg-white rounded p-4 space-y-3">
           <h3 className="text-base font-display font-semibold text-hotel-text-primary">
             {isNew ? t("newMember") : t("editMember")} — Gindiv_form
           </h3>
@@ -601,7 +595,7 @@ export default function GroupMemberReservation({
                   setSelected(updated);
                   setErrors(validateGroupMemberReservation(updated));
                 }}
-                className="w-full border border-hotel-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
               >
                 {currencyOptions.map((c) => (
                   <option key={c.code} value={c.code}>
@@ -621,7 +615,7 @@ export default function GroupMemberReservation({
                 value={selected.payt_mode}
                 onChange={(e) => handleChange("payt_mode", e.target.value)}
                 title={t("paymentMode")}
-                className="w-full border border-hotel-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
               >
                 {paymentModes.map((m) => (
                   <option key={m.id} value={m.id}>
@@ -632,7 +626,7 @@ export default function GroupMemberReservation({
             </div>
             {(
               [
-                ["airport_time", t("airportTime"), "text"],
+                ["airport_time", t("airportTime"), "time"],
                 ["stay_cost", t("stayCost"), "number"],
                 ["deposit", t("deposit"), "number"],
               ] as [keyof RCS, string, string][]
@@ -786,7 +780,7 @@ export default function GroupMemberReservation({
       {/* Error Dialog */}
       {errorMsg && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white border border-hotel-border rounded p-4 w-full max-w-md text-center space-y-3">
+          <div className="bg-white rounded p-4 w-full max-w-md text-center space-y-3">
             <AlertTriangle size={40} className="text-hotel-danger mx-auto" />
             <h3 className="text-base font-display font-semibold text-hotel-text-primary">
               Error

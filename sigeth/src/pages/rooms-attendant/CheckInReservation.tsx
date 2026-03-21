@@ -197,7 +197,7 @@ export default function CheckInReservation() {
     const isCheckedIn = checkedInMap.has(res.id!) || room?.status === "OCC";
 
     return (
-      <div className="bg-white border border-hotel-border rounded p-4 hover:bg-hotel-cream transition-colors">
+      <div className="bg-white rounded p-4 border-b border-gray-200 hover:bg-gray-100 transition-colors">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
@@ -217,7 +217,7 @@ export default function CheckInReservation() {
                 </p>
               </div>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs mt-3 p-2 bg-hotel-cream rounded">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs mt-3">
               <div>
                 <span className="text-hotel-text-secondary">
                   {t("roomNumber")}
@@ -253,19 +253,17 @@ export default function CheckInReservation() {
                   {nights}
                 </p>
               </div>
-            </div>
-            <div className="mt-2 p-2 bg-hotel-gold bg-opacity-10 rounded">
-              <p className="text-xs font-semibold text-hotel-text-primary">
-                {res.stay_cost.toLocaleString()}{" "}
-                <span className="text-hotel-text-secondary font-normal">
-                  {res.current_mon}
-                </span>
-              </p>
+              <div>
+                <span className="text-hotel-text-secondary">{t("stayCost")}</span>
+                <p className="font-semibold text-hotel-text-primary">
+                  {res.stay_cost.toLocaleString()} {res.current_mon}
+                </p>
+              </div>
             </div>
           </div>
           {isCheckedIn ? (
-            <div className="px-3 py-1 rounded flex items-center gap-1 text-xs font-medium bg-hotel-cream text-hotel-success shrink-0 whitespace-nowrap">
-              <CheckCircle2 size={14} />
+            <div className="px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-semibold bg-green-50 text-green-600 shrink-0 whitespace-nowrap">
+              <CheckCircle2 size={16} />
               Checked In
             </div>
           ) : (
@@ -276,13 +274,13 @@ export default function CheckInReservation() {
                 setIdVerified(false);
                 setSwapRoom(null);
               }}
-              className={`px-3 py-1 rounded flex items-center gap-1 text-xs font-medium transition-colors shrink-0 whitespace-nowrap ${
+              className={`px-5 py-2 rounded-lg flex items-center gap-2 text-sm font-semibold transition-colors shrink-0 whitespace-nowrap ${
                 isUpcoming
-                  ? "bg-hotel-cream text-hotel-text-secondary hover:bg-hotel-paper"
+                  ? "bg-gray-100 text-hotel-text-secondary hover:bg-gray-200"
                   : "bg-hotel-gold text-white hover:bg-hotel-gold-dark"
               }`}
             >
-              <UserCheck size={14} />
+              <UserCheck size={16} />
               {t("checkIn")}
             </button>
           )}
@@ -293,14 +291,8 @@ export default function CheckInReservation() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4">
-        <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
-          {t("checkInWithReservation")}
-        </h1>
-      </div>
-
       {/* ── Search bar ── */}
-      <div className="bg-white border border-hotel-border rounded p-4">
+      <div className="bg-white rounded p-4">
         <h3 className="text-sm font-semibold text-hotel-text-primary mb-3 uppercase tracking-wide">
           {t("search")}
         </h3>
@@ -314,20 +306,18 @@ export default function CheckInReservation() {
             onChange={(e) => setSearch(e.target.value)}
             placeholder={`${t("search")} ${t("guestName")}, ${t("roomNumber")}, ${t("idCard")}...`}
             title={`${t("search")} ${t("guestName")}, ${t("roomNumber")}, ${t("idCard")}...`}
-            className="w-full pl-10 pr-3 py-2 border border-hotel-border rounded text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
+            className="w-full border border-gray-300 pl-10 pr-3 py-2 rounded text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
           />
         </div>
       </div>
 
       {/* ── Today's arrivals ── */}
       <div>
-        <div className="flex items-center gap-3 mb-3 bg-hotel-cream p-3 rounded border border-hotel-border">
-          <CalendarDays size={18} className="text-hotel-text-primary" />
-          <div className="flex-1">
-            <h2 className="text-base font-display font-semibold text-hotel-text-primary">
-              {t("todaysArrivals")}
-            </h2>
-          </div>
+        <div className="flex items-center gap-3 mb-3 p-3">
+          <CalendarDays size={18} className="text-hotel-text-secondary" />
+          <h2 className="flex-1 text-base font-display font-semibold text-hotel-text-primary">
+            {t("todaysArrivals")}
+          </h2>
           <span className="bg-hotel-navy text-white text-xs font-semibold px-2 py-1 rounded">
             {filtered.arrivals.length}
           </span>
@@ -348,13 +338,11 @@ export default function CheckInReservation() {
       {/* ── Upcoming arrivals ── */}
       {filtered.upcoming.length > 0 && (
         <div>
-          <div className="flex items-center gap-3 mb-3 bg-hotel-cream p-3 rounded border border-hotel-border">
-            <CalendarDays size={18} className="text-hotel-text-primary" />
-            <div className="flex-1">
-              <h2 className="text-base font-display font-semibold text-hotel-text-primary">
-                {t("expectedArrivals")}
-              </h2>
-            </div>
+          <div className="flex items-center gap-3 mb-3 p-3">
+            <CalendarDays size={18} className="text-hotel-text-secondary" />
+            <h2 className="flex-1 text-base font-display font-semibold text-hotel-text-primary">
+              {t("expectedArrivals")}
+            </h2>
             <span className="bg-hotel-navy text-white text-xs font-semibold px-2 py-1 rounded">
               {filtered.upcoming.length}
             </span>
@@ -372,7 +360,7 @@ export default function CheckInReservation() {
          ════════════════════════════════════════════ */}
       {processing && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white border border-hotel-border rounded w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-hotel-border">
               <h2 className="text-base font-display font-bold text-hotel-text-primary flex items-center gap-2">
@@ -424,7 +412,7 @@ export default function CheckInReservation() {
               </div>
 
               {/* ID Verification */}
-              <label className="flex items-center gap-2 bg-hotel-cream border border-hotel-border rounded px-3 py-2 cursor-pointer select-none">
+              <label className="flex items-center gap-2 bg-hotel-cream rounded px-3 py-2 cursor-pointer select-none">
                 <input
                   type="checkbox"
                   checked={idVerified}
@@ -451,7 +439,7 @@ export default function CheckInReservation() {
                   {t("roomAssignment")}
                 </h3>
                 <div className="flex items-center gap-2">
-                  <div className="flex-1 bg-hotel-cream border border-hotel-border rounded px-3 py-2">
+                  <div className="flex-1 bg-hotel-cream rounded px-3 py-2">
                     <span className="text-xs text-hotel-text-secondary">
                       {t("assignedRoom")}
                     </span>
@@ -471,7 +459,7 @@ export default function CheckInReservation() {
                         size={16}
                         className="text-hotel-gold shrink-0"
                       />
-                      <div className="flex-1 bg-hotel-cream border border-hotel-border rounded px-3 py-2">
+                      <div className="flex-1 bg-hotel-cream rounded px-3 py-2">
                         <span className="text-xs text-hotel-success">
                           {t("swapRoomTo")}
                         </span>
@@ -595,7 +583,7 @@ export default function CheckInReservation() {
                         : base;
                     setProcessing(updated);
                   }}
-                  className="w-full border border-hotel-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
                 >
                   {currencyOptions.map((c) => (
                     <option key={c.code} value={c.code}>
@@ -641,7 +629,7 @@ export default function CheckInReservation() {
       {/* Success Confirmation Dialog */}
       {successMsg && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white border border-hotel-border rounded p-4 w-full max-w-md text-center space-y-3">
+          <div className="bg-white rounded p-4 w-full max-w-md text-center space-y-3">
             <CheckCircle2 size={40} className="text-hotel-success mx-auto" />
             <h3 className="text-base font-display font-semibold text-hotel-text-primary">
               Check-In Complete
@@ -660,7 +648,7 @@ export default function CheckInReservation() {
       {/* Error Dialog */}
       {errorMsg && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white border border-hotel-border rounded p-4 w-full max-w-md text-center space-y-3">
+          <div className="bg-white rounded p-4 w-full max-w-md text-center space-y-3">
             <AlertTriangle size={40} className="text-hotel-danger mx-auto" />
             <h3 className="text-base font-display font-semibold text-hotel-text-primary">
               Error

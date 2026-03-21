@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Search, Plus, Save, Trash2, AlertTriangle } from "lucide-react";
+import { Search, Save, Trash2, AlertTriangle } from "lucide-react";
 import { useLang } from "../../hooks/useLang";
 import { useHotelData } from "../../context/HotelDataContext";
 import ConfirmationModal from "../../components/common/ConfirmationModal";
@@ -207,13 +207,8 @@ export default function GroupReservation() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4">
-        <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
-          {t("groupReservation")}
-        </h1>
-      </div>
       {/* Query window */}
-      <div className="bg-white border border-hotel-border rounded p-4">
+      <div className="bg-white rounded p-4">
         <h3 className="text-sm font-semibold text-hotel-text-primary mb-3 uppercase tracking-wide">
           {t("queryWindow")}
         </h3>
@@ -224,11 +219,11 @@ export default function GroupReservation() {
               onChange={(e) => handleQueryChange(e.target.value)}
               placeholder={t("searchGroupName")}
               title={t("searchGroupName")}
-              className="w-full border border-hotel-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             />
             {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-hotel-border rounded z-50 max-h-48 overflow-y-auto">
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded z-50 max-h-48 overflow-y-auto">
                 {suggestions.map((g) => (
                   <button
                     key={g.code_g}
@@ -248,10 +243,9 @@ export default function GroupReservation() {
           </div>
           <button
             onClick={handleSearch}
-            className="bg-hotel-gold text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
+            className="bg-hotel-gold text-white p-2.5 rounded flex items-center justify-center hover:bg-hotel-gold-dark transition-colors"
           >
             <Search size={16} />
-            {t("search")}
           </button>
           <button
             onClick={() => {
@@ -261,14 +255,13 @@ export default function GroupReservation() {
             }}
             className="border border-hotel-border text-hotel-text-primary px-4 py-2 rounded flex items-center gap-2 text-sm font-medium hover:bg-hotel-cream transition-colors"
           >
-            <Plus size={16} />
-            {t("newRecord")}
+            + New
           </button>
         </div>
       </div>
       {/* Group_form */}
       {selected && (
-        <div className="bg-white border border-hotel-border rounded p-4 space-y-3">
+        <div className="bg-white rounded p-4 space-y-3">
           <h3 className="text-base font-display font-semibold text-hotel-text-primary">
             {isNew ? t("newGroup") : t("editGroup")} — Group_form
           </h3>
@@ -385,7 +378,7 @@ export default function GroupReservation() {
                   setSelected(updated);
                   setErrors(validateGroupReservation(updated));
                 }}
-                className="w-full border border-hotel-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
               >
                 {currencyOptions.map((c) => (
                   <option key={c.code} value={c.code}>
@@ -406,7 +399,7 @@ export default function GroupReservation() {
                 value={selected.payt_mode}
                 onChange={(e) => handleChange("payt_mode", e.target.value)}
                 title={t("paymentMode")}
-                className="w-full border border-hotel-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
               >
                 {paymentModes.map((m) => (
                   <option key={m.id} value={m.id}>
@@ -443,7 +436,7 @@ export default function GroupReservation() {
         </div>
       )}
       {/* Existing groups list */}
-      <div className="bg-white border border-hotel-border rounded overflow-hidden">
+      <div className="bg-white rounded overflow-hidden">
         <table className="w-full text-xs">
           <thead className="bg-hotel-navy text-white">
             <tr>
@@ -530,7 +523,7 @@ export default function GroupReservation() {
       {/* Error Dialog */}
       {errorMsg && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white border border-hotel-border rounded p-4 w-full max-w-md text-center space-y-3">
+          <div className="bg-white rounded p-4 w-full max-w-md text-center space-y-3">
             <AlertTriangle size={40} className="text-hotel-danger mx-auto" />
             <h3 className="text-base font-display font-semibold text-hotel-text-primary">
               Error

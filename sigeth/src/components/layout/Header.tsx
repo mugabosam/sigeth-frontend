@@ -1,5 +1,5 @@
 import { Bell, Menu, X, LogOut, Settings } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLang } from "../../hooks/useLang";
 import { useAuth } from "../../context/AuthContext";
 import { useNotification } from "../../hooks/useNotification";
@@ -15,6 +15,14 @@ export default function Header({ title, onMenuClick }: HeaderProps) {
   const { notifications, markAsRead, clearAll } = useNotification();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 0);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -36,7 +44,7 @@ export default function Header({ title, onMenuClick }: HeaderProps) {
   const userInitial = user?.name?.charAt(0).toUpperCase() || "U";
 
   return (
-    <header className="h-14 bg-white border-b border-hotel-border flex items-center justify-between px-5 sticky top-0 z-30">
+    <header className={`h-14 bg-white flex items-center justify-between px-5 sticky top-0 z-30 transition-shadow duration-200 ${scrolled ? "shadow-sm" : ""}`}>
       {/* Left: menu + title */}
       <div className="flex items-center gap-4">
         <button

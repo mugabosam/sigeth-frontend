@@ -246,14 +246,8 @@ export default function CheckInGroup() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4 p-4 rounded border border-hotel-border">
-        <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
-          {t("checkInGroupReservation")}
-        </h1>
-      </div>
-
       {/* ── Group Search ── */}
-      <div className="bg-white rounded border border-hotel-border p-4">
+      <div className="bg-white rounded p-4">
         <h3 className="text-base font-bold text-hotel-text-primary mb-4 flex items-center gap-2">
           <span className="w-1 h-6 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full" />
           {t("searchGroup")}
@@ -268,7 +262,7 @@ export default function CheckInGroup() {
               onChange={(e) => handleGroupInputChange(e.target.value, true)}
               placeholder={t("groupCode")}
               title={t("groupCode")}
-              className="w-full border border-hotel-border rounded px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
+              className="w-full border border-gray-300 rounded px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
             />
           </div>
           <div className="relative">
@@ -280,11 +274,11 @@ export default function CheckInGroup() {
               onChange={(e) => handleGroupInputChange(e.target.value, false)}
               placeholder={t("groupName")}
               title={t("groupName")}
-              className="w-full border border-hotel-border rounded px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
+              className="w-full border border-gray-300 rounded px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
               onKeyDown={(e) => e.key === "Enter" && handleSearchGroup()}
             />
             {showGroupSuggestions && groupSuggestions.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-hotel-border rounded z-50 max-h-48 overflow-y-auto">
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded z-50 max-h-48 overflow-y-auto">
                 {groupSuggestions.map((g) => (
                   <button
                     key={g.code_g}
@@ -305,10 +299,9 @@ export default function CheckInGroup() {
           <div className="flex items-end">
             <button
               onClick={handleSearchGroup}
-              className="w-full bg-hotel-gold text-white px-6 py-2 rounded flex items-center justify-center gap-2 text-sm font-medium hover:shadow-lg transition-colors duration-200"
+              className="w-full bg-hotel-gold text-white p-2.5 rounded flex items-center justify-center hover:bg-hotel-gold-dark transition-colors"
             >
               <Search size={16} />
-              {t("search")}
             </button>
           </div>
         </div>
@@ -392,8 +385,8 @@ export default function CheckInGroup() {
           </div>
 
           {/* ── Members table ── */}
-          <div className="bg-white rounded border border-hotel-border overflow-hidden">
-            <div className="px-6 py-4 border-b bg-white border border-hotel-border rounded p-4">
+          <div className="bg-white rounded overflow-hidden">
+            <div className="px-6 py-4 border-b bg-white rounded p-4">
               <h3 className="font-bold text-hotel-text-primary text-base">
                 {t("groupMembers")} ({groupMembers.length})
               </h3>

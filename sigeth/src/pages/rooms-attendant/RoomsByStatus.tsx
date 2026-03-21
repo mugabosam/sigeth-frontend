@@ -1,4 +1,4 @@
-import { Printer, FileSpreadsheet } from "lucide-react";
+
 import { useLang } from "../../hooks/useLang";
 import { useHotelData } from "../../context/HotelDataContext";
 import type { RoomStatusCode } from "../../types";
@@ -28,60 +28,13 @@ export default function RoomsByStatus({
     CO: "Lchout.prt",
   };
 
-  const exportCSV = () => {
-    const headers = [
-      "room_num",
-      "designation",
-      "price_1",
-      "price_2",
-      "current_mon",
-      "status",
-    ];
-    const rows = filtered.map((r) =>
-      headers
-        .map((h) => String((r as unknown as Record<string, unknown>)[h] ?? ""))
-        .join(","),
-    );
-    const blob = new Blob([headers.join(",") + "\n" + rows.join("\n")], {
-      type: "text/csv",
-    });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = codes[statusFilter]?.replace(".prt", ".csv") ?? "rooms.csv";
-    a.click();
-  };
-
   return (
     <div className="space-y-4 p-4">
-      {/* Toolbar */}
-      <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4 p-4 rounded border border-hotel-border">
-        <div>
-          <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
-            {titles[statusFilter] ?? t("roomsByStatus")}
-          </h1>
-        </div>
-        <div className="flex gap-3">
-          <button
-            onClick={() => window.print()}
-            className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-3 rounded flex items-center gap-2 text-sm font-medium hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-colors duration-200"
-          >
-            <Printer size={18} />
-            {t("print")}
-          </button>
-          <button
-            onClick={exportCSV}
-            className="border-2 border-hotel-border text-hotel-text-primary px-6 py-3 rounded flex items-center gap-2 text-sm font-medium bg-hotel-cream hover:bg-hotel-cream hover:shadow-lg transition-colors duration-200"
-          >
-            <FileSpreadsheet size={18} />
-            Excel
-          </button>
-        </div>
-      </div>
       <div
         id="report-output"
-        className="bg-white rounded border border-hotel-border overflow-hidden"
+        className="bg-white rounded overflow-hidden"
       >
-        <div className="px-6 py-4 border-b border-hotel-border bg-white border border-hotel-border rounded p-4">
+        <div className="px-6 py-4 border-b border-hotel-border bg-white rounded p-4">
           <h2 className="text-base font-bold bg-hotel-gold bg-clip-text text-transparent">
             {printTitles[statusFilter] ?? "Rooms situation"}{" "}
             <span className="font-normal text-sm text-hotel-text-secondary ml-2">

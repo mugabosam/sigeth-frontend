@@ -59,12 +59,7 @@ export default function FindRoom() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4 p-4 rounded border border-hotel-border">
-        <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
-          {t("findRoom")}
-        </h1>
-      </div>
-      <div className="bg-white rounded border border-hotel-border p-4">
+      <div className="bg-white rounded p-4">
         <h3 className="text-base font-bold text-hotel-text-primary mb-4 flex items-center gap-2">
           <span className="w-1 h-6 bg-gradient-to-b from-amber-500 to-amber-700 rounded-full" />
           {t("queryWindow")}
@@ -76,11 +71,11 @@ export default function FindRoom() {
               onChange={(e) => handleQueryChange(e.target.value)}
               placeholder={`${t("roomNumber")} / ${t("guestName")}`}
               title={`${t("roomNumber")} / ${t("guestName")}`}
-              className="w-full border border-hotel-border rounded px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
+              className="w-full border border-gray-300 rounded px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             />
             {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-hotel-border rounded z-50 max-h-48 overflow-y-auto">
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded z-50 max-h-48 overflow-y-auto">
                 {suggestions.map((r) => (
                   <button
                     key={r.room_num}
@@ -98,17 +93,16 @@ export default function FindRoom() {
           </div>
           <button
             onClick={handleSearch}
-            className="bg-hotel-gold text-white px-6 py-2 rounded flex items-center gap-2 text-sm font-medium hover:shadow-lg transition-colors"
+            className="bg-hotel-gold text-white p-2.5 rounded flex items-center justify-center hover:bg-hotel-gold-dark transition-colors"
           >
             <Search size={16} />
-            {t("search")}
           </button>
         </div>
       </div>
       {found && (
         <div className="bg-white rounded border p-4">
           <h3 className="text-base font-semibold text-hotel-text-primary mb-4">
-            Ffind_form — {t("room")} {found.room_num}
+            Find Room Result — {t("room")} {found.room_num}
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
             {(

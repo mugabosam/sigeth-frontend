@@ -11,7 +11,7 @@ export default function Layout() {
   const title = usePageTitle();
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#F5F3EF' }}>
+    <div className="min-h-screen bg-white">
       <Sidebar
         collapsed={collapsed}
         onToggle={() => setCollapsed(!collapsed)}

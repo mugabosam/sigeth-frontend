@@ -210,8 +210,7 @@ export default function CheckOut() {
         room_num: preview.room_num,
         guest_name: preview.guest_name,
         mode_payt: genPaytMode || undefined,
-        phone: genPhone || undefined,
-        country_code: "+250",
+        phone: genPhone.slice(0, 10) || undefined,
         tin: genTin || undefined,
       });
       setInvoice({
@@ -339,8 +338,7 @@ export default function CheckOut() {
       const data = await frontOfficeApi.generateGroupInvoice({
         groupe_name: groupPreview.groupe_name,
         mode_payt: genPaytMode || undefined,
-        phone: genPhone || undefined,
-        country_code: "+250",
+        phone: genPhone.slice(0, 10) || undefined,
         tin: genTin || undefined,
       });
       setGroupInvoice({
@@ -438,7 +436,8 @@ export default function CheckOut() {
   const indivRaw = invoice ?? preview;
   const groupRaw = groupInvoice ?? groupPreview;
 
-  // Convert amounts to RWF for invoice display
+  // Convert amounts to RWF for invoice display.
+  // For room charges: uses room base prices (price_1/price_2) to avoid rounding errors.
   const toRwf = (
     raw: PreviewData | InvoiceData | GroupPreviewData | GroupInvoiceData | null,
     isGroup: boolean,
@@ -450,8 +449,18 @@ export default function CheckOut() {
     const items = raw.items.map((item) => {
       const converted = { ...item };
       if (item.designation.startsWith("Room ")) {
-        converted.puv = Math.round(item.puv * rate);
-        converted.credit = Math.round(item.credit * rate);
+        // Use room base price for exact RWF conversion (no rounding loss)
+        const itemRoom = isGroup
+          ? rooms.find((r) => r.room_num === item.room_num)
+          : selectedRoom;
+        if (itemRoom) {
+          const rwfPuv = itemRoom.twin_num > 1 ? itemRoom.price_2 : itemRoom.price_1;
+          converted.puv = rwfPuv;
+          converted.credit = rwfPuv * item.qty;
+        } else {
+          converted.puv = Math.round(item.puv * rate);
+          converted.credit = Math.round(item.credit * rate);
+        }
       }
       if (item.debit > 0) {
         converted.debit = Math.round(item.debit * rate);
@@ -481,8 +490,10 @@ export default function CheckOut() {
     };
   };
 
-  const indivDisplay = useMemo(() => toRwf(indivRaw, false) as typeof indivRaw, [indivRaw, currencies]);
-  const groupDisplay = useMemo(() => toRwf(groupRaw, true) as typeof groupRaw, [groupRaw, currencies]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const indivDisplay = useMemo(() => toRwf(indivRaw, false) as typeof indivRaw, [indivRaw, currencies, selectedRoom]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const groupDisplay = useMemo(() => toRwf(groupRaw, true) as typeof groupRaw, [groupRaw, currencies, rooms]);
   const isIndividual = tab === "individual";
 
   // Which items to show in the invoice table
@@ -502,46 +513,27 @@ export default function CheckOut() {
 
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4 p-4 rounded border border-hotel-border">
-        <div>
-          <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
-            Check-Out
-          </h1>
-          {step !== "select" && step !== "done" && (
-            <p className="text-sm text-hotel-text-secondary mt-1">
-              {step === "preview"
-                ? "Step 1: Review invoice preview"
-                : "Step 2: Invoice generated — proceed to check out"}
-            </p>
-          )}
+      {step !== "select" && (
+        <div className="flex justify-between items-center">
+          <p className="text-sm text-hotel-text-secondary">
+            {step === "preview"
+              ? "Step 1: Review invoice preview"
+              : step !== "done" ? "Step 2: Invoice generated — proceed to check out" : ""}
+          </p>
+          <button
+            onClick={resetFlow}
+            className="px-5 py-2.5 rounded bg-hotel-cream text-hotel-text-secondary hover:bg-hotel-paper text-sm font-medium"
+          >
+            Back to List
+          </button>
         </div>
-        <div className="flex gap-3">
-          {step !== "select" && (
-            <button
-              onClick={resetFlow}
-              className="px-5 py-2.5 rounded bg-hotel-cream text-hotel-text-secondary hover:bg-hotel-paper text-sm font-medium"
-            >
-              Back to List
-            </button>
-          )}
-          {step === "preview" && (
-            <button
-              onClick={() => window.print()}
-              className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-medium hover:shadow-lg transition-colors"
-            >
-              <Printer size={16} />
-              {t("print")}
-            </button>
-          )}
-        </div>
-      </div>
+      )}
 
       {/* ═══ STEP: SELECT ═══ */}
       {step === "select" && (
         <>
           {/* Tab toggle + search */}
-          <div className="bg-white rounded border border-hotel-border p-4">
+          <div className="bg-white rounded p-4">
             <div className="flex gap-3 mb-4">
               <button
                 onClick={() => {
@@ -585,7 +577,7 @@ export default function CheckOut() {
                     ? `${t("search")} ${t("roomNumber")} / ${t("guestName")}...`
                     : `${t("search")} ${t("groupName")} / ${t("groupCode")}...`
                 }
-                className="w-full pl-12 pr-4 py-3 border border-hotel-border rounded text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
+                className="w-full border border-gray-300 pl-12 pr-4 py-3 rounded text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
               />
             </div>
           </div>
@@ -593,7 +585,7 @@ export default function CheckOut() {
           {/* Individual room list */}
           {isIndividual && (
             <div className="space-y-3">
-              <div className="flex items-center gap-3 bg-gradient-to-r from-red-50 to-orange-50 p-4 rounded border border-hotel-border">
+              <div className="flex items-center gap-3 bg-gradient-to-r from-red-50 to-orange-50 p-4 rounded">
                 <LogOut size={20} className="text-hotel-gold" />
                 <h2 className="flex-1 text-base font-bold bg-hotel-navy bg-clip-text text-transparent">
                   Occupied Rooms
@@ -624,66 +616,58 @@ export default function CheckOut() {
                       key={room.room_num}
                       onClick={() => handleSelectGuest(room)}
                       disabled={loading}
-                      className="w-full text-left bg-white rounded border border-hotel-border p-5 hover:shadow-lg transition-colors"
+                      className="w-full text-left bg-white rounded p-5 border-b border-gray-200 hover:bg-gray-100 transition-colors"
                     >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-3">
-                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-amber-700 flex items-center justify-center text-white font-bold text-sm">
-                              {room.guest_name
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")
-                                .slice(0, 2)}
-                            </div>
-                            <div>
-                              <h3 className="font-semibold text-hotel-text-primary text-base">
-                                {room.guest_name}
-                              </h3>
-                              <p className="text-xs text-hotel-text-secondary">
-                                Room {room.room_num} — {room.designation}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm p-3 bg-white rounded">
-                            <div>
-                              <span className="text-hotel-text-secondary text-xs">
-                                {t("arrivalDate")}
-                              </span>
-                              <p className="font-semibold text-hotel-text-primary">
-                                {room.arrival_date}
-                              </p>
-                            </div>
-                            <div>
-                              <span className="text-hotel-text-secondary text-xs">
-                                {t("departDate")}
-                              </span>
-                              <p className="font-semibold text-hotel-text-primary">
-                                {room.depart_date}
-                              </p>
-                            </div>
-                            <div>
-                              <span className="text-hotel-text-secondary text-xs">
-                                {t("nights")}
-                              </span>
-                              <p className="font-semibold text-hotel-text-primary">
-                                {nights}
-                              </p>
-                            </div>
-                            <div>
-                              <span className="text-hotel-text-secondary text-xs">
-                                {t("deposit")}
-                              </span>
-                              <p className="font-semibold text-hotel-text-primary">
-                                {room.deposit.toLocaleString()}{" "}
-                                {currency}
-                              </p>
-                            </div>
-                          </div>
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-12 h-12 rounded-full bg-hotel-navy flex items-center justify-center text-white font-bold text-sm">
+                          {room.guest_name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")
+                            .slice(0, 2)}
                         </div>
-                        <div className="ml-4 px-4 py-2 rounded flex items-center gap-2 text-sm font-medium shrink-0 bg-gradient-to-r from-amber-500 to-amber-700 text-white">
-                          <Receipt size={16} />
-                          Select
+                        <div>
+                          <h3 className="font-semibold text-hotel-text-primary text-base">
+                            {room.guest_name}
+                          </h3>
+                          <p className="text-xs text-hotel-text-secondary">
+                            Room {room.room_num} — {room.designation}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                        <div>
+                          <span className="text-hotel-text-secondary text-xs">
+                            {t("arrivalDate")}
+                          </span>
+                          <p className="font-semibold text-hotel-text-primary">
+                            {room.arrival_date}
+                          </p>
+                        </div>
+                        <div>
+                          <span className="text-hotel-text-secondary text-xs">
+                            {t("departDate")}
+                          </span>
+                          <p className="font-semibold text-hotel-text-primary">
+                            {room.depart_date}
+                          </p>
+                        </div>
+                        <div>
+                          <span className="text-hotel-text-secondary text-xs">
+                            {t("nights")}
+                          </span>
+                          <p className="font-semibold text-hotel-text-primary">
+                            {nights}
+                          </p>
+                        </div>
+                        <div>
+                          <span className="text-hotel-text-secondary text-xs">
+                            {t("deposit")}
+                          </span>
+                          <p className="font-semibold text-hotel-text-primary">
+                            {room.deposit.toLocaleString()}{" "}
+                            {currency}
+                          </p>
                         </div>
                       </div>
                     </button>
@@ -717,63 +701,55 @@ export default function CheckOut() {
                     key={group.id ?? group.code_g}
                     onClick={() => handleSelectGroup(group)}
                     disabled={loading}
-                    className="w-full text-left bg-white rounded border border-hotel-border p-5 hover:shadow-lg transition-colors"
+                    className="w-full text-left bg-white rounded p-5 border-b border-gray-200 hover:bg-gray-100 transition-colors"
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-amber-700 flex items-center justify-center text-white font-bold text-sm">
-                            <Users size={20} />
-                          </div>
-                          <div>
-                            <h3 className="font-semibold text-hotel-text-primary text-base">
-                              {group.groupe_name}
-                            </h3>
-                            <p className="text-xs text-hotel-text-secondary">
-                              Code: {group.code_g} — {group.number_pers} persons
-                            </p>
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm p-3 bg-white rounded">
-                          <div>
-                            <span className="text-hotel-text-secondary text-xs">
-                              {t("arrivalDate")}
-                            </span>
-                            <p className="font-semibold text-hotel-text-primary">
-                              {group.arrival_date}
-                            </p>
-                          </div>
-                          <div>
-                            <span className="text-hotel-text-secondary text-xs">
-                              {t("departDate")}
-                            </span>
-                            <p className="font-semibold text-hotel-text-primary">
-                              {group.depart_date}
-                            </p>
-                          </div>
-                          <div>
-                            <span className="text-hotel-text-secondary text-xs">
-                              {t("stayCost")}
-                            </span>
-                            <p className="font-semibold text-hotel-text-primary">
-                              {group.stay_cost.toLocaleString()}{" "}
-                              {group.current_mon}
-                            </p>
-                          </div>
-                          <div>
-                            <span className="text-hotel-text-secondary text-xs">
-                              {t("deposit")}
-                            </span>
-                            <p className="font-semibold text-hotel-text-primary">
-                              {group.deposit.toLocaleString()}{" "}
-                              {group.current_mon}
-                            </p>
-                          </div>
-                        </div>
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-12 h-12 rounded-full bg-hotel-navy flex items-center justify-center text-white font-bold text-sm">
+                        <Users size={20} />
                       </div>
-                      <div className="ml-4 px-4 py-2 rounded flex items-center gap-2 text-sm font-medium shrink-0 bg-gradient-to-r from-amber-500 to-amber-700 text-white">
-                        <Receipt size={16} />
-                        Select
+                      <div>
+                        <h3 className="font-semibold text-hotel-text-primary text-base">
+                          {group.groupe_name}
+                        </h3>
+                        <p className="text-xs text-hotel-text-secondary">
+                          Code: {group.code_g} — {group.number_pers} persons
+                        </p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                      <div>
+                        <span className="text-hotel-text-secondary text-xs">
+                          {t("arrivalDate")}
+                        </span>
+                        <p className="font-semibold text-hotel-text-primary">
+                          {group.arrival_date}
+                        </p>
+                      </div>
+                      <div>
+                        <span className="text-hotel-text-secondary text-xs">
+                          {t("departDate")}
+                        </span>
+                        <p className="font-semibold text-hotel-text-primary">
+                          {group.depart_date}
+                        </p>
+                      </div>
+                      <div>
+                        <span className="text-hotel-text-secondary text-xs">
+                          {t("stayCost")}
+                        </span>
+                        <p className="font-semibold text-hotel-text-primary">
+                          {group.stay_cost.toLocaleString()}{" "}
+                          {group.current_mon}
+                        </p>
+                      </div>
+                      <div>
+                        <span className="text-hotel-text-secondary text-xs">
+                          {t("deposit")}
+                        </span>
+                        <p className="font-semibold text-hotel-text-primary">
+                          {group.deposit.toLocaleString()}{" "}
+                          {group.current_mon}
+                        </p>
                       </div>
                     </div>
                   </button>
@@ -798,7 +774,7 @@ export default function CheckOut() {
         indivDisplay && (
           <div
             id="checkout-invoice"
-            className="bg-white text-[10px] leading-tight text-black max-w-[1000px] mx-auto p-4 font-sans rounded border border-hotel-border"
+            className="bg-white text-[10px] leading-tight text-black max-w-[1000px] mx-auto p-4 font-sans rounded"
           >
             <div className="mb-4 pb-4 border-b-2 border-hotel-border">
               <p className="text-base font-bold text-hotel-text-primary">
@@ -928,7 +904,7 @@ export default function CheckOut() {
         groupDisplay && (
           <div
             id="checkout-invoice"
-            className="bg-white text-[10px] leading-tight text-black max-w-[1000px] mx-auto p-4 font-sans rounded border border-hotel-border"
+            className="bg-white text-[10px] leading-tight text-black max-w-[1000px] mx-auto p-4 font-sans rounded"
           >
             <div className="mb-4 pb-4 border-b-2 border-hotel-border">
               <p className="text-base font-bold text-hotel-text-primary">
@@ -1067,7 +1043,7 @@ export default function CheckOut() {
         <div className="flex justify-center">
           <button
             onClick={() => setShowGenModal(true)}
-            className="bg-gradient-to-r from-amber-500 to-amber-700 text-white px-8 py-3 rounded flex items-center gap-2 text-sm font-medium hover:shadow-lg transition-colors"
+            className="bg-hotel-gold text-white px-8 py-3 rounded flex items-center gap-2 text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
           >
             <Receipt size={18} />
             Generate Definitive Invoice
@@ -1086,7 +1062,7 @@ export default function CheckOut() {
           </button>
           <button
             onClick={() => setStep("checkout-confirm")}
-            className="bg-gradient-to-r from-amber-500 to-amber-700 text-white px-8 py-3 rounded flex items-center gap-2 text-sm font-medium hover:shadow-lg transition-colors"
+            className="bg-hotel-gold text-white px-8 py-3 rounded flex items-center gap-2 text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
           >
             <LogOut size={18} />
             Proceed to Check-Out
@@ -1147,7 +1123,7 @@ export default function CheckOut() {
 
       {/* ═══ STEP: DONE ═══ */}
       {step === "done" && (
-        <div className="max-w-lg mx-auto bg-white rounded border border-hotel-border p-4 text-center space-y-4">
+        <div className="max-w-lg mx-auto bg-white rounded p-4 text-center space-y-4">
           <div className="w-16 h-16 mx-auto rounded-full bg-green-50 flex items-center justify-center">
             <CheckCircle size={32} className="text-emerald-500" />
           </div>
