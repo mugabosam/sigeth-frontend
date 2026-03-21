@@ -67,7 +67,7 @@ const sections: NavSection[] = [
       },
       {
         path: "/rooms-attendant/checkout",
-        labelKey: "checkedOutRooms",
+        labelKey: "checkOut",
       },
       { path: "/rooms-attendant/find-room", labelKey: "findRoom" },
       { path: "/rooms-attendant/move-guest", labelKey: "moveGuest" },
@@ -86,8 +86,7 @@ const sections: NavSection[] = [
         path: "/rooms-attendant/daily-consumptions",
         labelKey: "dailyConsumptions",
       },
-      { path: "/rooms-attendant/invoice-by-guest", labelKey: "invoiceByGuest" },
-      { path: "/rooms-attendant/invoice-by-group", labelKey: "invoiceByGroup" },
+      { path: "/rooms-attendant/reprint-invoice", labelKey: "reprintInvoice" },
     ],
   },
   {

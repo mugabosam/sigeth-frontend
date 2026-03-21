@@ -554,12 +554,20 @@ export const frontOfficeApi = {
       new_room: normalizeRoom((data.new_room ?? {}) as ApiRecord),
     };
   },
-  async twin(id: string, payload: { twin_name: string; twin_num: number }) {
+  async twin(id: string, payload: { twin_name: string }) {
     const { data } = await api.post<ApiRecord>(
       `/v1/front-office/rooms/${id}/twin/`,
       payload,
     );
-    return normalizeRoom(data);
+    return {
+      detail: stringValue(data.detail),
+      room: normalizeRoom((data.room ?? data) as ApiRecord),
+      old_puv: numberValue(data.old_puv),
+      new_puv: numberValue(data.new_puv),
+      price_changed: Boolean(data.price_changed),
+      twin_num: numberValue(data.twin_num),
+      current_mon: stringValue(data.current_mon, "RWF"),
+    };
   },
   async reservations(params?: Record<string, string>) {
     const { data } = await api.get<ApiRecord[]>(

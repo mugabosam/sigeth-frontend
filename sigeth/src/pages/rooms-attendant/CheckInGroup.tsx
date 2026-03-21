@@ -255,7 +255,7 @@ export default function CheckInGroup() {
       {/* ── Group Search ── */}
       <div className="bg-white rounded border border-hotel-border p-4">
         <h3 className="text-base font-bold text-hotel-text-primary mb-4 flex items-center gap-2">
-          <span className="w-1 h-6 bg-gradient-to-b from-amber-500 to-amber-700 rounded-full" />
+          <span className="w-1 h-6 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full" />
           {t("searchGroup")}
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -361,7 +361,7 @@ export default function CheckInGroup() {
                 onClick={() => setShowBatchConfirm(true)}
                 disabled={loadingBatch || pendingCount === 0}
                 title={pendingCount === 0 ? "All members have been checked in" : "Check in all pending members"}
-                className="bg-hotel-gold text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:bg-hotel-gold-dark disabled:bg-hotel-border disabled:cursor-not-allowed shrink-0 transition-colors"
+                className="bg-emerald-500 text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:bg-emerald-600 disabled:bg-hotel-border disabled:cursor-not-allowed shrink-0 transition-colors"
               >
                 {loadingBatch ? <Loader2 className="animate-spin" size={18} /> : <UserCheck size={18} />}
                 {loadingBatch ? "Checking in..." : `${t("checkInAll")} (${pendingCount})`}
@@ -382,7 +382,7 @@ export default function CheckInGroup() {
               </div>
               <div className="w-full bg-hotel-paper rounded-full h-2">
                 <div
-                  className="bg-hotel-gold h-2 rounded-full transition-colors"
+                  className="bg-emerald-500 h-2 rounded-full transition-colors"
                   style={{
                     width: `${groupMembers.length > 0 ? (checkedInCount / groupMembers.length) * 100 : 0}%`,
                   }}
@@ -400,7 +400,7 @@ export default function CheckInGroup() {
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-gradient-to-r from-hotel-gold to-hotel-gold-dark">
+                <thead className="bg-gradient-to-r from-gray-800 to-gray-700">
                   <tr>
                     {[
                       t("roomNumber"),
@@ -429,14 +429,14 @@ export default function CheckInGroup() {
                     return (
                     <tr
                       key={i}
-                      className={`border-b border-hotel-border ${isCheckedIn ? "bg-hotel-cream" : "hover:bg-hotel-cream"} transition-colors duration-150`}
+                      className={`border-b border-hotel-border ${isCheckedIn ? "bg-green-50" : "hover:bg-hotel-cream"} transition-colors duration-150`}
                     >
                       <td className="px-4 py-3 font-bold text-hotel-text-primary">
                         {m.room_num}
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-xs font-bold text-white">
+                          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-xs font-bold text-white">
                             {m.guest_name
                               .split(" ")
                               .map((n) => n[0])
@@ -464,12 +464,12 @@ export default function CheckInGroup() {
                           const room = rooms.find((r) => r.room_num === m.room_num);
                           const isCheckedIn = room?.status === "OCC";
                           return isCheckedIn ? (
-                            <span className="inline-flex items-center gap-1 bg-hotel-cream text-hotel-text-primary text-xs font-semibold px-2.5 py-1 rounded-full">
+                            <span className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-1 rounded-full">
                               <CheckCircle2 size={12} />
                               {t("checkedIn")}
                             </span>
                           ) : (
-                            <span className="bg-hotel-cream text-hotel-gold text-xs font-semibold px-2.5 py-1 rounded-full">
+                            <span className="bg-amber-100 text-amber-700 text-xs font-semibold px-2.5 py-1 rounded-full">
                               {t("pendingArrival")}
                             </span>
                           );
@@ -490,7 +490,7 @@ export default function CheckInGroup() {
                               }}
                               disabled={isRoomOccupied || m.status !== 0}
                               title={isRoomOccupied ? "Room is occupied - cannot check in" : m.status !== 0 ? "Guest has checked out" : "Check in this member"}
-                              className="bg-gradient-to-r from-amber-500 to-amber-700 text-white px-3 py-1.5 rounded text-xs font-medium hover:shadow-lg transition-colors flex items-center gap-1 disabled:from-hotel-border disabled:to-hotel-border disabled:cursor-not-allowed disabled:shadow-none"
+                              className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-3 py-1.5 rounded text-xs font-medium hover:shadow-lg transition-colors flex items-center gap-1 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:shadow-none"
                             >
                               <UserCheck size={14} />
                               {t("checkIn")}
@@ -578,11 +578,11 @@ export default function CheckInGroup() {
                         size={16}
                         className="text-amber-500 shrink-0"
                       />
-                      <div className="flex-1 bg-hotel-cream border border-hotel-border rounded px-4 py-2 text-center">
-                        <span className="text-xs text-hotel-gold">
+                      <div className="flex-1 bg-green-50 border border-green-200 rounded px-4 py-2 text-center">
+                        <span className="text-xs text-green-600">
                           {t("swapRoomTo")}
                         </span>
-                        <p className="font-bold text-base text-hotel-gold">
+                        <p className="font-bold text-base text-green-800">
                           {swapRoom}
                         </p>
                       </div>
@@ -659,7 +659,7 @@ export default function CheckInGroup() {
               <button
                 onClick={handleConfirmMemberCheckIn}
                 disabled={loadingMember}
-                className="w-full py-3 rounded font-semibold text-sm bg-hotel-gold text-white hover:bg-hotel-gold-dark disabled:bg-hotel-border disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full py-3 rounded font-semibold text-sm bg-emerald-500 text-white hover:bg-emerald-600 disabled:bg-hotel-border disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {loadingMember ? <Loader2 className="animate-spin" size={18} /> : <UserCheck size={18} />}
                 {loadingMember ? "Checking in..." : t("confirmAndCheckIn")}
@@ -715,7 +715,7 @@ export default function CheckInGroup() {
               <button
                 onClick={handleBatchCheckIn}
                 disabled={loadingBatch}
-                className="px-4 py-2 rounded bg-hotel-gold-dark text-white hover:bg-hotel-gold-dark transition-colors font-medium text-sm flex items-center gap-2 disabled:bg-hotel-border disabled:cursor-not-allowed"
+                className="px-4 py-2 rounded bg-emerald-500 text-white hover:bg-emerald-600 transition-colors font-medium text-sm flex items-center gap-2 disabled:bg-hotel-border disabled:cursor-not-allowed"
               >
                 {loadingBatch && <Loader2 className="animate-spin" size={16} />}
                 {loadingBatch ? "Checking in..." : "Confirm & Check-In All"}
@@ -729,12 +729,12 @@ export default function CheckInGroup() {
       {successMsg && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded p-4 w-full max-w-md text-center space-y-4">
-            <CheckCircle2 size={40} className="text-hotel-gold mx-auto" />
+            <CheckCircle2 size={40} className="text-emerald-500 mx-auto" />
             <h3 className="text-base font-semibold text-hotel-text-primary">Check-In Complete</h3>
             <p className="text-sm text-hotel-text-secondary">{successMsg}</p>
             <button
               onClick={() => setSuccessMsg("")}
-              className="bg-hotel-gold text-white px-6 py-2 rounded text-sm hover:bg-hotel-gold-dark"
+              className="bg-emerald-500 text-white px-6 py-2 rounded text-sm hover:bg-emerald-600"
             >
               OK
             </button>

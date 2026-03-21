@@ -1,8 +1,19 @@
 import { useState } from "react";
-import { Search, Save } from "lucide-react";
+import { Search, Save, CheckCircle2, AlertTriangle, ArrowRight } from "lucide-react";
 import { useLang } from "../../hooks/useLang";
 import { useHotelData } from "../../context/HotelDataContext";
 import { frontOfficeApi } from "../../services/sigethApi";
+
+interface TwinResult {
+  detail: string;
+  room: ReturnType<typeof useHotelData>["rooms"][0];
+  old_puv: number;
+  new_puv: number;
+  price_changed: boolean;
+  twin_num: number;
+  twin_name: string;
+  current_mon: string;
+}
 
 export default function TwinRecording() {
   const { t } = useLang();
@@ -11,8 +22,12 @@ export default function TwinRecording() {
   const [selectedRoom, setSelectedRoom] = useState<(typeof rooms)[0] | null>(
     null,
   );
+  const [twinName, setTwinName] = useState("");
   const [suggestions, setSuggestions] = useState<typeof rooms>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [resultModal, setResultModal] = useState<TwinResult | null>(null);
+  const [errorModal, setErrorModal] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const handleQueryChange = (value: string) => {
     setQuery(value);
@@ -37,60 +52,71 @@ export default function TwinRecording() {
   const handleSelectSuggestion = (r: (typeof rooms)[0]) => {
     setSelectedRoom({ ...r });
     setQuery(r.room_num);
+    setTwinName("");
     setSuggestions([]);
     setShowSuggestions(false);
   };
 
   const handleSearch = () => {
     const found = rooms.find((r) => r.room_num === query && r.status === "OCC");
-    if (found) setSelectedRoom({ ...found });
-    else alert(t("roomNotFoundOrNotOccupied"));
+    if (found) {
+      setSelectedRoom({ ...found });
+      setTwinName("");
+    } else {
+      alert(t("roomNotFoundOrNotOccupied"));
+    }
     setSuggestions([]);
     setShowSuggestions(false);
   };
 
-  const handleChange = (
-    field: "twin_name" | "twin_num",
-    value: string | number,
-  ) => {
-    if (!selectedRoom) return;
-    setSelectedRoom({ ...selectedRoom, [field]: value });
-  };
-
   const handleSave = async () => {
-    if (!selectedRoom) return;
+    if (!selectedRoom || !twinName.trim()) return;
 
+    setSaving(true);
     try {
       if (!selectedRoom.id) {
         throw new Error("Room id is required for twin recording.");
       }
-      const saved = await frontOfficeApi.twin(selectedRoom.id, {
-        twin_name: selectedRoom.twin_name,
-        twin_num: selectedRoom.twin_num,
+      const result = await frontOfficeApi.twin(selectedRoom.id, {
+        twin_name: twinName.trim(),
       });
+      // Update rooms list with the new room data
       setRooms((prev) =>
-        prev.map((r) => (r.id === saved.id ? saved : r)),
+        prev.map((r) => (r.id === result.room.id ? result.room : r)),
       );
-    } catch (error) {
-      alert(
-        typeof error === "object" && error !== null && "message" in error
-          ? String((error as { message: string }).message)
-          : t("loginError"),
-      );
-      return;
+      setResultModal({
+        ...result,
+        twin_name: twinName.trim(),
+        current_mon: result.current_mon || selectedRoom.current_mon || "RWF",
+      });
+      setSelectedRoom(null);
+      setQuery("");
+      setTwinName("");
+    } catch (error: unknown) {
+      const msg =
+        error instanceof Error
+          ? error.message
+          : typeof error === "object" &&
+              error !== null &&
+              "response" in error &&
+              typeof (error as { response?: { data?: { detail?: string } } }).response?.data?.detail === "string"
+            ? (error as { response: { data: { detail: string } } }).response.data.detail
+            : t("loginError");
+      setErrorModal(msg);
+    } finally {
+      setSaving(false);
     }
-
-    setSelectedRoom(null);
-    setQuery("");
   };
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4 p-4 rounded border border-hotel-border">
+      <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4">
         <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
           {t("twinRecording")}
         </h1>
       </div>
+
+      {/* Search */}
       <div className="bg-white rounded border border-hotel-border p-4">
         <h3 className="text-base font-bold text-hotel-text-primary mb-4 flex items-center gap-2">
           <span className="w-1 h-6 bg-gradient-to-b from-amber-500 to-amber-700 rounded-full" />
@@ -132,10 +158,12 @@ export default function TwinRecording() {
           </button>
         </div>
       </div>
+
+      {/* Room details + twin name form */}
       {selectedRoom && (
-        <div className="bg-white rounded border p-4 space-y-4">
+        <div className="bg-white rounded border border-hotel-border p-4 space-y-4">
           <h3 className="text-base font-semibold text-hotel-text-primary">
-            Twin_form — {t("room")} {selectedRoom.room_num}
+            {t("twinRecording")} — {t("room")} {selectedRoom.room_num}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {(
@@ -146,6 +174,9 @@ export default function TwinRecording() {
                 ["depart_date", t("departDate")],
                 ["qty", t("nightNum")],
                 ["puv", t("rateDay")],
+                ["current_mon", t("currency")],
+                ["deposit", t("deposit")],
+                ["status", t("status")],
               ] as [keyof (typeof rooms)[0], string][]
             ).map(([field, label]) => (
               <div key={field}>
@@ -157,71 +188,35 @@ export default function TwinRecording() {
                   value={selectedRoom[field] ?? ""}
                   readOnly
                   title={label}
-                  className="w-full border rounded px-3 py-2 text-sm bg-white"
+                  className="w-full border rounded px-3 py-2 text-sm bg-gray-50"
                 />
               </div>
             ))}
-            <div>
-              <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
-                {t("twinNum")}
-              </label>
-              <input
-                type="number"
-                value={selectedRoom.twin_num}
-                onChange={(e) =>
-                  handleChange("twin_num", Number(e.target.value))
-                }
-                title={t("twinNum")}
-                className="w-full border rounded px-3 py-2 text-sm"
-              />
-            </div>
-            <div>
+            <div className="md:col-span-2">
               <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                 {t("twinName")}
               </label>
               <input
                 type="text"
-                value={selectedRoom.twin_name}
-                onChange={(e) => handleChange("twin_name", e.target.value)}
+                value={twinName}
+                onChange={(e) => setTwinName(e.target.value)}
+                placeholder={t("twinName")}
                 title={t("twinName")}
-                className="w-full border rounded px-3 py-2 text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
-                {t("deposit")}
-              </label>
-              <input
-                type="number"
-                value={selectedRoom.deposit}
-                readOnly
-                title={t("deposit")}
-                className="w-full border rounded px-3 py-2 text-sm bg-white"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
-                {t("status")}
-              </label>
-              <input
-                type="text"
-                value={selectedRoom.status}
-                readOnly
-                title={t("status")}
-                className="w-full border rounded px-3 py-2 text-sm bg-white"
+                className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
               />
             </div>
           </div>
           <div className="flex gap-3 pt-4 border-t">
             <button
               onClick={handleSave}
-              className="bg-hotel-gold text-white px-6 py-2 rounded flex items-center gap-2 text-sm hover:bg-hotel-gold-dark"
+              disabled={!twinName.trim() || saving}
+              className="bg-hotel-gold text-white px-6 py-2 rounded flex items-center gap-2 text-sm hover:bg-hotel-gold-dark disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Save size={16} />
-              {t("save")}
+              {saving ? "..." : t("save")}
             </button>
             <button
-              onClick={() => setSelectedRoom(null)}
+              onClick={() => { setSelectedRoom(null); setTwinName(""); }}
               className="border px-6 py-2 rounded text-sm"
             >
               {t("cancel")}
@@ -229,8 +224,104 @@ export default function TwinRecording() {
           </div>
         </div>
       )}
+
+      {/* Success Result Modal */}
+      {resultModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden">
+            {/* Header */}
+            <div className="bg-emerald-50 p-6 text-center">
+              <div className="w-14 h-14 mx-auto bg-emerald-100 rounded-full flex items-center justify-center mb-3">
+                <CheckCircle2 size={28} className="text-emerald-500" />
+              </div>
+              <h3 className="text-lg font-bold text-emerald-800">
+                Twin Guest Added Successfully
+              </h3>
+            </div>
+
+            {/* Body */}
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <span className="text-hotel-text-secondary">{t("roomNumber")}:</span>
+                  <p className="font-semibold text-hotel-text-primary">{resultModal.room.room_num}</p>
+                </div>
+                <div>
+                  <span className="text-hotel-text-secondary">{t("twinName")}:</span>
+                  <p className="font-semibold text-hotel-text-primary">{resultModal.twin_name}</p>
+                </div>
+                <div>
+                  <span className="text-hotel-text-secondary">Occupants:</span>
+                  <p className="font-semibold text-hotel-text-primary">{resultModal.twin_num}</p>
+                </div>
+              </div>
+
+              {/* Price change box */}
+              {resultModal.price_changed ? (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                  <p className="text-sm font-semibold text-amber-800 mb-2">
+                    Room Rate Updated
+                  </p>
+                  <div className="flex items-center gap-3 text-sm">
+                    <div className="text-center">
+                      <p className="text-xs text-amber-600">Previous (Single)</p>
+                      <p className="text-lg font-bold text-amber-700">
+                        {resultModal.old_puv.toLocaleString()} {resultModal.current_mon}
+                      </p>
+                    </div>
+                    <ArrowRight size={20} className="text-amber-500 shrink-0" />
+                    <div className="text-center">
+                      <p className="text-xs text-emerald-600">New (Double)</p>
+                      <p className="text-lg font-bold text-emerald-700">
+                        {resultModal.new_puv.toLocaleString()} {resultModal.current_mon}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-center">
+                  <p className="text-sm text-hotel-text-secondary">
+                    Room rate unchanged — {resultModal.new_puv.toLocaleString()} {resultModal.current_mon}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 pb-6">
+              <button
+                onClick={() => setResultModal(null)}
+                className="w-full bg-emerald-500 text-white py-2.5 rounded-lg font-medium hover:bg-emerald-600 transition-colors"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Error Modal */}
+      {errorModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-sm w-full mx-4 overflow-hidden">
+            <div className="bg-red-50 p-6 text-center">
+              <div className="w-14 h-14 mx-auto bg-red-100 rounded-full flex items-center justify-center mb-3">
+                <AlertTriangle size={28} className="text-red-500" />
+              </div>
+              <h3 className="text-lg font-bold text-red-800">Error</h3>
+              <p className="text-sm text-red-600 mt-2">{errorModal}</p>
+            </div>
+            <div className="p-4">
+              <button
+                onClick={() => setErrorModal(null)}
+                className="w-full bg-red-500 text-white py-2.5 rounded-lg font-medium hover:bg-red-600 transition-colors"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-
-

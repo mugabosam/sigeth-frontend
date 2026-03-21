@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, ArrowRightLeft, AlertCircle, XCircle, X } from "lucide-react";
+import { Search, ArrowRightLeft, AlertCircle, CheckCircle2, AlertTriangle } from "lucide-react";
 import { useLang } from "../../hooks/useLang";
 import { useHotelData } from "../../context/HotelDataContext";
 import { useNotification } from "../../hooks/useNotification";
@@ -14,14 +14,19 @@ export default function MoveGuest() {
   const [sourceRoom, setSourceRoom] = useState<(typeof rooms)[0] | null>(null);
   const [roomSuggestions, setRoomSuggestions] = useState<typeof rooms>([]);
   const [showRoomSuggestions, setShowRoomSuggestions] = useState(false);
-  const [newRoomSuggestions, setNewRoomSuggestions] = useState<typeof rooms>(
-    [],
-  );
+  const [newRoomSuggestions, setNewRoomSuggestions] = useState<typeof rooms>([]);
   const [showNewRoomSuggestions, setShowNewRoomSuggestions] = useState(false);
-  const [error, setError] = useState("");
-  const [errorType, setErrorType] = useState<"search" | "move" | null>(null);
+
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [targetRoom, setTargetRoom] = useState<(typeof rooms)[0] | null>(null);
+  const [moving, setMoving] = useState(false);
+  const [moveError, setMoveError] = useState("");
+
+  // Single modal for all feedback (search error, move error, move success)
+  const [feedbackModal, setFeedbackModal] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
 
   const handleOldRoomChange = (value: string) => {
     setOldRoom(value);
@@ -77,12 +82,9 @@ export default function MoveGuest() {
     );
     if (found) {
       setSourceRoom(found);
-      setError("");
-      setErrorType(null);
     } else {
-      setError(t("roomNotFoundOrNotOccupied"));
-      setErrorType("search");
       setSourceRoom(null);
+      setFeedbackModal({ type: "error", message: t("roomNotFoundOrNotOccupied") });
     }
     setRoomSuggestions([]);
     setShowRoomSuggestions(false);
@@ -90,28 +92,34 @@ export default function MoveGuest() {
 
   const handleMove = () => {
     if (!sourceRoom || !newRoom) {
-      setError("Please select both source and target rooms");
-      setErrorType("move");
+      setFeedbackModal({ type: "error", message: "Please select both source and target rooms" });
       return;
     }
     const target = rooms.find((r) => r.room_num === newRoom);
     if (!target || target.status !== "VC") {
-      setError(t("targetRoomNotVacant"));
-      setErrorType("move");
+      setFeedbackModal({ type: "error", message: t("targetRoomNotVacant") });
       return;
     }
 
     setTargetRoom(target);
+    setMoveError("");
     setShowConfirmation(true);
   };
 
   const confirmMove = async () => {
     if (!sourceRoom || !targetRoom) return;
 
+    const guestName = sourceRoom.guest_name;
+    const fromRoom = sourceRoom.room_num;
+    const toRoom = targetRoom.room_num;
+
+    setMoving(true);
+    setMoveError("");
+
     try {
       const moved = await frontOfficeApi.moveGuest({
-        old_room_num: sourceRoom.room_num,
-        new_room_num: targetRoom.room_num,
+        old_room_num: fromRoom,
+        new_room_num: toRoom,
       });
 
       setRooms((prev) =>
@@ -121,117 +129,55 @@ export default function MoveGuest() {
           return r;
         }),
       );
-    } catch (error) {
-      setError(
-        typeof error === "object" && error !== null && "message" in error
-          ? String((error as { message: string }).message)
-          : t("targetRoomNotVacant"),
+      setReservations((prev) =>
+        prev.map((r) =>
+          r.room_num === fromRoom ? { ...r, room_num: toRoom } : r,
+        ),
       );
-      setErrorType("move");
-      return;
+      setSales((prev) =>
+        prev.map((s) =>
+          s.room_num === fromRoom ? { ...s, room_num: toRoom } : s,
+        ),
+      );
+      addNotification(
+        `Guest ${guestName} moved from room ${fromRoom} to ${toRoom}`,
+        "Rooms Attendant",
+        "success",
+      );
+
+      setSourceRoom(null);
+      setOldRoom("");
+      setNewRoom("");
+      setShowConfirmation(false);
+      setTargetRoom(null);
+
+      setFeedbackModal({
+        type: "success",
+        message: `Guest ${guestName} moved from room ${fromRoom} to ${toRoom}`,
+      });
+    } catch (error: unknown) {
+      const msg =
+        error instanceof Error
+          ? error.message
+          : typeof error === "object" &&
+              error !== null &&
+              "response" in error &&
+              typeof (error as { response?: { data?: { detail?: string } } }).response?.data?.detail === "string"
+            ? (error as { response: { data: { detail: string } } }).response.data.detail
+            : t("targetRoomNotVacant");
+      setMoveError(msg);
+    } finally {
+      setMoving(false);
     }
-    // Update RCS.dat room_num
-    setReservations((prev) =>
-      prev.map((r) =>
-        r.room_num === sourceRoom.room_num
-          ? { ...r, room_num: targetRoom.room_num }
-          : r,
-      ),
-    );
-    // Update SALES.dat room_num
-    setSales((prev) =>
-      prev.map((s) =>
-        s.room_num === sourceRoom.room_num
-          ? { ...s, room_num: targetRoom.room_num }
-          : s,
-      ),
-    );
-    // Trigger notification
-    addNotification(
-      `Guest ${sourceRoom.guest_name} moved from room ${sourceRoom.room_num} to ${targetRoom.room_num}`,
-      "Rooms Attendant",
-      "success",
-    );
-    setSourceRoom(null);
-    setOldRoom("");
-    setNewRoom("");
-    setError("");
-    setErrorType(null);
-    setShowConfirmation(false);
-    setTargetRoom(null);
   };
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4 p-4 rounded border border-hotel-border">
+      <div className="flex justify-between items-center bg-white border border-hotel-border rounded p-4">
         <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
           {t("moveGuest")}
         </h1>
       </div>
-
-      {error && (
-        <div
-          className={`rounded border-l-4 p-4 flex items-start justify-between ${
-            errorType === "search"
-              ? "bg-hotel-cream border-l-red-500 border border-hotel-border"
-              : errorType === "move"
-                ? "bg-hotel-cream border-l-hotel-gold border border-hotel-border"
-                : "bg-hotel-cream border-l-hotel-gold border border-hotel-border"
-          }`}
-        >
-          <div className="flex items-start gap-3">
-            {errorType === "search" ? (
-              <AlertCircle className="w-6 h-6 text-hotel-gold flex-shrink-0 mt-0.5" />
-            ) : (
-              <XCircle className="w-6 h-6 text-hotel-gold flex-shrink-0 mt-0.5" />
-            )}
-            <div>
-              <h4
-                className={`font-bold text-base mb-1 ${
-                  errorType === "search"
-                    ? "text-hotel-gold"
-                    : errorType === "move"
-                      ? "text-hotel-gold"
-                      : "text-hotel-gold"
-                }`}
-              >
-                {errorType === "search"
-                  ? "Search Error"
-                  : errorType === "move"
-                    ? "Move Error"
-                    : "Error"}
-              </h4>
-              <p
-                className={`text-sm ${
-                  errorType === "search"
-                    ? "text-hotel-gold"
-                    : errorType === "move"
-                      ? "text-hotel-gold"
-                      : "text-hotel-gold"
-                }`}
-              >
-                {error}
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={() => {
-              setError("");
-              setErrorType(null);
-            }}
-            title="Close error message"
-            className={`flex-shrink-0 p-1 rounded transition-colors ${
-              errorType === "search"
-                ? "hover:bg-hotel-paper text-hotel-gold"
-                : errorType === "move"
-                  ? "hover:bg-hotel-paper text-hotel-gold"
-                  : "hover:bg-hotel-paper text-hotel-gold"
-            }`}
-          >
-            <X size={20} />
-          </button>
-        </div>
-      )}
 
       <div className="bg-white rounded border border-hotel-border p-4">
         <h3 className="text-base font-bold text-hotel-text-primary mb-4 flex items-center gap-2">
@@ -274,6 +220,7 @@ export default function MoveGuest() {
           </button>
         </div>
       </div>
+
       {sourceRoom && (
         <div className="bg-white rounded border p-4 space-y-4">
           <h3 className="text-base font-semibold text-hotel-text-primary">
@@ -377,6 +324,48 @@ export default function MoveGuest() {
         </div>
       )}
 
+      {/* Feedback Modal — success or error, one style */}
+      {feedbackModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-sm w-full mx-4 overflow-hidden">
+            <div className={`p-6 text-center ${feedbackModal.type === "success" ? "bg-emerald-50" : "bg-red-50"}`}>
+              <div className={`w-14 h-14 mx-auto rounded-full flex items-center justify-center mb-3 ${
+                feedbackModal.type === "success" ? "bg-emerald-100" : "bg-red-100"
+              }`}>
+                {feedbackModal.type === "success" ? (
+                  <CheckCircle2 size={28} className="text-emerald-500" />
+                ) : (
+                  <AlertTriangle size={28} className="text-red-500" />
+                )}
+              </div>
+              <h3 className={`text-lg font-bold ${
+                feedbackModal.type === "success" ? "text-emerald-800" : "text-red-800"
+              }`}>
+                {feedbackModal.type === "success" ? "Success" : "Error"}
+              </h3>
+              <p className={`text-sm mt-2 ${
+                feedbackModal.type === "success" ? "text-emerald-600" : "text-red-600"
+              }`}>
+                {feedbackModal.message}
+              </p>
+            </div>
+            <div className="p-4">
+              <button
+                onClick={() => setFeedbackModal(null)}
+                className={`w-full py-2.5 rounded-lg font-medium transition-colors text-white ${
+                  feedbackModal.type === "success"
+                    ? "bg-emerald-500 hover:bg-emerald-600"
+                    : "bg-red-500 hover:bg-red-600"
+                }`}
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal (with inline error on move failure) */}
       {showConfirmation && sourceRoom && targetRoom && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white rounded max-w-md w-full mx-4 p-4 space-y-4">
@@ -386,49 +375,37 @@ export default function MoveGuest() {
             <div className="text-center space-y-1">
               <h2 className="text-base font-bold text-hotel-text-primary">Are you sure?</h2>
               <p className="text-sm text-hotel-text-secondary">
-                You are about to move a guest from one room to another. This
-                action will update all related records.
+                Move <strong>{sourceRoom.guest_name}</strong> from
+                room <strong>{sourceRoom.room_num}</strong> to
+                room <strong>{targetRoom.room_num}</strong>?
               </p>
             </div>
 
-            <div className="bg-white rounded p-4 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-hotel-text-primary">From:</span>
-                <span className="font-bold text-hotel-text-primary">
-                  {sourceRoom.room_num}
-                </span>
+            {moveError && (
+              <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-lg p-3">
+                <AlertTriangle size={18} className="text-red-500 shrink-0 mt-0.5" />
+                <p className="text-sm text-red-700">{moveError}</p>
               </div>
-              <div className="flex items-center justify-between border-t pt-2">
-                <span className="text-sm font-medium text-hotel-text-primary">
-                  Guest:
-                </span>
-                <span className="font-bold text-hotel-text-primary">
-                  {sourceRoom.guest_name}
-                </span>
-              </div>
-              <div className="flex items-center justify-between border-t pt-2">
-                <span className="text-sm font-medium text-hotel-text-primary">To:</span>
-                <span className="font-bold text-hotel-text-primary">
-                  {targetRoom.room_num}
-                </span>
-              </div>
-            </div>
+            )}
 
-            <div className="flex gap-3 pt-4">
+            <div className="flex gap-3 pt-2">
               <button
                 onClick={() => {
                   setShowConfirmation(false);
                   setTargetRoom(null);
+                  setMoveError("");
                 }}
-                className="flex-1 px-4 py-2 border border-hotel-border rounded text-hotel-text-primary font-medium hover:bg-hotel-cream transition-colors"
+                disabled={moving}
+                className="flex-1 px-4 py-2 border border-hotel-border rounded text-hotel-text-primary font-medium hover:bg-hotel-cream transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 onClick={confirmMove}
-                className="flex-1 px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-700 text-white rounded font-medium hover:shadow-lg transition-colors"
+                disabled={moving}
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-700 text-white rounded font-medium hover:shadow-lg transition-colors disabled:opacity-50"
               >
-                Confirm
+                {moving ? "Moving..." : "Confirm"}
               </button>
             </div>
           </div>
@@ -437,5 +414,3 @@ export default function MoveGuest() {
     </div>
   );
 }
-
-

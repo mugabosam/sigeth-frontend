@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Save, ShoppingCart, Clock } from "lucide-react";
+import { Save, ShoppingCart, Clock, CheckCircle2, AlertTriangle } from "lucide-react";
 import { useLang } from "../../hooks/useLang";
 import { useHotelData } from "../../context/HotelDataContext";
 import type { JBANQUET } from "../../types";
@@ -35,6 +35,7 @@ export default function BanquetOrders() {
   const [error, setError] = useState("");
   const [confirmTransfer, setConfirmTransfer] = useState(false);
   const [itemsToTransfer, setItemsToTransfer] = useState(0);
+  const [resultModal, setResultModal] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   const activeGroups = groupReservations.filter((g) => g.status === 0);
   const group = activeGroups.find((g) => g.code_g === selectedGroup);
@@ -96,14 +97,22 @@ export default function BanquetOrders() {
         banquetingApi.archive(),
       ]);
       setJbanquet(journal.concat(archive) as JBANQUET[]);
-    } catch {
-      return;
+      setBuffer([]);
+      setSelectedLot(null);
+      setError("");
+      setConfirmTransfer(false);
+      setResultModal({ type: "success", message: `${itemsToTransfer} item(s) transferred to journal for ${group.groupe_name} successfully.` });
+    } catch (err: unknown) {
+      setConfirmTransfer(false);
+      const msg =
+        err && typeof err === "object" && "response" in err
+          ? String(
+              ((err as { response?: { data?: { detail?: string } } }).response?.data as Record<string, unknown>)?.detail ??
+                "Failed to transfer order to journal",
+            )
+          : "Failed to transfer order to journal";
+      setResultModal({ type: "error", message: msg });
     }
-
-    setBuffer([]);
-    setSelectedLot(null);
-    setError("");
-    setConfirmTransfer(false);
   };
 
   const grandTotal = buffer.reduce((s, b) => s + b.total, 0);
@@ -350,6 +359,33 @@ export default function BanquetOrders() {
             </div>
           </div>
         </div>
+
+        {/* Success / Error Result Modal */}
+        {resultModal && (
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+            <div className="bg-white rounded p-6 w-full max-w-md text-center space-y-4">
+              {resultModal.type === "success" ? (
+                <CheckCircle2 size={40} className="text-emerald-500 mx-auto" />
+              ) : (
+                <AlertTriangle size={40} className="text-hotel-danger mx-auto" />
+              )}
+              <h3 className="text-base font-semibold text-hotel-text-primary">
+                {resultModal.type === "success" ? t("success") : t("error")}
+              </h3>
+              <p className="text-sm text-hotel-text-secondary">{resultModal.message}</p>
+              <button
+                onClick={() => setResultModal(null)}
+                className={`px-6 py-2 rounded text-sm font-medium text-white ${
+                  resultModal.type === "success"
+                    ? "bg-emerald-500 hover:bg-emerald-600"
+                    : "bg-hotel-danger hover:bg-red-700"
+                }`}
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Transfer Confirmation Modal */}
         {confirmTransfer && (

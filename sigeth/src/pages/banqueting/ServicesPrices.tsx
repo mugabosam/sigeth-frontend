@@ -116,13 +116,8 @@ export default function ServicesPrices() {
   const handleFieldChange = (field: keyof BanquetService, value: any) => {
     if (!selected) return;
     const updated: BanquetService = {
-      date: field === "date" ? (value as string) : selected.date,
-      lot: field === "lot" ? (value as string) : selected.lot,
-      nature: field === "nature" ? (value as string) : selected.nature,
-      item: field === "item" ? (value as string) : selected.item,
-      unity: field === "unity" ? (value as string) : selected.unity,
-      qty: field === "qty" ? (value as number) : selected.qty,
-      puv: field === "puv" ? (value as number) : selected.puv,
+      ...selected,
+      [field]: value,
     };
     setSelected(updated);
 
@@ -351,7 +346,7 @@ export default function ServicesPrices() {
                   {!isNew && (
                     <button
                       onClick={handleDelete}
-                      className="bg-hotel-cream0 text-white px-6 py-2 rounded flex items-center gap-2 text-sm hover:bg-hotel-gold-dark transition-colors"
+                      className="bg-hotel-danger text-white px-6 py-2 rounded flex items-center gap-2 text-sm hover:bg-red-700 transition-colors"
                     >
                       <Trash2 size={16} />
                       {t("delete")}

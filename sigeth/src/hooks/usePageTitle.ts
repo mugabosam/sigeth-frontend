@@ -10,7 +10,7 @@ const routeTitles: Record<string, TranslationKey> = {
     '/rooms-attendant/twin-recording': 'twinRecording',
     '/rooms-attendant/checkin-no-reservation': 'checkInWithoutReservation',
     '/rooms-attendant/checkin-group': 'checkInGroupReservation',
-    '/rooms-attendant/checkout': 'checkedOutRooms',
+    '/rooms-attendant/checkout': 'checkOut',
     '/rooms-attendant/find-room': 'findRoom',
     '/rooms-attendant/move-guest': 'moveGuest',
     '/rooms-attendant/invoice-preview': 'invoicePreview',
@@ -21,8 +21,7 @@ const routeTitles: Record<string, TranslationKey> = {
     '/rooms-attendant/occupied-rooms': 'occupiedRooms',
     '/rooms-attendant/checked-out-rooms': 'checkedOutRooms',
     '/rooms-attendant/daily-consumptions': 'dailyConsumptions',
-    '/rooms-attendant/invoice-by-guest': 'invoiceByGuest',
-    '/rooms-attendant/invoice-by-group': 'invoiceByGroup',
+    '/rooms-attendant/reprint-invoice': 'reprintInvoice',
     // 1.2 Housekeeping – Forms
     '/housekeeping/room-board': 'roomBoard',
     '/housekeeping/room-categories': 'roomCategories',

@@ -107,8 +107,8 @@ export default function InvoiceByGroup() {
         groupe_name: data.groupe_name ?? preview.groupe_name,
         code_g: data.code_g ?? preview.code_g,
         number_pers: data.number_pers ?? preview.number_pers,
-        arrival_date: data.arrival_date ?? preview.arrival_date,
-        depart_date: data.depart_date ?? preview.depart_date,
+        arrival_date: data.arrival_date || preview.arrival_date,
+        depart_date: data.depart_date || preview.depart_date,
         items: data.items,
         total_charges: data.total_charges,
         group_deposit: data.group_deposit ?? preview.group_deposit,
@@ -148,15 +148,17 @@ export default function InvoiceByGroup() {
     const rate = currencies.find((c) => c.code === mon)?.exchange_rate || 1;
 
     const items = rawData.items.map((item) => {
+      const converted = { ...item };
       if (item.designation.startsWith("Room ")) {
-        return { ...item, puv: Math.round(item.puv * rate), credit: Math.round(item.credit * rate) };
+        converted.puv = Math.round(item.puv * rate);
+        converted.credit = Math.round(item.credit * rate);
       }
-      return item;
+      // Deposit (debit) is always in foreign currency — convert any non-zero debit
+      if (item.debit > 0) {
+        converted.debit = Math.round(item.debit * rate);
+      }
+      return converted;
     });
-
-    if (items.length > 0 && items[0].designation.startsWith("Room ") && items[0].debit > 0) {
-      items[0] = { ...items[0], debit: Math.round(items[0].debit * rate) };
-    }
 
     const total_charges = items.reduce((s, i) => s + i.credit, 0);
     const total_paid = items.reduce((s, i) => s + i.debit, 0);
@@ -429,83 +431,31 @@ export default function InvoiceByGroup() {
             </div>
 
             {/* Footer */}
-            <div className="flex justify-between items-start px-4 py-4 border-t-2 border-hotel-border bg-gradient-to-r from-hotel-paper to-white">
-              {invoice && (
-                <div className="space-y-3 text-xs">
-                  <div className="flex items-baseline gap-3">
-                    <span className="font-semibold text-hotel-text-primary">
-                      Company Signature
-                    </span>
-                    <span className="border-b-2 border-hotel-border w-24 inline-block" />
-                  </div>
-                  <div className="flex items-baseline gap-3">
-                    <span className="font-semibold text-hotel-text-primary">
-                      Username:
-                    </span>
-                    <span className="font-bold text-hotel-gold">
-                      {invoice.username}
-                    </span>
-                  </div>
+            <div className="flex justify-between items-end px-4 py-6 border-t border-dashed border-gray-300">
+              <div className="text-xs space-y-6">
+                <p className="font-semibold text-hotel-text-primary">Hotel de la Front Office</p>
+                <div>
+                  <span className="text-hotel-text-secondary">Signature:</span>
+                  <span className="inline-block border-b border-gray-400 w-36 ml-2" />
                 </div>
-              )}
-              <div className="space-y-2 text-xs ml-auto">
-                <div className="flex items-center justify-end gap-3">
-                  <span className="font-semibold text-hotel-text-primary">
-                    Total Charges
-                  </span>
-                  <span className="border-2 border-gray-400 bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
-                    {fmt(displayData.total_charges)} {displayData.current_mon}
-                  </span>
-                </div>
-                <div className="flex items-center justify-end gap-3">
-                  <span className="font-semibold text-hotel-text-primary">
-                    Group Deposit
-                  </span>
-                  <span className="border-2 border-gray-400 bg-gradient-to-r from-purple-50 to-violet-50 px-3 py-1.5 w-28 text-right font-bold text-purple-700">
-                    {fmt(displayData.group_deposit)} {displayData.current_mon}
-                  </span>
-                </div>
-                <div className="flex items-center justify-end gap-3">
-                  <span className="font-semibold text-hotel-text-primary">
-                    Total Paid
-                  </span>
-                  <span className="border-2 border-gray-400 bg-gradient-to-r from-blue-50 to-cyan-50 px-3 py-1.5 w-28 text-right font-bold text-blue-700">
-                    {fmt(displayData.total_paid)} {displayData.current_mon}
-                  </span>
-                </div>
-                <div className="flex items-center justify-end gap-3">
-                  <span className="font-semibold text-hotel-text-primary">
-                    Balance Due
-                  </span>
-                  <span className="border-2 border-gray-400 bg-gradient-to-r from-orange-50 to-red-50 px-3 py-1.5 w-28 text-right font-bold text-red-700">
-                    {fmt(displayData.balance_due)} {displayData.current_mon}
-                  </span>
-                </div>
-                {(displayData as any)?.tax?.taux != null && (
+              </div>
+              <div className="text-xs text-right space-y-1">
+                {(displayData as any)?.tax?.taux != null ? (
                   <>
-                    <div className="flex items-center justify-end gap-3 pt-2 border-t border-hotel-border">
-                      <span className="font-semibold text-hotel-text-primary">HTVA</span>
-                      <span className="border-2 border-gray-400 px-3 py-1.5 w-28 text-right font-bold text-blue-700">
-                        {fmt((displayData as any).tax.htva ?? 0)} {displayData.current_mon}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-end gap-3">
-                      <span className="font-semibold text-hotel-text-primary">
-                        TVA ({(displayData as any).tax.taux}%)
-                      </span>
-                      <span className="border-2 border-gray-400 px-3 py-1.5 w-28 text-right font-bold text-red-700">
-                        {fmt((displayData as any).tax.tva ?? 0)} {displayData.current_mon}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-end gap-3">
-                      <span className="font-semibold text-hotel-text-primary">
-                        Total TTC
-                      </span>
-                      <span className="border-2 border-gray-400 bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-1.5 w-28 text-right font-bold text-green-800">
-                        {fmt((displayData as any).tax.total_ttc ?? 0)} {displayData.current_mon}
-                      </span>
-                    </div>
+                    <p className="text-hotel-text-primary">
+                      Total TTC: <span className="font-bold">{fmt((displayData as any).tax.total_ttc ?? 0)} {displayData.current_mon}</span>
+                    </p>
+                    <p className="text-hotel-text-secondary">
+                      HTVA: {fmt((displayData as any).tax.htva ?? 0)} {displayData.current_mon}
+                    </p>
+                    <p className="text-hotel-text-secondary">
+                      TVA ({(displayData as any).tax.taux}%): {fmt((displayData as any).tax.tva ?? 0)} {displayData.current_mon}
+                    </p>
                   </>
+                ) : (
+                  <p className="text-hotel-text-primary">
+                    Total: <span className="font-bold">{fmt(displayData.total_charges)} {displayData.current_mon}</span>
+                  </p>
                 )}
               </div>
             </div>

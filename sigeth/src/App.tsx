@@ -22,8 +22,7 @@ import ArrivalOn from "./pages/rooms-attendant/ArrivalOn";
 import ArrivalOff from "./pages/rooms-attendant/ArrivalOff";
 import RoomsByStatus from "./pages/rooms-attendant/RoomsByStatus";
 import DailyConsumptions from "./pages/rooms-attendant/DailyConsumptions";
-import InvoiceByGuest from "./pages/rooms-attendant/InvoiceByGuest";
-import InvoiceByGroup from "./pages/rooms-attendant/InvoiceByGroup";
+import ReprintInvoice from "./pages/rooms-attendant/ReprintInvoice";
 
 // ── 1.2 Housekeeping – Forms ──
 import RoomCategories from "./pages/housekeeping/RoomCategories";
@@ -129,12 +128,8 @@ export default function App() {
               element={<DailyConsumptions />}
             />
             <Route
-              path="/rooms-attendant/invoice-by-guest"
-              element={<InvoiceByGuest />}
-            />
-            <Route
-              path="/rooms-attendant/invoice-by-group"
-              element={<InvoiceByGroup />}
+              path="/rooms-attendant/reprint-invoice"
+              element={<ReprintInvoice />}
             />
 
             {/* ── 1.2 Housekeeping – Forms ── */}
