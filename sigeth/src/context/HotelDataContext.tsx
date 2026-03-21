@@ -38,6 +38,8 @@ import {
 } from "../services/sigethApi";
 import { useAuth } from "./AuthContext";
 
+const SYNC_INTERVAL_MS = 30_000; // 30 seconds
+
 interface HotelDataContextType {
   rooms: RDF[];
   setRooms: React.Dispatch<React.SetStateAction<RDF[]>>;
@@ -256,6 +258,62 @@ export function HotelDataProvider({ children }: { children: ReactNode }) {
       clearData();
     });
   }, [clearData, reloadData]);
+
+  // Silent background sync — keeps data fresh across ALL user roles
+  const syncCriticalData = useCallback(async () => {
+    if (!isAuthenticated || !user) return;
+
+    // Rooms — ALL roles need this (room board, check-in, dispatching, etc.)
+    try {
+      const roomsData = await frontOfficeApi.rooms();
+      setRooms(roomsData);
+    } catch { /* silent */ }
+
+    // Role-specific syncs
+    if (user.level === "Manager_R") {
+      try {
+        const [res, groups] = await Promise.all([
+          frontOfficeApi.reservations(),
+          frontOfficeApi.groups(),
+        ]);
+        setReservations(res);
+        setGroupReservations(groups);
+      } catch { /* silent */ }
+    }
+
+    if (user.level === "Manager_H") {
+      try {
+        const rstaffData = await housekeepingApi.dispatching();
+        setRstaff(rstaffData);
+      } catch { /* silent */ }
+    }
+
+    if (user.level === "Manager_B") {
+      try {
+        const groups = await frontOfficeApi.groups();
+        setGroupReservations(groups);
+      } catch { /* silent */ }
+    }
+  }, [isAuthenticated, user]);
+
+  // Poll every 30 seconds
+  useEffect(() => {
+    if (!isAuthenticated || !user) return;
+    const id = setInterval(() => { void syncCriticalData(); }, SYNC_INTERVAL_MS);
+    return () => clearInterval(id);
+  }, [isAuthenticated, user, syncCriticalData]);
+
+  // Instant sync when tab regains focus
+  useEffect(() => {
+    if (!isAuthenticated || !user) return;
+    const onVisible = () => {
+      if (document.visibilityState === "visible") {
+        void syncCriticalData();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, [isAuthenticated, user, syncCriticalData]);
 
   return (
     <HotelDataContext.Provider
