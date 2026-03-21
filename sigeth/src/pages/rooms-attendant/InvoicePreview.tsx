@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Printer, Loader2, Receipt, AlertTriangle } from "lucide-react";
 import { useLang } from "../../hooks/useLang";
 import { useHotelData } from "../../context/HotelDataContext";
@@ -28,7 +28,7 @@ const fmt = (n: number) => new Intl.NumberFormat("en-RW").format(Math.round(n));
 
 export default function InvoicePreview() {
   const { t } = useLang();
-  const { rooms, paymentModes } = useHotelData();
+  const { rooms, paymentModes, currencies } = useHotelData();
 
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState<PreviewData | null>(null);
@@ -125,7 +125,52 @@ export default function InvoicePreview() {
     }
   };
 
-  const displayData = invoice ?? preview;
+  const rawData = invoice ?? preview;
+
+  // Convert all amounts to RWF for the invoice display
+  const displayData = useMemo(() => {
+    if (!rawData) return null;
+    const mon = rawData.current_mon;
+    if (!mon || mon === "RWF") return rawData;
+
+    const rate = currencies.find((c) => c.code === mon)?.exchange_rate || 1;
+
+    // Room charge items (designation starts with "Room") are in foreign currency → convert back to RWF
+    // Laundry/Banquet items are already in RWF
+    const items = rawData.items.map((item) => {
+      if (item.designation.startsWith("Room ")) {
+        return { ...item, puv: Math.round(item.puv * rate), credit: Math.round(item.credit * rate) };
+      }
+      return item;
+    });
+
+    // Deposit (debit on first item) may be in foreign currency too
+    if (items.length > 0 && items[0].designation.startsWith("Room ") && items[0].debit > 0) {
+      items[0] = { ...items[0], debit: Math.round(items[0].debit * rate) };
+    }
+
+    const total_charges = items.reduce((s, i) => s + i.credit, 0);
+    const total_paid = items.reduce((s, i) => s + i.debit, 0);
+    const balance_due = total_charges - total_paid;
+
+    // Recalculate tax in RWF if present
+    let tax = (rawData as InvoiceData).tax;
+    if (tax?.taux != null) {
+      const htva = Math.round(total_charges / (1 + tax.taux / 100));
+      const tva = total_charges - htva;
+      tax = { ...tax, htva, tva, total_ttc: total_charges };
+    }
+
+    return {
+      ...rawData,
+      items,
+      total_charges,
+      total_paid,
+      balance_due,
+      current_mon: "RWF",
+      ...(tax ? { tax } : {}),
+    };
+  }, [rawData, currencies]);
 
   return (
     <div className="space-y-4 p-4">
@@ -229,7 +274,7 @@ export default function InvoicePreview() {
 
           {/* Header Info */}
           <div className="border-2 border-hotel-border rounded overflow-hidden mb-4">
-            <div className="bg-gradient-to-r from-hotel-gold to-hotel-gold-dark px-4 py-3 flex justify-between items-center text-white">
+            <div className="bg-hotel-navy px-4 py-3 flex justify-between items-center text-white">
               <p className="font-bold text-sm">
                 {invoice ? "DEFINITIVE INVOICE" : "Guest Invoice Preview"}
               </p>
@@ -257,7 +302,7 @@ export default function InvoicePreview() {
             <div className="relative overflow-hidden bg-white">
               <table className="w-full border-collapse">
                 <thead>
-                  <tr className="bg-gradient-to-r from-hotel-gold to-hotel-gold-dark">
+                  <tr className="bg-hotel-navy">
                     {[
                       "Date",
                       "Designation",
@@ -350,20 +395,20 @@ export default function InvoicePreview() {
                     {fmt(displayData.balance_due)} {displayData.current_mon}
                   </span>
                 </div>
-                {invoice?.tax?.taux != null && (
+                {(displayData as any)?.tax?.taux != null && (
                   <>
                     <div className="flex items-center justify-end gap-3 pt-2 border-t border-hotel-border">
                       <span className="font-semibold text-hotel-text-primary">HTVA</span>
                       <span className="border-2 border-gray-400 px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
-                        {fmt(invoice.tax.htva ?? 0)} {displayData.current_mon}
+                        {fmt((displayData as any).tax.htva ?? 0)} {displayData.current_mon}
                       </span>
                     </div>
                     <div className="flex items-center justify-end gap-3">
                       <span className="font-semibold text-hotel-text-primary">
-                        TVA ({invoice.tax.taux}%)
+                        TVA ({(displayData as any).tax.taux}%)
                       </span>
                       <span className="border-2 border-gray-400 px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
-                        {fmt(invoice.tax.tva ?? 0)} {displayData.current_mon}
+                        {fmt((displayData as any).tax.tva ?? 0)} {displayData.current_mon}
                       </span>
                     </div>
                     <div className="flex items-center justify-end gap-3">
@@ -371,7 +416,7 @@ export default function InvoicePreview() {
                         Total TTC
                       </span>
                       <span className="border-2 border-gray-400 bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-1.5 w-28 text-right font-bold text-green-800">
-                        {fmt(invoice.tax.total_ttc ?? 0)} {displayData.current_mon}
+                        {fmt((displayData as any).tax.total_ttc ?? 0)} {displayData.current_mon}
                       </span>
                     </div>
                   </>

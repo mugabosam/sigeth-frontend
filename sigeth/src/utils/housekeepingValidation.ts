@@ -156,9 +156,7 @@ export function validateRoom(room: RDF): ValidationResult {
         errors.push({ field: 'room_num', message: 'roomNumberRequired' });
     }
 
-    if (!room.designation || room.designation.trim() === '') {
-        errors.push({ field: 'designation', message: 'fieldRequired' });
-    }
+    // designation is optional (backend allows blank)
 
     if (room.price_1 < 0) {
         errors.push({ field: 'price_1', message: 'priceMustBePositive' });

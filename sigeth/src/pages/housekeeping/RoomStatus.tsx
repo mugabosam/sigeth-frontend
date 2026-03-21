@@ -55,7 +55,7 @@ export default function RoomStatus() {
               onClick={() => setSelectedCat(c.code)}
               className={`px-4 py-2.5 rounded text-sm font-semibold border-2 transition-colors ${
                 selectedCat === c.code
-                  ? "bg-gradient-to-r from-amber-500 to-amber-600 text-white border-hotel-gold"
+                  ? "bg-hotel-gold text-white border-hotel-gold"
                   : "border-hotel-border text-hotel-text-primary hover:border-hotel-border hover:bg-hotel-cream"
               }`}
             >

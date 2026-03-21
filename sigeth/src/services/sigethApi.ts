@@ -106,7 +106,7 @@ const normalizeRoom = (raw: ApiRecord): RDF => ({
   puv: numberValue(raw.puv),
   deposit: numberValue(raw.deposit),
   date: stringValue(raw.date),
-  groupe_name: stringValue(raw.groupe_name),
+  groupe_name: stringValue(raw.group_name ?? raw.groupe_name),
 });
 
 const normalizeReservation = (raw: ApiRecord): RCS => ({
@@ -334,19 +334,23 @@ const normalizeInvoicePreview = (raw: ApiRecord): InvoicePreviewResponse => ({
 /** Transform a frontend RDF to backend room payload */
 const toRoomPayload = (room: Partial<RDF>): ApiRecord => {
   const payload: ApiRecord = { ...room };
-  if ("categorie" in payload) {
-    payload.categorie_code = payload.categorie;
-    delete payload.categorie;
-  }
-  if ("status" in payload) {
-    payload.status_code = payload.status;
-    delete payload.status;
-  }
-  if ("qty" in payload) {
-    payload.nights = payload.qty;
-    delete payload.qty;
-  }
   delete payload.id;
+
+  // categorie and status are sent as code values (e.g. "1", "VC")
+  // — backend SlugRelatedField resolves them to FK objects
+  if (payload.categorie != null) payload.categorie = String(payload.categorie);
+
+  // Frontend uses "groupe_name" but backend model field is "group_name"
+  if ("groupe_name" in payload) {
+    payload.group_name = payload.groupe_name;
+    delete payload.groupe_name;
+  }
+
+  // Empty date strings → null (DRF DateField rejects "" for nullable fields)
+  for (const f of ["arrival_date", "depart_date", "date"] as const) {
+    if (f in payload && !payload[f]) payload[f] = null;
+  }
+
   return payload;
 };
 

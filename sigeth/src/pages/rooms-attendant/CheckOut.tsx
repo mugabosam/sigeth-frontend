@@ -89,6 +89,7 @@ export default function CheckOut() {
     setGroupReservations,
     setGroupArchive,
     paymentModes,
+    currencies,
     setJlaundry,
   } = useHotelData();
 
@@ -434,8 +435,52 @@ export default function CheckOut() {
   //  SHARED DISPLAY HELPERS
   // ═══════════════════════════════════════════════
 
-  const indivDisplay = invoice ?? preview;
-  const groupDisplay = groupInvoice ?? groupPreview;
+  const indivRaw = invoice ?? preview;
+  const groupRaw = groupInvoice ?? groupPreview;
+
+  // Convert amounts to RWF for invoice display
+  const toRwf = (
+    raw: PreviewData | InvoiceData | GroupPreviewData | GroupInvoiceData | null,
+    isGroup: boolean,
+  ) => {
+    if (!raw) return null;
+    const mon = raw.current_mon;
+    if (!mon || mon === "RWF") return raw;
+    const rate = currencies.find((c) => c.code === mon)?.exchange_rate || 1;
+    const items = raw.items.map((item) => {
+      if (item.designation.startsWith("Room ")) {
+        return { ...item, puv: Math.round(item.puv * rate), credit: Math.round(item.credit * rate) };
+      }
+      return item;
+    });
+    if (items.length > 0 && items[0].designation.startsWith("Room ") && items[0].debit > 0) {
+      items[0] = { ...items[0], debit: Math.round(items[0].debit * rate) };
+    }
+    const total_charges = items.reduce((s, i) => s + i.credit, 0);
+    const total_paid = items.reduce((s, i) => s + i.debit, 0);
+    const balance_due = total_charges - total_paid;
+    let tax = (raw as InvoiceData).tax;
+    if (tax?.taux != null) {
+      const htva = Math.round(total_charges / (1 + tax.taux / 100));
+      const tva = total_charges - htva;
+      tax = { ...tax, htva, tva, total_ttc: total_charges };
+    }
+    return {
+      ...raw,
+      items,
+      total_charges,
+      total_paid,
+      balance_due,
+      current_mon: "RWF",
+      ...(isGroup && "group_deposit" in raw
+        ? { group_deposit: Math.round((raw as GroupPreviewData).group_deposit * rate) }
+        : {}),
+      ...(tax ? { tax } : {}),
+    };
+  };
+
+  const indivDisplay = useMemo(() => toRwf(indivRaw, false) as typeof indivRaw, [indivRaw, currencies]);
+  const groupDisplay = useMemo(() => toRwf(groupRaw, true) as typeof groupRaw, [groupRaw, currencies]);
   const isIndividual = tab === "individual";
 
   // Which items to show in the invoice table
@@ -548,7 +593,7 @@ export default function CheckOut() {
             <div className="space-y-3">
               <div className="flex items-center gap-3 bg-gradient-to-r from-red-50 to-orange-50 p-4 rounded border border-hotel-border">
                 <LogOut size={20} className="text-hotel-gold" />
-                <h2 className="flex-1 text-base font-bold bg-gradient-to-r from-hotel-gold to-hotel-gold-dark bg-clip-text text-transparent">
+                <h2 className="flex-1 text-base font-bold bg-hotel-navy bg-clip-text text-transparent">
                   Occupied Rooms
                 </h2>
                 <span className="bg-hotel-cream text-hotel-gold text-sm font-bold px-3 py-1 rounded-full">
@@ -651,7 +696,7 @@ export default function CheckOut() {
             <div className="space-y-3">
               <div className="flex items-center gap-3 bg-gradient-to-r from-hotel-paper to-hotel-cream p-4 rounded border border-amber-100">
                 <Users size={20} className="text-amber-600" />
-                <h2 className="flex-1 text-base font-bold bg-gradient-to-r from-hotel-gold to-hotel-gold-dark bg-clip-text text-transparent">
+                <h2 className="flex-1 text-base font-bold bg-hotel-navy bg-clip-text text-transparent">
                   Active Groups
                 </h2>
                 <span className="bg-hotel-cream text-hotel-gold text-sm font-bold px-3 py-1 rounded-full">
@@ -768,7 +813,7 @@ export default function CheckOut() {
             </div>
 
             <div className="border-2 border-hotel-border rounded overflow-hidden mb-4">
-              <div className="bg-gradient-to-r from-hotel-gold to-hotel-gold-dark px-4 py-3 flex justify-between items-center text-white">
+              <div className="bg-hotel-navy px-4 py-3 flex justify-between items-center text-white">
                 <p className="font-bold text-sm">
                   {invoice ? "DEFINITIVE INVOICE" : "Guest Invoice Preview"}
                 </p>
@@ -795,7 +840,7 @@ export default function CheckOut() {
               {/* Items table */}
               <table className="w-full border-collapse bg-white">
                 <thead>
-                  <tr className="bg-gradient-to-r from-hotel-gold to-hotel-gold-dark">
+                  <tr className="bg-hotel-navy">
                     {[
                       "Date",
                       "Designation",
@@ -890,24 +935,24 @@ export default function CheckOut() {
                       {indivDisplay?.current_mon ?? "RWF"}
                     </span>
                   </div>
-                  {invoice?.tax?.taux != null && (
+                  {(indivDisplay as any)?.tax?.taux != null && (
                     <>
                       <div className="flex items-center justify-end gap-3 pt-2 border-t border-hotel-border">
                         <span className="font-semibold text-hotel-text-primary">
                           HTVA
                         </span>
                         <span className="border-2 border-hotel-border px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
-                          {fmt(invoice.tax.htva ?? 0)}{" "}
-                          {invoice?.current_mon ?? "RWF"}
+                          {fmt((indivDisplay as any).tax.htva ?? 0)}{" "}
+                          {indivDisplay?.current_mon ?? "RWF"}
                         </span>
                       </div>
                       <div className="flex items-center justify-end gap-3">
                         <span className="font-semibold text-hotel-text-primary">
-                          TVA ({invoice.tax.taux}%)
+                          TVA ({(indivDisplay as any).tax.taux}%)
                         </span>
                         <span className="border-2 border-hotel-border px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
-                          {fmt(invoice.tax.tva ?? 0)}{" "}
-                          {invoice?.current_mon ?? "RWF"}
+                          {fmt((indivDisplay as any).tax.tva ?? 0)}{" "}
+                          {indivDisplay?.current_mon ?? "RWF"}
                         </span>
                       </div>
                       <div className="flex items-center justify-end gap-3">
@@ -915,8 +960,8 @@ export default function CheckOut() {
                           Total TTC
                         </span>
                         <span className="border-2 border-hotel-border bg-gradient-to-r from-hotel-paper to-hotel-cream px-3 py-1.5 w-28 text-right font-bold text-hotel-gold">
-                          {fmt(invoice.tax.total_ttc ?? 0)}{" "}
-                          {invoice?.current_mon ?? "RWF"}
+                          {fmt((indivDisplay as any).tax.total_ttc ?? 0)}{" "}
+                          {indivDisplay?.current_mon ?? "RWF"}
                         </span>
                       </div>
                     </>
@@ -953,7 +998,7 @@ export default function CheckOut() {
             </div>
 
             <div className="border-2 border-hotel-border rounded overflow-hidden mb-4">
-              <div className="bg-gradient-to-r from-hotel-gold to-hotel-gold-dark px-4 py-3 flex justify-between items-center text-white">
+              <div className="bg-hotel-navy px-4 py-3 flex justify-between items-center text-white">
                 <p className="font-bold text-sm">
                   {groupInvoice ? "GROUP INVOICE" : "GROUP INVOICE PREVIEW"}
                 </p>
@@ -975,7 +1020,7 @@ export default function CheckOut() {
 
               <table className="w-full border-collapse bg-white">
                 <thead>
-                  <tr className="bg-gradient-to-r from-hotel-gold to-hotel-gold-dark">
+                  <tr className="bg-hotel-navy">
                     {[
                       "Date",
                       "Room",
@@ -1091,24 +1136,24 @@ export default function CheckOut() {
                       {groupDisplay?.current_mon ?? "RWF"}
                     </span>
                   </div>
-                  {groupInvoice?.tax?.taux != null && (
+                  {(groupDisplay as any)?.tax?.taux != null && (
                     <>
                       <div className="flex items-center justify-end gap-3 pt-2 border-t border-hotel-border">
                         <span className="font-semibold text-hotel-text-primary">
                           HTVA
                         </span>
                         <span className="border-2 border-hotel-border px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
-                          {fmt(groupInvoice.tax.htva ?? 0)}{" "}
-                          {groupInvoice?.current_mon ?? "RWF"}
+                          {fmt((groupDisplay as any).tax.htva ?? 0)}{" "}
+                          {groupDisplay?.current_mon ?? "RWF"}
                         </span>
                       </div>
                       <div className="flex items-center justify-end gap-3">
                         <span className="font-semibold text-hotel-text-primary">
-                          TVA ({groupInvoice.tax.taux}%)
+                          TVA ({(groupDisplay as any).tax.taux}%)
                         </span>
                         <span className="border-2 border-hotel-border px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
-                          {fmt(groupInvoice.tax.tva ?? 0)}{" "}
-                          {groupInvoice?.current_mon ?? "RWF"}
+                          {fmt((groupDisplay as any).tax.tva ?? 0)}{" "}
+                          {groupDisplay?.current_mon ?? "RWF"}
                         </span>
                       </div>
                       <div className="flex items-center justify-end gap-3">
@@ -1116,8 +1161,8 @@ export default function CheckOut() {
                           Total TTC
                         </span>
                         <span className="border-2 border-hotel-border bg-gradient-to-r from-hotel-paper to-hotel-cream px-3 py-1.5 w-28 text-right font-bold text-hotel-gold">
-                          {fmt(groupInvoice.tax.total_ttc ?? 0)}{" "}
-                          {groupInvoice?.current_mon ?? "RWF"}
+                          {fmt((groupDisplay as any).tax.total_ttc ?? 0)}{" "}
+                          {groupDisplay?.current_mon ?? "RWF"}
                         </span>
                       </div>
                     </>

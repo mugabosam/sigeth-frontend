@@ -137,7 +137,7 @@ export default function RequestNote({
             setSelected({ ...blank });
             setIsNew(true);
           }}
-          className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-colors duration-200"
+          className="bg-hotel-gold text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:bg-hotel-gold-dark transition-colors"
         >
           <Plus size={16} />
           {t("newRecord")}
@@ -321,7 +321,7 @@ export default function RequestNote({
           <div className="flex gap-3 pt-5 border-t border-hotel-border">
             <button
               onClick={handleSave}
-              className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-colors duration-200"
+              className="bg-hotel-gold text-white px-6 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:bg-hotel-gold-dark transition-colors"
             >
               <Save size={16} />
               {t("save")}
@@ -329,7 +329,7 @@ export default function RequestNote({
             {!isNew && (
               <button
                 onClick={() => setShowDeleteConfirm(true)}
-                className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-colors duration-200"
+                className="bg-hotel-danger text-white px-6 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:bg-red-700 transition-colors"
               >
                 <Trash2 size={16} />
                 {t("delete")}

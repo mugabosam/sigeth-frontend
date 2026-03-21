@@ -1,7 +1,12 @@
-import { useState } from "react";
-import { Save } from "lucide-react";
+import { useState, useMemo } from "react";
+import {
+  Save,
+  CheckCircle2,
+  AlertTriangle,
+} from "lucide-react";
 import { useLang } from "../../hooks/useLang";
 import { useHotelData } from "../../context/HotelDataContext";
+import ConfirmationModal from "../../components/common/ConfirmationModal";
 import type { JLAUNDRY } from "../../types";
 import { housekeepingApi } from "../../services/sigethApi";
 
@@ -17,7 +22,7 @@ type BufferItem = {
 
 export default function LaundryOrder() {
   const { t } = useLang();
-  const { catlaundry, setJlaundry } = useHotelData();
+  const { catlaundry, setJlaundry, rooms } = useHotelData();
   const [selectedCat, setSelectedCat] = useState("");
   const [roomNum, setRoomNum] = useState("");
   const [orderDate, setOrderDate] = useState(
@@ -25,6 +30,26 @@ export default function LaundryOrder() {
   );
   const [items, setItems] = useState<BufferItem[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [confirmSaveOpen, setConfirmSaveOpen] = useState(false);
+  const [showResultModal, setShowResultModal] = useState(false);
+  const [resultMessage, setResultMessage] = useState("");
+
+  // Filter occupied rooms matching the typed room number
+  const occupiedSuggestions = useMemo(() => {
+    if (!roomNum.trim()) return [];
+    return rooms.filter(
+      (r) => r.status === "OCC" && r.room_num.startsWith(roomNum),
+    );
+  }, [roomNum, rooms]);
+
+  const handleSelectRoom = (num: string) => {
+    setRoomNum(num);
+    setShowSuggestions(false);
+    const newErrors = { ...errors };
+    delete newErrors["roomNum"];
+    setErrors(newErrors);
+  };
 
   const handleSelectCategory = async (cat: string) => {
     setSelectedCat(cat);
@@ -47,7 +72,6 @@ export default function LaundryOrder() {
   };
 
   const handleQtyChange = (idx: number, qty: number) => {
-    // Validate quantity: must be between 0 and 999
     if (qty < 0 || qty > 999) return;
     setItems((prev) =>
       prev.map((item, i) => (i === idx ? { ...item, orderQty: qty } : item)),
@@ -59,6 +83,13 @@ export default function LaundryOrder() {
 
     if (!roomNum.trim()) {
       newErrors["roomNum"] = t("roomNumberRequired");
+    } else {
+      const room = rooms.find((r) => r.room_num === roomNum);
+      if (!room) {
+        newErrors["roomNum"] = t("roomNotFound");
+      } else if (room.status !== "OCC") {
+        newErrors["roomNum"] = t("roomNotOccupied");
+      }
     }
 
     if (!orderDate) {
@@ -73,9 +104,14 @@ export default function LaundryOrder() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSave = async () => {
+  // Open confirmation modal
+  const handleSave = () => {
     if (!validateOrder()) return;
+    setConfirmSaveOpen(true);
+  };
 
+  // Execute after user confirms
+  const confirmSave = async () => {
     try {
       for (const item of items.filter((i) => i.orderQty > 0 && i.id)) {
         await housekeepingApi.updateLaundryBuffer(item.id!, {
@@ -88,17 +124,31 @@ export default function LaundryOrder() {
       await housekeepingApi.confirmLaundry({ room_num: roomNum });
       const journal = await housekeepingApi.laundryJournal();
       setJlaundry(journal as JLAUNDRY[]);
-    } catch {
-      return;
-    }
 
-    setItems([]);
-    setSelectedCat("");
-    setRoomNum("");
-    setErrors({});
+      setResultMessage(t("laundryOrderSuccess"));
+      setShowResultModal(true);
+      setItems([]);
+      setSelectedCat("");
+      setRoomNum("");
+      setErrors({});
+    } catch (error) {
+      const errorMessage =
+        typeof error === "object" && error !== null && "message" in error
+          ? String((error as { message: string }).message)
+          : t("laundryOrderFailed");
+      setResultMessage(`Error: ${errorMessage}`);
+      setShowResultModal(true);
+    } finally {
+      setConfirmSaveOpen(false);
+    }
   };
 
   const totalOrder = items.reduce((s, i) => s + i.orderQty * i.puv, 0);
+
+  // Guest name from the matched occupied room
+  const matchedRoom = rooms.find(
+    (r) => r.room_num === roomNum && r.status === "OCC",
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-hotel-paper to-hotel-cream p-4 space-y-4">
@@ -128,17 +178,17 @@ export default function LaundryOrder() {
               title={t("date")}
               className={`w-full border-2 rounded px-4 py-2.5 text-sm font-medium transition-colors focus:outline-none ${
                 errors["orderDate"]
-                  ? "border-hotel-gold bg-hotel-cream focus:border-hotel-gold"
+                  ? "border-hotel-danger bg-red-50 focus:border-hotel-danger"
                   : "border-hotel-border hover:border-hotel-border focus:border-hotel-gold"
               }`}
             />
             {errors["orderDate"] && (
-              <p className="text-hotel-gold text-xs mt-2 font-medium">
+              <p className="text-hotel-danger text-xs mt-2 font-medium">
                 {errors["orderDate"]}
               </p>
             )}
           </div>
-          <div>
+          <div className="relative">
             <label className="block text-sm font-semibold text-hotel-text-primary mb-2">
               {t("roomNumber")}
             </label>
@@ -146,25 +196,48 @@ export default function LaundryOrder() {
               type="text"
               value={roomNum}
               onChange={(e) => {
-                setRoomNum(e.target.value.toUpperCase());
-                if (e.target.value.trim()) {
+                const val = e.target.value.toUpperCase();
+                setRoomNum(val);
+                setShowSuggestions(true);
+                if (val.trim()) {
                   const newErrors = { ...errors };
                   delete newErrors["roomNum"];
                   setErrors(newErrors);
                 }
               }}
+              onFocus={() => setShowSuggestions(true)}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
               placeholder="e.g., 101"
               title={t("roomNumber")}
               className={`w-full border-2 rounded px-4 py-2.5 text-sm font-medium transition-colors focus:outline-none ${
                 errors["roomNum"]
-                  ? "border-hotel-gold bg-hotel-cream focus:border-hotel-gold"
+                  ? "border-hotel-danger bg-red-50 focus:border-hotel-danger"
                   : "border-hotel-border hover:border-hotel-border focus:border-hotel-gold"
               }`}
             />
             {errors["roomNum"] && (
-              <p className="text-hotel-gold text-xs mt-2 font-medium">
+              <p className="text-hotel-danger text-xs mt-2 font-medium">
                 {errors["roomNum"]}
               </p>
+            )}
+            {/* Autocomplete dropdown for occupied rooms */}
+            {showSuggestions && roomNum.trim() && occupiedSuggestions.length > 0 && (
+              <ul className="absolute z-50 left-0 right-0 mt-1 bg-white border border-hotel-border rounded shadow-lg max-h-48 overflow-y-auto">
+                {occupiedSuggestions.map((r) => (
+                  <li key={r.room_num}>
+                    <button
+                      type="button"
+                      onMouseDown={() => handleSelectRoom(r.room_num)}
+                      className="w-full text-left px-4 py-2.5 text-sm hover:bg-amber-50 transition-colors flex justify-between items-center"
+                    >
+                      <span className="font-semibold text-hotel-gold">{r.room_num}</span>
+                      <span className="text-hotel-text-secondary text-xs">
+                        {r.guest_name} — {r.designation}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
             )}
           </div>
           <div>
@@ -186,8 +259,21 @@ export default function LaundryOrder() {
             </select>
           </div>
         </div>
+        {/* Show matched guest info */}
+        {matchedRoom && (
+          <div className="bg-amber-50 border border-amber-200 rounded px-4 py-2.5 text-sm">
+            <span className="font-semibold text-hotel-gold">{t("guest")}:</span>{" "}
+            <span className="text-hotel-text-primary">{matchedRoom.guest_name}</span>
+            {matchedRoom.designation && (
+              <>
+                {" — "}
+                <span className="text-hotel-text-secondary">{matchedRoom.designation}</span>
+              </>
+            )}
+          </div>
+        )}
         {errors["items"] && (
-          <p className="text-hotel-gold text-sm">{errors["items"]}</p>
+          <p className="text-hotel-danger text-sm">{errors["items"]}</p>
         )}
       </div>
       {items.length > 0 && (
@@ -253,18 +339,55 @@ export default function LaundryOrder() {
             <div className="flex gap-2">
               <button
                 onClick={handleSave}
-                className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-colors duration-200"
+                className="bg-hotel-gold text-white px-6 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:bg-hotel-gold-dark transition-colors"
               >
                 <Save size={16} />
-                {t("save")}
+                {t("placeOrder")}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={confirmSaveOpen}
+        title={t("confirm")}
+        message={`${t("confirmLaundryOrder")} ${roomNum}?`}
+        onConfirm={confirmSave}
+        onCancel={() => setConfirmSaveOpen(false)}
+      />
+
+      {/* Success/Error Modal */}
+      {showResultModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+          <div className="bg-white border border-hotel-border rounded p-4 max-w-sm mx-auto">
+            <div className="flex items-center gap-3 mb-4">
+              {resultMessage.includes("Error") ? (
+                <div className="w-10 h-10 rounded-full bg-hotel-danger/20 flex items-center justify-center">
+                  <AlertTriangle className="text-hotel-danger" size={20} />
+                </div>
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-hotel-success/20 flex items-center justify-center">
+                  <CheckCircle2 className="text-hotel-success" size={20} />
+                </div>
+              )}
+              <h3 className="text-base font-semibold text-hotel-text-primary">
+                {resultMessage.includes("Error") ? t("error") : t("success")}
+              </h3>
+            </div>
+            <p className="text-sm text-hotel-text-secondary mb-4">
+              {resultMessage}
+            </p>
+            <button
+              onClick={() => setShowResultModal(false)}
+              className="w-full bg-hotel-gold text-white py-2 rounded text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
+            >
+              OK
+            </button>
           </div>
         </div>
       )}
     </div>
   );
 }
-
-
-

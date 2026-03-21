@@ -1,11 +1,19 @@
 import { useState } from "react";
-import { Search, Plus, Save, Trash2, Printer } from "lucide-react";
+import {
+  Search,
+  Plus,
+  Save,
+  Trash2,
+  Printer,
+  CheckCircle2,
+  AlertTriangle,
+} from "lucide-react";
 import { useLang } from "../../hooks/useLang";
 import { useHotelData } from "../../context/HotelDataContext";
 import ConfirmationModal from "../../components/common/ConfirmationModal";
 import { validateRoom } from "../../utils/housekeepingValidation";
 import type { RDF } from "../../types";
-import { frontOfficeApi, housekeepingApi } from "../../services/sigethApi";
+import { frontOfficeApi } from "../../services/sigethApi";
 import type { RoomStatusCode } from "../../types";
 
 // Hotel information for printing
@@ -23,8 +31,11 @@ export default function RoomsRepertory() {
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<RDF | null>(null);
   const [isNew, setIsNew] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [confirmSaveOpen, setConfirmSaveOpen] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   const blank: RDF = {
     categorie: 1,
@@ -46,6 +57,7 @@ export default function RoomsRepertory() {
   };
 
   const handleSearch = () => {
+    setValidationErrors([]);
     const found = rooms.find((r) => r.room_num === query);
     if (found) {
       setSelected({ ...found });
@@ -61,40 +73,31 @@ export default function RoomsRepertory() {
     setSelected({ ...selected, [field]: value });
   };
 
-  const handleStatusChange = async (newStatus: RoomStatusCode) => {
-    if (!selected || !selected.room_num) return;
-    try {
-      const updated = await housekeepingApi.updateRoomStatus({
-        room_num: selected.room_num,
-        status_code: newStatus,
-      });
-      setSelected({ ...selected, status: newStatus });
-      setRooms((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
-    } catch {
-      // Revert on failure
-    }
+  const handleStatusChange = (newStatus: RoomStatusCode) => {
+    if (!selected) return;
+    setSelected({ ...selected, status: newStatus });
   };
 
+  // Just open modal — same pattern as room attendant pages
   const handleSave = () => {
     if (!selected) return;
 
-    // Validate form
     const validation = validateRoom(selected);
     if (!validation.isValid) {
-      // Log validation errors, optional: show toast notification
-      console.warn("Validation errors:", validation.errors);
+      setValidationErrors(validation.errors.map((e) => t(e.message)));
       return;
     }
 
-    // Check for duplicates when creating new
     if (isNew && rooms.some((r) => r.room_num === selected.room_num)) {
-      console.warn("Room number already exists");
+      setValidationErrors([t("roomNumberExists")]);
       return;
     }
 
-    setShowSaveConfirm(true);
+    setValidationErrors([]);
+    setConfirmSaveOpen(true);
   };
 
+  // Runs only when user clicks Confirm in the modal
   const confirmSave = async () => {
     if (!selected) return;
 
@@ -110,39 +113,48 @@ export default function RoomsRepertory() {
       } else {
         setRooms((prev) => prev.map((r) => (r.id === saved.id ? saved : r)));
       }
+
+      setSuccessMessage(isNew ? t("roomAddedSuccess") : t("roomUpdatedSuccess"));
+      setShowSuccessModal(true);
+      setSelected(null);
+      setQuery("");
     } catch (error) {
-      alert(
+      const errorMessage =
         typeof error === "object" && error !== null && "message" in error
           ? String((error as { message: string }).message)
-          : "Failed to save room",
-      );
-      return;
+          : "Failed to save room";
+      setSuccessMessage(`Error: ${errorMessage}`);
+      setShowSuccessModal(true);
+    } finally {
+      setConfirmSaveOpen(false);
     }
-
-    setSelected(null);
-    setQuery("");
-    setShowSaveConfirm(false);
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
+    setConfirmDeleteOpen(true);
+  };
+
+  const confirmDelete = async () => {
     if (!selected) return;
 
     if (selected.id) {
       try {
         await frontOfficeApi.deleteRoom(selected.id);
       } catch (error) {
-        alert(
+        const errorMessage =
           typeof error === "object" && error !== null && "message" in error
             ? String((error as { message: string }).message)
-            : "Failed to delete room",
-        );
+            : "Failed to delete room";
+        setSuccessMessage(`Error: ${errorMessage}`);
+        setShowSuccessModal(true);
+        setConfirmDeleteOpen(false);
         return;
       }
     }
 
     setRooms((prev) => prev.filter((r) => r.id !== selected.id));
     setSelected(null);
-    setShowDeleteConfirm(false);
+    setConfirmDeleteOpen(false);
   };
 
   const handlePrint = () => {
@@ -162,7 +174,7 @@ export default function RoomsRepertory() {
       <div className="flex gap-3 flex-wrap print:hidden">
         <button
           onClick={handlePrint}
-          className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-colors duration-200"
+          className="bg-hotel-gold text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:bg-hotel-gold-dark transition-colors"
         >
           <Printer size={16} />
           {t("print")}
@@ -207,7 +219,7 @@ export default function RoomsRepertory() {
           />
           <button
             onClick={handleSearch}
-            className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-colors duration-200"
+            className="bg-hotel-gold text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:bg-hotel-gold-dark transition-colors"
           >
             <Search size={16} />
             {t("search")}
@@ -301,18 +313,25 @@ export default function RoomsRepertory() {
               </div>
             )}
           </div>
+          {validationErrors.length > 0 && (
+            <div className="bg-red-50 border border-red-200 rounded p-3 text-sm text-red-700">
+              {validationErrors.map((err, i) => (
+                <p key={i}>{err}</p>
+              ))}
+            </div>
+          )}
           <div className="flex gap-3 pt-5 border-t border-hotel-border">
             <button
               onClick={handleSave}
-              className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-colors duration-200"
+              className="bg-hotel-gold text-white px-6 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:bg-hotel-gold-dark transition-colors"
             >
               <Save size={16} />
               {t("save")}
             </button>
             {!isNew && (
               <button
-                onClick={() => setShowDeleteConfirm(true)}
-                className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-colors duration-200"
+                onClick={handleDelete}
+                className="bg-hotel-danger text-white px-6 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:bg-red-700 transition-colors"
               >
                 <Trash2 size={16} />
                 {t("delete")}
@@ -401,29 +420,53 @@ export default function RoomsRepertory() {
 
       {/* Save Confirmation Modal */}
       <ConfirmationModal
-        isOpen={showSaveConfirm}
-        title={isNew ? t("addRoom") : t("updateRoom")}
-        message={`${t(isNew ? "confirmAddRoom" : "confirmUpdateRoom")} ${selected?.room_num} (${selected?.designation})?`}
-        confirmText={isNew ? t("add") : t("update")}
-        cancelText={t("cancel")}
-        isDangerous={false}
+        isOpen={confirmSaveOpen}
+        title={t("confirm")}
+        message={t("confirmSave")}
         onConfirm={confirmSave}
-        onCancel={() => setShowSaveConfirm(false)}
+        onCancel={() => setConfirmSaveOpen(false)}
       />
 
       {/* Delete Confirmation Modal */}
       <ConfirmationModal
-        isOpen={showDeleteConfirm}
-        title={t("deleteRoom")}
-        message={`${t("confirmDeleteRoom")} ${selected?.room_num}? ${t("cannotBeUndone")}`}
-        confirmText={t("delete")}
-        cancelText={t("cancel")}
+        isOpen={confirmDeleteOpen}
+        title={t("confirm")}
+        message={t("confirmDelete")}
         isDangerous={true}
-        onConfirm={handleDelete}
-        onCancel={() => setShowDeleteConfirm(false)}
+        onConfirm={confirmDelete}
+        onCancel={() => setConfirmDeleteOpen(false)}
       />
+
+      {/* Success/Error Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+          <div className="bg-white border border-hotel-border rounded p-4 max-w-sm mx-auto">
+            <div className="flex items-center gap-3 mb-4">
+              {successMessage.includes("Error") ? (
+                <div className="w-10 h-10 rounded-full bg-hotel-danger/20 flex items-center justify-center">
+                  <AlertTriangle className="text-hotel-danger" size={20} />
+                </div>
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-hotel-success/20 flex items-center justify-center">
+                  <CheckCircle2 className="text-hotel-success" size={20} />
+                </div>
+              )}
+              <h3 className="text-base font-semibold text-hotel-text-primary">
+                {successMessage.includes("Error") ? t("error") : t("success")}
+              </h3>
+            </div>
+            <p className="text-sm text-hotel-text-secondary mb-4">
+              {successMessage}
+            </p>
+            <button
+              onClick={() => setShowSuccessModal(false)}
+              className="w-full bg-hotel-gold text-white py-2 rounded text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-
-
