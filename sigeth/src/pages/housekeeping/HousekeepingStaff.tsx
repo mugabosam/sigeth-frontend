@@ -141,17 +141,8 @@ export default function HousekeepingStaff() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-hotel-paper to-hotel-cream p-4 space-y-4">
-      {/* Header Section */}
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent mb-1">
-            {t("housekeepingStaff")}
-          </h1>
-          <p className="text-sm text-hotel-text-secondary">
-            Manage your housekeeping team members and personnel
-          </p>
-        </div>
+    <div className="space-y-4">
+      <div className="flex gap-3">
         <button
           onClick={() => {
             setSelected({
@@ -163,25 +154,20 @@ export default function HousekeepingStaff() {
             setIsNew(true);
             setErrors({ isValid: true, errors: [] });
           }}
-          className="bg-hotel-gold text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:bg-hotel-gold-dark transition-colors"
+          className="bg-hotel-gold text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
         >
-          <Plus size={18} />
+          <Plus size={14} />
           {t("newRecord")}
         </button>
       </div>
       {selected && (
-        <div className="bg-white rounded border border-hotel-border p-7 space-y-3">
-          <div>
-            <h3 className="text-base font-bold text-hotel-text-primary">
-              {isNew ? t("newStaff") : t("editStaff")}
-            </h3>
-            <p className="text-xs text-hotel-text-secondary mt-1">
-              Fill in the staff information below
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="bg-white rounded p-4 space-y-4">
+          <h3 className="text-sm font-semibold text-hotel-text-primary uppercase tracking-wide">
+            {isNew ? t("newStaff") : t("editStaff")}
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-semibold text-hotel-text-primary mb-2">
+              <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                 {t("staffNumber")}
               </label>
               <input
@@ -191,10 +177,10 @@ export default function HousekeepingStaff() {
                   handleFieldChange("number", Number(e.target.value))
                 }
                 title={t("staffNumber")}
-                className={`w-full border-2 rounded px-4 py-2.5 text-sm font-medium focus:outline-none focus:border-hotel-gold transition-colors ${
+                className={`w-full border border-gray-300 rounded px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-hotel-gold ${
                   getErrorMessage("number")
                     ? "border-hotel-gold bg-hotel-cream"
-                    : "border-hotel-border hover:border-hotel-border"
+                    : ""
                 }`}
               />
               {getErrorMessage("number") && (
@@ -204,7 +190,7 @@ export default function HousekeepingStaff() {
               )}
             </div>
             <div>
-              <label className="block text-sm font-semibold text-hotel-text-primary mb-2">
+              <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                 {t("firstName")}
               </label>
               <input
@@ -216,10 +202,10 @@ export default function HousekeepingStaff() {
                 pattern="^[a-zA-Z\s\-']{2,}$"
                 title={t("firstName")}
                 placeholder="Letters only"
-                className={`w-full border-2 rounded px-4 py-2.5 text-sm font-medium focus:outline-none focus:border-hotel-gold transition-colors ${
+                className={`w-full border border-gray-300 rounded px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-hotel-gold ${
                   getErrorMessage("first_name")
                     ? "border-hotel-gold bg-hotel-cream"
-                    : "border-hotel-border hover:border-hotel-border"
+                    : ""
                 }`}
               />
               {getErrorMessage("first_name") && (
@@ -229,7 +215,7 @@ export default function HousekeepingStaff() {
               )}
             </div>
             <div>
-              <label className="block text-sm font-semibold text-hotel-text-primary mb-2">
+              <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                 {t("lastName")}
               </label>
               <input
@@ -239,10 +225,10 @@ export default function HousekeepingStaff() {
                 pattern="^[a-zA-Z\s\-']{2,}$"
                 title={t("lastName")}
                 placeholder="Letters only"
-                className={`w-full border-2 rounded px-4 py-2.5 text-sm font-medium focus:outline-none focus:border-hotel-gold transition-colors ${
+                className={`w-full border border-gray-300 rounded px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-hotel-gold ${
                   getErrorMessage("last_name")
                     ? "border-hotel-gold bg-hotel-cream"
-                    : "border-hotel-border hover:border-hotel-border"
+                    : ""
                 }`}
               />
               {getErrorMessage("last_name") && (
@@ -252,7 +238,7 @@ export default function HousekeepingStaff() {
               )}
             </div>
             <div>
-              <label className="block text-sm font-semibold text-hotel-text-primary mb-2">
+              <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                 {t("poste")}
               </label>
               <input

@@ -32,90 +32,87 @@ export default function BanquetRequestFollowUp() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-hotel-paper to-hotel-cream p-4">
-      <div className="max-w-6xl mx-auto space-y-4">
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
-            {t("banquetRequestFollowUp")}
-          </h1>
-          <div className="flex gap-2">
-            <button
-              onClick={() => window.print()}
-              className="bg-hotel-gold text-white px-4 py-2 rounded flex items-center gap-2 text-sm hover:bg-hotel-gold-dark transition-colors"
-            >
-              <Printer size={16} />
-              {t("print")}
-            </button>
-            <button
-              onClick={handleExport}
-              className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-4 py-2 rounded flex items-center gap-2 text-sm hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-colors"
-            >
-              <FileSpreadsheet size={16} />
-              {t("excel")}
-            </button>
-          </div>
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <div className="flex gap-2">
+          <button
+            onClick={() => window.print()}
+            className="bg-hotel-gold text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
+          >
+            <Printer size={14} />
+            {t("print")}
+          </button>
+          <button
+            onClick={handleExport}
+            className="bg-hotel-gold text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
+          >
+            <FileSpreadsheet size={14} />
+            {t("excel")}
+          </button>
         </div>
-        <div className="bg-white rounded border-2 border-hotel-border p-4 flex gap-3">
-          <div>
-            <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
-              {t("dateFrom")}
-            </label>
-            <input
-              type="date"
-              value={dateFrom}
-              onChange={(e) => setDateFrom(e.target.value)}
-              title={t("dateFrom")}
-              className="border-2 border-hotel-border hover:border-hotel-border focus:border-hotel-gold focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
-              {t("dateTo")}
-            </label>
-            <input
-              type="date"
-              value={dateTo}
-              onChange={(e) => setDateTo(e.target.value)}
-              title={t("dateTo")}
-              className="border-2 border-hotel-border hover:border-hotel-border focus:border-hotel-gold focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
-            />
-          </div>
+      </div>
+      <div className="bg-white rounded p-4 flex gap-3">
+        <div>
+          <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
+            {t("dateFrom")}
+          </label>
+          <input
+            type="date"
+            value={dateFrom}
+            onChange={(e) => setDateFrom(e.target.value)}
+            title={t("dateFrom")}
+            className="border border-gray-300 rounded px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-hotel-gold"
+          />
         </div>
-        <div className="bg-white rounded border-2 border-hotel-border overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-white border-b-2 border-hotel-border">
-              <tr>
-                {[
-                  t("dateD"),
-                  t("libelle"),
-                  t("qty"),
-                  t("credit1"),
-                  t("credit2"),
-                  t("dateR"),
-                  t("statut"),
-                ].map((h) => (
-                  <th
-                    key={h}
-                    className="text-left px-4 py-3 font-medium text-hotel-text-secondary"
-                  >
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((r, i) => (
+        <div>
+          <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
+            {t("dateTo")}
+          </label>
+          <input
+            type="date"
+            value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)}
+            title={t("dateTo")}
+            className="border border-gray-300 rounded px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-hotel-gold"
+          />
+        </div>
+      </div>
+      <div className="bg-white rounded overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="bg-hotel-navy text-white sticky top-0">
+            <tr>
+              {[
+                t("dateD"),
+                t("libelle"),
+                t("qty"),
+                t("credit1"),
+                t("credit2"),
+                t("dateR"),
+                t("statut"),
+              ].map((h) => (
+                <th
+                  key={h}
+                  className="text-left py-2 px-2 font-medium"
+                >
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.length > 0 ? (
+              filtered.map((r, i) => (
                 <tr
                   key={i}
-                  className="border-b hover:bg-hotel-cream/50 transition-colors"
+                  className="border-b border-hotel-border hover:bg-hotel-cream cursor-pointer transition-colors"
                 >
-                  <td className="px-4 py-3">{r.date_d}</td>
-                  <td className="px-4 py-3">{r.libelle}</td>
-                  <td className="px-4 py-3">{r.qty}</td>
-                  <td className="px-4 py-3">{r.credit_1.toLocaleString()}</td>
-                  <td className="px-4 py-3">{r.credit_2.toLocaleString()}</td>
-                  <td className="px-4 py-3">{r.date_r || "—"}</td>
-                  <td className="px-4 py-3">
+                  <td className="py-2 px-2 font-medium text-hotel-text-primary">{r.date_d}</td>
+                  <td className="py-2 px-2">{r.libelle}</td>
+                  <td className="py-2 px-2">{r.qty}</td>
+                  <td className="py-2 px-2">{r.credit_1.toLocaleString()}</td>
+                  <td className="py-2 px-2">{r.credit_2.toLocaleString()}</td>
+                  <td className="py-2 px-2">{r.date_r || "—"}</td>
+                  <td className="py-2 px-2">
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-semibold ${r.statut === "Approved" ? "bg-hotel-cream text-hotel-gold" : r.statut === "Rejected" ? "bg-hotel-cream text-hotel-gold" : "bg-hotel-cream text-hotel-gold"}`}
                     >
@@ -123,14 +120,17 @@ export default function BanquetRequestFollowUp() {
                     </span>
                   </td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={7} className="px-4 py-8 text-hotel-text-secondary text-center">
+                  {t("noRecords")}
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );
 }
-
-
-

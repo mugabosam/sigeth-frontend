@@ -92,42 +92,28 @@ export default function LaundryCategories() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-hotel-paper to-hotel-cream p-4 space-y-4">
-      {/* Header Section */}
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent mb-1">
-            {t("laundryCategories")}
-          </h1>
-          <p className="text-sm text-hotel-text-secondary">
-            {t("manageLaundryCategoriesDesc")}
-          </p>
-        </div>
+    <div className="space-y-4">
+      <div className="flex gap-3">
         <button
           onClick={() => {
             setSelected({ code: "", name: "" });
             setIsNew(true);
             setErrors({ isValid: true, errors: [] });
           }}
-          className="bg-hotel-gold text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:bg-hotel-gold-dark transition-colors"
+          className="bg-hotel-gold text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
         >
-          <Plus size={18} />
+          <Plus size={14} />
           {t("newRecord")}
         </button>
       </div>
       {selected && (
-        <div className="bg-white rounded border border-hotel-border p-7 space-y-3">
-          <div>
-            <h3 className="text-base font-bold text-hotel-text-primary">
-              {isNew ? t("newCategory") : t("editCategory")}
-            </h3>
-            <p className="text-xs text-hotel-text-secondary mt-1">
-              Fill in the category information below
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="bg-white rounded p-4 space-y-4">
+          <h3 className="text-sm font-semibold text-hotel-text-primary uppercase tracking-wide">
+            {isNew ? t("newCategory") : t("editCategory")}
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-semibold text-hotel-text-primary mb-2">
+              <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                 {t("code")}
               </label>
               <input
@@ -137,10 +123,10 @@ export default function LaundryCategories() {
                   setSelected({ ...selected, code: e.target.value })
                 }
                 title={t("code")}
-                className={`w-full border-2 rounded px-4 py-2.5 text-sm font-medium focus:outline-none focus:border-hotel-gold transition-colors ${
+                className={`w-full border border-gray-300 rounded px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-hotel-gold ${
                   getErrorMessage("code")
                     ? "border-hotel-gold bg-hotel-cream"
-                    : "border-hotel-border hover:border-hotel-border"
+                    : ""
                 }`}
               />
               {getErrorMessage("code") && (
@@ -150,7 +136,7 @@ export default function LaundryCategories() {
               )}
             </div>
             <div>
-              <label className="block text-sm font-semibold text-hotel-text-primary mb-2">
+              <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                 {t("categoryName")}
               </label>
               <input
@@ -160,10 +146,10 @@ export default function LaundryCategories() {
                   setSelected({ ...selected, name: e.target.value })
                 }
                 title={t("categoryName")}
-                className={`w-full border-2 rounded px-4 py-2.5 text-sm font-medium focus:outline-none focus:border-hotel-gold transition-colors ${
+                className={`w-full border border-gray-300 rounded px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-hotel-gold ${
                   getErrorMessage("name")
                     ? "border-hotel-gold bg-hotel-cream"
-                    : "border-hotel-border hover:border-hotel-border"
+                    : ""
                 }`}
               />
               {getErrorMessage("name") && (
@@ -173,20 +159,20 @@ export default function LaundryCategories() {
               )}
             </div>
           </div>
-          <div className="flex gap-3 pt-5 border-t border-hotel-border">
+          <div className="flex gap-3 pt-2 border-t border-hotel-border">
             <button
               onClick={handleSave}
-              className="bg-hotel-gold text-white px-6 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:bg-hotel-gold-dark transition-colors"
+              className="bg-hotel-gold text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
             >
-              <Save size={16} />
+              <Save size={14} />
               {t("save")}
             </button>
             {!isNew && (
               <button
                 onClick={() => setShowDeleteConfirm(true)}
-                className="bg-hotel-danger text-white px-6 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:bg-red-700 transition-colors"
+                className="bg-hotel-danger text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium hover:bg-red-700 transition-colors"
               >
-                <Trash2 size={16} />
+                <Trash2 size={14} />
                 {t("delete")}
               </button>
             )}
@@ -195,7 +181,7 @@ export default function LaundryCategories() {
                 setSelected(null);
                 setErrors({ isValid: true, errors: [] });
               }}
-              className="border-2 border-hotel-border px-6 py-2.5 rounded text-sm font-semibold text-hotel-text-primary hover:bg-hotel-cream transition-colors"
+              className="border border-hotel-border text-hotel-text-primary px-4 py-2 rounded text-sm font-medium hover:bg-hotel-cream transition-colors"
             >
               {t("cancel")}
             </button>
@@ -228,19 +214,17 @@ export default function LaundryCategories() {
       />
 
       {/* Categories Table */}
-      <div className="bg-white rounded border border-hotel-border overflow-hidden">
-        <div className="bg-gradient-to-r from-hotel-paper to-hotel-cream px-6 py-4 border-b border-hotel-border">
-          <h2 className="text-base font-bold text-hotel-text-primary">
-            {t("laundryCategoriesDirectory")}
-          </h2>
-        </div>
+      <div className="bg-white rounded overflow-hidden">
+        <h2 className="text-sm font-semibold text-hotel-text-primary mb-2 uppercase tracking-wide px-2">
+          {t("laundryCategoriesDirectory")}
+        </h2>
         <table className="w-full text-sm">
-          <thead className="bg-white border-b-2 border-hotel-border">
+          <thead className="bg-hotel-navy text-white sticky top-0">
             <tr>
-              <th className="text-left px-6 py-3 font-bold text-hotel-text-primary">
+              <th className="text-left py-2 px-2 font-medium">
                 {t("code")}
               </th>
-              <th className="text-left px-6 py-3 font-bold text-hotel-text-primary">
+              <th className="text-left py-2 px-2 font-medium">
                 {t("categoryName")}
               </th>
             </tr>
@@ -249,23 +233,23 @@ export default function LaundryCategories() {
             {catlaundry.map((c) => (
               <tr
                 key={c.code}
-                className="border-b hover:bg-hotel-cream/50 cursor-pointer transition-colors duration-150"
+                className="border-b border-hotel-border hover:bg-hotel-cream cursor-pointer transition-colors"
                 onClick={() => {
                   setSelected({ ...c });
                   setIsNew(false);
                   setErrors({ isValid: true, errors: [] });
                 }}
               >
-                <td className="px-6 py-3 font-semibold text-hotel-gold">
+                <td className="py-2 px-2 font-medium text-hotel-text-primary">
                   {c.code}
                 </td>
-                <td className="px-6 py-3 text-hotel-text-primary">{c.name}</td>
+                <td className="py-2 px-2 text-hotel-text-primary">{c.name}</td>
               </tr>
             ))}
           </tbody>
         </table>
         {catlaundry.length === 0 && (
-          <div className="px-6 py-12 text-center text-hotel-text-secondary">
+          <div className="px-4 py-8 text-center text-hotel-text-secondary">
             <p className="text-sm">{t("noCategoriesFound")}</p>
           </div>
         )}

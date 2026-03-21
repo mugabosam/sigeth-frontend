@@ -162,21 +162,13 @@ export default function RoomsRepertory() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-hotel-paper to-hotel-cream p-4 space-y-4">
-      <div className="space-y-2">
-        <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
-          {t("roomsRepertory")}
-        </h1>
-        <p className="text-sm text-hotel-text-secondary">
-          {t("manageRoomsDesc")}
-        </p>
-      </div>
+    <div className="space-y-4">
       <div className="flex gap-3 flex-wrap print:hidden">
         <button
           onClick={handlePrint}
-          className="bg-hotel-gold text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:bg-hotel-gold-dark transition-colors"
+          className="bg-hotel-gold text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
         >
-          <Printer size={16} />
+          <Printer size={14} />
           {t("print")}
         </button>
       </div>
@@ -204,9 +196,9 @@ export default function RoomsRepertory() {
           </p>
         </div>
       </div>
-      <div className="bg-white rounded border border-hotel-border p-4 print:border-none print:shadow-none print:p-0">
-        <h3 className="text-sm font-semibold text-hotel-gold mb-4 flex items-center gap-2 print:hidden">
-          <Search size={16} />
+      <div className="bg-white rounded p-4 space-y-4 print:border-none print:shadow-none print:p-0">
+        <h3 className="text-sm font-semibold text-hotel-text-primary uppercase tracking-wide flex items-center gap-2 print:hidden">
+          <Search size={14} />
           {t("queryWindow")}
         </h3>
         <div className="flex gap-3 flex-wrap print:hidden">
@@ -214,14 +206,14 @@ export default function RoomsRepertory() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t("roomNumber")}
-            className="border-2 border-hotel-border hover:border-hotel-border focus:border-hotel-gold focus:outline-none rounded px-4 py-2.5 text-sm font-medium w-40 transition-colors"
+            className="border border-gray-300 rounded px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-hotel-gold w-40"
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
           />
           <button
             onClick={handleSearch}
-            className="bg-hotel-gold text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:bg-hotel-gold-dark transition-colors"
+            className="bg-hotel-gold text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
           >
-            <Search size={16} />
+            <Search size={14} />
             {t("search")}
           </button>
           <button
@@ -229,21 +221,21 @@ export default function RoomsRepertory() {
               setSelected({ ...blank });
               setIsNew(true);
             }}
-            className="border-2 border-hotel-border text-hotel-gold px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:bg-hotel-cream transition-colors"
+            className="bg-hotel-gold text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
           >
-            <Plus size={16} />
+            <Plus size={14} />
             {t("newRecord")}
           </button>
         </div>
       </div>
       {selected && (
-        <div className="bg-white rounded border border-hotel-border p-7 space-y-4 print:hidden">
-          <h3 className="text-base font-bold text-hotel-gold">
+        <div className="bg-white rounded p-4 space-y-4 print:hidden">
+          <h3 className="text-sm font-semibold text-hotel-text-primary uppercase tracking-wide">
             {isNew ? t("newRoom") : t("editRoom")}
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div>
-              <label className="block text-sm font-semibold text-hotel-text-primary mb-2">
+              <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                 {t("category")}
               </label>
               <select
@@ -252,7 +244,7 @@ export default function RoomsRepertory() {
                   handleChange("categorie", Number(e.target.value))
                 }
                 title={t("category")}
-                className="w-full border-2 border-hotel-border hover:border-hotel-border focus:border-hotel-gold focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
+                className="w-full border border-gray-300 rounded px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-hotel-gold"
               >
                 {catrooms.map((c) => (
                   <option key={c.code} value={c.code}>
@@ -272,7 +264,7 @@ export default function RoomsRepertory() {
               ] as [keyof RDF, string, string][]
             ).map(([field, label, type]) => (
               <div key={field}>
-                <label className="block text-sm font-semibold text-hotel-text-primary mb-2">
+                <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                   {label}
                 </label>
                 <input
@@ -287,13 +279,13 @@ export default function RoomsRepertory() {
                     )
                   }
                   title={label}
-                  className="w-full border-2 border-hotel-border hover:border-hotel-border focus:border-hotel-gold focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-hotel-gold"
                 />
               </div>
             ))}
             {!isNew && (
               <div>
-                <label className="block text-sm font-semibold text-hotel-text-primary mb-2">
+                <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
                   {t("status")}
                 </label>
                 <select
@@ -302,7 +294,7 @@ export default function RoomsRepertory() {
                     handleStatusChange(e.target.value as RoomStatusCode)
                   }
                   title={t("status")}
-                  className="w-full border-2 border-hotel-border hover:border-hotel-border focus:border-hotel-gold focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors"
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-hotel-gold"
                 >
                   {statuses.map((s) => (
                     <option key={s.code} value={s.code}>
@@ -320,40 +312,38 @@ export default function RoomsRepertory() {
               ))}
             </div>
           )}
-          <div className="flex gap-3 pt-5 border-t border-hotel-border">
+          <div className="flex gap-3 pt-2 border-t border-hotel-border">
             <button
               onClick={handleSave}
-              className="bg-hotel-gold text-white px-6 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:bg-hotel-gold-dark transition-colors"
+              className="bg-hotel-gold text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
             >
-              <Save size={16} />
+              <Save size={14} />
               {t("save")}
             </button>
             {!isNew && (
               <button
                 onClick={handleDelete}
-                className="bg-hotel-danger text-white px-6 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:bg-red-700 transition-colors"
+                className="bg-hotel-danger text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium hover:bg-red-700 transition-colors"
               >
-                <Trash2 size={16} />
+                <Trash2 size={14} />
                 {t("delete")}
               </button>
             )}
             <button
               onClick={() => setSelected(null)}
-              className="border-2 border-hotel-border px-6 py-2.5 rounded text-sm font-semibold text-hotel-text-primary hover:bg-hotel-cream transition-colors"
+              className="border border-hotel-border text-hotel-text-primary px-4 py-2 rounded text-sm font-medium hover:bg-hotel-cream transition-colors"
             >
               {t("cancel")}
             </button>
           </div>
         </div>
       )}
-      <div className="bg-white rounded border border-hotel-border overflow-hidden print:border-0 print:shadow-none print:rounded-none">
-        <div className="bg-gradient-to-r from-hotel-paper to-hotel-cream px-6 py-4 border-b border-hotel-border print:hidden">
-          <h2 className="text-base font-bold text-hotel-text-primary">
-            {t("roomsDirectory")}
-          </h2>
-        </div>
+      <div className="bg-white rounded overflow-hidden print:border-0 print:shadow-none print:rounded-none">
+        <h2 className="text-sm font-semibold text-hotel-text-primary mb-2 uppercase tracking-wide px-4 pt-4 print:hidden">
+          {t("roomsDirectory")}
+        </h2>
         <table className="w-full text-sm print:text-xs">
-          <thead className="bg-white border-b-2 border-hotel-border print:border-b-4 print:border-black">
+          <thead className="bg-hotel-navy text-white sticky top-0 print:border-b-4 print:border-black">
             <tr>
               {[
                 t("roomNumber"),
@@ -366,7 +356,7 @@ export default function RoomsRepertory() {
               ].map((h) => (
                 <th
                   key={h}
-                  className="text-left px-6 py-3 font-bold text-hotel-text-primary print:text-black print:font-bold"
+                  className="text-left py-2 px-2 font-medium print:text-black print:font-bold"
                 >
                   {h}
                 </th>
@@ -377,32 +367,32 @@ export default function RoomsRepertory() {
             {rooms.map((r) => (
               <tr
                 key={r.room_num}
-                className="border-b hover:bg-hotel-cream/50 cursor-pointer transition-colors duration-150 print:border-b print:hover:bg-white"
+                className="border-b border-hotel-border hover:bg-hotel-cream cursor-pointer transition-colors print:border-b print:hover:bg-white"
                 onClick={() => {
                   setSelected({ ...r });
                   setIsNew(false);
                 }}
               >
-                <td className="px-6 py-3 font-semibold text-hotel-gold print:text-black">
+                <td className="py-2 px-2 font-medium text-hotel-text-primary print:text-black">
                   {r.room_num}
                 </td>
-                <td className="px-6 py-3 text-hotel-text-primary">
+                <td className="py-2 px-2 text-hotel-text-primary">
                   {r.designation}
                 </td>
-                <td className="px-6 py-3 text-hotel-text-primary">
+                <td className="py-2 px-2 text-hotel-text-primary">
                   {catrooms.find((c) => c.code === r.categorie)?.name ??
                     r.categorie}
                 </td>
-                <td className="px-6 py-3 text-hotel-text-primary">
+                <td className="py-2 px-2 text-hotel-text-primary">
                   {r.price_1.toLocaleString()}
                 </td>
-                <td className="px-6 py-3 text-hotel-text-primary">
+                <td className="py-2 px-2 text-hotel-text-primary">
                   {r.price_2.toLocaleString()}
                 </td>
-                <td className="px-6 py-3 text-hotel-text-primary">
+                <td className="py-2 px-2 text-hotel-text-primary">
                   {r.current_mon}
                 </td>
-                <td className="px-6 py-3 print:text-black">
+                <td className="py-2 px-2 print:text-black">
                   <span className="px-3 py-1.5 rounded-full text-xs font-semibold bg-hotel-cream text-hotel-gold print:bg-transparent print:border print:border-hotel-border">
                     {r.status}
                   </span>
@@ -412,7 +402,7 @@ export default function RoomsRepertory() {
           </tbody>
         </table>
         {rooms.length === 0 && (
-          <div className="px-6 py-12 text-center text-hotel-text-secondary print:hidden">
+          <div className="px-4 py-8 text-center text-hotel-text-secondary print:hidden">
             <p className="text-sm">{t("noRoomsFound")}</p>
           </div>
         )}

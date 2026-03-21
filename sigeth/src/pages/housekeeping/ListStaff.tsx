@@ -38,31 +38,25 @@ export default function ListStaff() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-hotel-paper to-hotel-cream p-4 space-y-4">
-      <div className="space-y-2">
-        <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
-          {t("listStaff")}
-        </h1>
-        <p className="text-sm text-hotel-text-secondary">Complete staff directory</p>
-      </div>
+    <div className="space-y-4">
       <div className="flex gap-3">
         <button
           onClick={() => window.print()}
-          className="bg-hotel-gold text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:bg-hotel-gold-dark transition-colors"
+          className="bg-hotel-gold text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
         >
-          <Printer size={16} />
+          <Printer size={14} />
           {t("print")}
         </button>
         <button
           onClick={handleExport}
-          className="bg-hotel-gold text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:bg-hotel-gold-dark transition-colors"
+          className="bg-hotel-gold text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
         >
-          <FileSpreadsheet size={16} />
+          <FileSpreadsheet size={14} />
           {t("excel")}
         </button>
       </div>
-      <div className="bg-white rounded border border-hotel-border overflow-hidden">
-        <div className="px-6 py-4 border-b border-hotel-border">
+      <div className="bg-white rounded overflow-hidden">
+        <div className="px-4 py-4">
           <div className="relative">
             <Search
               className="absolute left-3 top-1/2 transform -translate-y-1/2 text-hotel-text-secondary"
@@ -73,7 +67,7 @@ export default function ListStaff() {
               placeholder={`${t("search")} staff by name, number, or position...`}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-10 py-2.5 border-2 border-hotel-border hover:border-hotel-border focus:border-hotel-gold focus:outline-none rounded text-sm font-medium transition-colors"
+              className="w-full pl-10 pr-10 border border-gray-300 rounded px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-hotel-gold"
             />
             {searchTerm && (
               <button
@@ -86,7 +80,7 @@ export default function ListStaff() {
           </div>
         </div>
         <table className="w-full text-sm">
-          <thead className="bg-white border-b-2 border-hotel-border">
+          <thead className="bg-hotel-navy text-white sticky top-0">
             <tr>
               {[
                 t("number"),
@@ -96,7 +90,7 @@ export default function ListStaff() {
               ].map((h) => (
                 <th
                   key={h}
-                  className="text-left px-6 py-3 font-bold text-hotel-text-primary"
+                  className="text-left py-2 px-2 font-medium"
                 >
                   {h}
                 </th>
@@ -107,20 +101,20 @@ export default function ListStaff() {
             {filteredStaff.map((s) => (
               <tr
                 key={s.number}
-                className="border-b hover:bg-hotel-cream/50 transition-colors duration-150"
+                className="border-b border-hotel-border hover:bg-hotel-cream cursor-pointer transition-colors"
               >
-                <td className="px-6 py-3 font-semibold text-hotel-gold">
+                <td className="py-2 px-2 font-medium text-hotel-text-primary">
                   {s.number}
                 </td>
-                <td className="px-6 py-3 text-hotel-text-primary">{s.first_name}</td>
-                <td className="px-6 py-3 text-hotel-text-primary">{s.last_name}</td>
-                <td className="px-6 py-3 text-hotel-text-primary">{s.poste}</td>
+                <td className="py-2 px-2 text-hotel-text-primary">{s.first_name}</td>
+                <td className="py-2 px-2 text-hotel-text-primary">{s.last_name}</td>
+                <td className="py-2 px-2 text-hotel-text-primary">{s.poste}</td>
               </tr>
             ))}
           </tbody>
         </table>
         {filteredStaff.length === 0 && (
-          <div className="px-6 py-12 text-center text-hotel-text-secondary">
+          <div className="px-4 py-8 text-center text-hotel-text-secondary">
             <p className="text-sm">
               {searchTerm
                 ? `No staff members match "${searchTerm}"`
@@ -132,6 +126,3 @@ export default function ListStaff() {
     </div>
   );
 }
-
-
-

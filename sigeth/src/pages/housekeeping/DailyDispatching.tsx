@@ -70,30 +70,22 @@ export default function DailyDispatching() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-hotel-paper to-hotel-cream p-4 space-y-4">
-      <div className="space-y-2">
-        <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
-          {t("dailyDispatching")}
-        </h1>
-        <p className="text-sm text-hotel-text-secondary">{t("assignStaffDesc")}</p>
-      </div>
+    <div className="space-y-4">
       <div className="flex gap-3">
         <button
           onClick={handleSave}
-          className="bg-hotel-gold text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:bg-hotel-gold-dark transition-colors"
+          className="bg-hotel-gold text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
         >
-          <Save size={16} />
+          <Save size={14} />
           {t("saveAll")}
         </button>
       </div>
-      <div className="bg-white rounded border border-hotel-border overflow-hidden">
-        <div className="bg-gradient-to-r from-hotel-paper to-hotel-cream px-6 py-4 border-b border-hotel-border">
-          <h2 className="text-base font-bold text-hotel-text-primary">
-            {t("roomsAssignment")}
-          </h2>
-        </div>
+      <div className="bg-white rounded overflow-hidden">
+        <h2 className="text-sm font-semibold text-hotel-text-primary mb-2 uppercase tracking-wide px-2">
+          {t("roomsAssignment")}
+        </h2>
         <table className="w-full text-sm">
-          <thead className="bg-white border-b-2 border-hotel-border">
+          <thead className="bg-hotel-navy text-white sticky top-0">
             <tr>
               {[
                 t("roomNumber"),
@@ -105,7 +97,7 @@ export default function DailyDispatching() {
               ].map((h) => (
                 <th
                   key={h}
-                  className="text-left px-6 py-3 font-bold text-hotel-text-primary"
+                  className="text-left py-2 px-2 font-medium"
                 >
                   {h}
                 </th>
@@ -120,21 +112,21 @@ export default function DailyDispatching() {
               return (
                 <tr
                   key={room.room_num}
-                  className="border-b hover:bg-hotel-cream/50 cursor-pointer transition-colors duration-150"
+                  className="border-b border-hotel-border hover:bg-hotel-cream cursor-pointer transition-colors"
                 >
-                  <td className="px-6 py-3 font-semibold text-hotel-gold">
+                  <td className="py-2 px-2 font-medium text-hotel-text-primary">
                     {room.room_num}
                   </td>
-                  <td className="px-6 py-3 text-hotel-text-primary">
+                  <td className="py-2 px-2 text-hotel-text-primary">
                     {room.guest_name || "—"}
                   </td>
-                  <td className="px-6 py-3 text-hotel-text-primary">
+                  <td className="py-2 px-2 text-hotel-text-primary">
                     {room.arrival_date || "—"}
                   </td>
-                  <td className="px-6 py-3 text-hotel-text-primary">
+                  <td className="py-2 px-2 text-hotel-text-primary">
                     {room.depart_date || "—"}
                   </td>
-                  <td className="px-6 py-3">
+                  <td className="py-2 px-2">
                     <span
                       className={`px-3 py-1.5 rounded-full text-xs font-semibold ${
                         room.status === "VD"
@@ -147,14 +139,14 @@ export default function DailyDispatching() {
                       {room.status}
                     </span>
                   </td>
-                  <td className="px-6 py-3">
+                  <td className="py-2 px-2">
                     <select
                       value={assigned?.staff_number ?? ""}
                       onChange={(e) =>
                         handleAssign(room.room_num, Number(e.target.value))
                       }
                       title={t("selectStaff")}
-                      className="border-2 border-hotel-border hover:border-hotel-border focus:border-hotel-gold focus:outline-none rounded px-3 py-2 text-sm w-full font-medium transition-colors"
+                      className="border border-gray-300 rounded px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-hotel-gold w-full"
                     >
                       <option value="">{t("selectStaff")}</option>
                       {staff.map((s) => (
@@ -170,7 +162,7 @@ export default function DailyDispatching() {
           </tbody>
         </table>
         {roomsToAssign.length === 0 && (
-          <div className="px-6 py-12 text-center text-hotel-text-secondary">
+          <div className="px-4 py-8 text-center text-hotel-text-secondary">
             <p className="text-sm">{t("noRoomsHousekeeping")}</p>
           </div>
         )}
@@ -178,30 +170,30 @@ export default function DailyDispatching() {
 
       {/* Daily Journal (JSTAFF.dat) - Available for printing */}
       {assignments.length > 0 && (
-        <div className="bg-white rounded border border-hotel-border overflow-hidden">
-          <div className="bg-gradient-to-r from-hotel-paper to-hotel-cream px-6 py-4 border-b border-hotel-border flex justify-between items-center">
-            <h2 className="text-base font-bold text-hotel-text-primary">
+        <div className="bg-white rounded overflow-hidden">
+          <div className="flex justify-between items-center px-2 mb-2">
+            <h2 className="text-sm font-semibold text-hotel-text-primary uppercase tracking-wide">
               {t("dailyHousekeepingJournal")}
             </h2>
             <div className="flex gap-2">
               <button
                 onClick={() => window.print()}
-                className="bg-hotel-gold text-white px-4 py-2 rounded flex items-center gap-2 text-sm hover:bg-hotel-gold-dark transition-colors"
+                className="bg-hotel-gold text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
               >
-                <Printer size={16} />
+                <Printer size={14} />
                 {t("print")}
               </button>
               <button
                 onClick={handleExport}
-                className="bg-hotel-gold text-white px-4 py-2 rounded flex items-center gap-2 text-sm hover:bg-hotel-gold-dark transition-colors"
+                className="bg-hotel-gold text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
               >
-                <FileSpreadsheet size={16} />
+                <FileSpreadsheet size={14} />
                 {t("excel")}
               </button>
             </div>
           </div>
           <table className="w-full text-sm">
-            <thead className="bg-white border-b-2 border-hotel-border">
+            <thead className="bg-hotel-navy text-white sticky top-0">
               <tr>
                 {[
                   t("staffName"),
@@ -214,7 +206,7 @@ export default function DailyDispatching() {
                 ].map((h) => (
                   <th
                     key={h}
-                    className="text-left px-6 py-3 font-bold text-hotel-text-primary"
+                    className="text-left py-2 px-2 font-medium"
                   >
                     {h}
                   </th>
@@ -225,22 +217,22 @@ export default function DailyDispatching() {
               {assignments.map((a, i) => (
                 <tr
                   key={i}
-                  className="border-b hover:bg-hotel-cream/50 transition-colors print:hover:bg-white"
+                  className="border-b border-hotel-border hover:bg-hotel-cream transition-colors print:hover:bg-white"
                 >
-                  <td className="px-6 py-3 font-semibold text-hotel-gold">
+                  <td className="py-2 px-2 font-medium text-hotel-text-primary">
                     {a.staff_name}
                   </td>
-                  <td className="px-6 py-3 text-hotel-text-primary">{a.room_num}</td>
-                  <td className="px-6 py-3 text-hotel-text-primary">
+                  <td className="py-2 px-2 text-hotel-text-primary">{a.room_num}</td>
+                  <td className="py-2 px-2 text-hotel-text-primary">
                     {a.guest_name || "—"}
                   </td>
-                  <td className="px-6 py-3 text-hotel-text-primary">
+                  <td className="py-2 px-2 text-hotel-text-primary">
                     {a.arrival_date || "—"}
                   </td>
-                  <td className="px-6 py-3 text-hotel-text-primary">
+                  <td className="py-2 px-2 text-hotel-text-primary">
                     {a.depart_date || "—"}
                   </td>
-                  <td className="px-6 py-3">
+                  <td className="py-2 px-2">
                     <span
                       className={`px-3 py-1.5 rounded-full text-xs font-semibold ${
                         a.status === "VD"
@@ -253,7 +245,7 @@ export default function DailyDispatching() {
                       {a.status}
                     </span>
                   </td>
-                  <td className="px-6 py-3 font-medium text-hotel-text-primary">
+                  <td className="py-2 px-2 font-medium text-hotel-text-primary">
                     {a.date}
                   </td>
                 </tr>
@@ -265,6 +257,3 @@ export default function DailyDispatching() {
     </div>
   );
 }
-
-
-

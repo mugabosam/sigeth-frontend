@@ -36,16 +36,10 @@ export default function RoomStatus() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-hotel-paper to-hotel-cream p-4 space-y-4">
-      <div className="space-y-2">
-        <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
-          {t("updateRoomStatus")}
-        </h1>
-        <p className="text-sm text-hotel-text-secondary">{t("updateRoomStatusDesc")}</p>
-      </div>
+    <div className="space-y-4">
       {/* Category selection (CATROOM.dat browser) */}
-      <div className="bg-white rounded border border-hotel-border p-4">
-        <h3 className="text-sm font-semibold text-hotel-gold mb-4">
+      <div className="bg-white rounded p-4 space-y-4">
+        <h3 className="text-sm font-semibold text-hotel-text-primary uppercase tracking-wide">
           {t("selectCategory")}
         </h3>
         <div className="flex gap-3 flex-wrap">
@@ -53,7 +47,7 @@ export default function RoomStatus() {
             <button
               key={c.code}
               onClick={() => setSelectedCat(c.code)}
-              className={`px-4 py-2.5 rounded text-sm font-semibold border-2 transition-colors ${
+              className={`px-4 py-2 rounded text-sm font-medium border transition-colors ${
                 selectedCat === c.code
                   ? "bg-hotel-gold text-white border-hotel-gold"
                   : "border-hotel-border text-hotel-text-primary hover:border-hotel-border hover:bg-hotel-cream"
@@ -66,19 +60,17 @@ export default function RoomStatus() {
       </div>
       {/* Room status browser */}
       {selectedCat !== null && (
-        <div className="bg-white rounded border border-hotel-border overflow-hidden">
-          <div className="px-6 py-4 bg-gradient-to-r from-hotel-paper to-hotel-cream border-b border-hotel-border">
-            <p className="text-sm text-hotel-text-primary font-semibold">
-              {t("roomsInCategory")}:{" "}
-              <span className="text-hotel-gold">
-                {catrooms.find((c) => c.code === selectedCat)?.name}
-              </span>{" "}
-              — <span className="font-bold">{filteredRooms.length}</span>{" "}
-              {t("rooms")}
-            </p>
-          </div>
+        <div className="bg-white rounded overflow-hidden">
+          <p className="text-sm font-semibold text-hotel-text-primary mb-2 uppercase tracking-wide px-4 pt-4">
+            {t("roomsInCategory")}:{" "}
+            <span className="text-hotel-gold">
+              {catrooms.find((c) => c.code === selectedCat)?.name}
+            </span>{" "}
+            — <span className="font-bold">{filteredRooms.length}</span>{" "}
+            {t("rooms")}
+          </p>
           <table className="w-full text-sm">
-            <thead className="bg-white border-b-2 border-hotel-border">
+            <thead className="bg-hotel-navy text-white sticky top-0">
               <tr>
                 {[
                   t("roomNumber"),
@@ -90,7 +82,7 @@ export default function RoomStatus() {
                 ].map((h) => (
                   <th
                     key={h}
-                    className="text-left px-6 py-3 font-bold text-hotel-text-primary"
+                    className="text-left py-2 px-2 font-medium"
                   >
                     {h}
                   </th>
@@ -101,24 +93,24 @@ export default function RoomStatus() {
               {filteredRooms.map((r) => (
                 <tr
                   key={r.room_num}
-                  className="border-b hover:bg-hotel-cream/50 cursor-pointer transition-colors duration-150"
+                  className="border-b border-hotel-border hover:bg-hotel-cream cursor-pointer transition-colors"
                 >
-                  <td className="px-6 py-3 font-semibold text-hotel-gold">
+                  <td className="py-2 px-2 font-medium text-hotel-text-primary">
                     {r.room_num}
                   </td>
-                  <td className="px-6 py-3 text-hotel-text-primary">{r.designation}</td>
-                  <td className="px-6 py-3 text-hotel-text-primary">
+                  <td className="py-2 px-2 text-hotel-text-primary">{r.designation}</td>
+                  <td className="py-2 px-2 text-hotel-text-primary">
                     {r.price_1.toLocaleString()}
                   </td>
-                  <td className="px-6 py-3 text-hotel-text-primary">
+                  <td className="py-2 px-2 text-hotel-text-primary">
                     {r.price_2.toLocaleString()}
                   </td>
-                  <td className="px-6 py-3">
+                  <td className="py-2 px-2">
                     <span className="px-3 py-1.5 rounded-full text-xs font-semibold bg-hotel-cream text-hotel-gold">
                       {r.status}
                     </span>
                   </td>
-                  <td className="px-6 py-3">
+                  <td className="py-2 px-2">
                     <select
                       value={r.status}
                       onChange={(e) =>
@@ -128,7 +120,7 @@ export default function RoomStatus() {
                         )
                       }
                       title={t("currentStatus")}
-                      className="border-2 border-hotel-border hover:border-hotel-border focus:border-hotel-gold focus:outline-none rounded px-3 py-2 text-sm font-medium transition-colors"
+                      className="border border-gray-300 rounded px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-hotel-gold"
                     >
                       {statuses.map((s) => (
                         <option key={s.code} value={s.code}>
@@ -146,6 +138,3 @@ export default function RoomStatus() {
     </div>
   );
 }
-
-
-

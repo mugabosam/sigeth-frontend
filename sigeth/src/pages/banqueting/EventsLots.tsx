@@ -117,228 +117,220 @@ export default function EventsLots() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-hotel-paper to-hotel-cream p-4">
-      <div className="max-w-4xl mx-auto space-y-4">
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
-            {t("eventsLots")}
-          </h1>
-          <button
-            onClick={() => {
-              setSelected({ lot: String(events.length + 1).padStart(2, "0"), nature: "" });
-              setIsNew(true);
-              setErrors({ isValid: true, errors: [] });
-            }}
-            className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-4 py-2 rounded flex items-center gap-2 text-sm hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-colors"
-          >
-            <Plus size={16} />
-            {t("newRecord")}
-          </button>
-        </div>
-        {selected && (
-          <div className="bg-white rounded border-2 border-hotel-border p-4 space-y-4">
-            <div className="p-3 bg-hotel-cream border border-hotel-border rounded flex gap-2">
-              <Info size={16} className="text-hotel-gold flex-shrink-0 mt-0.5" />
-              <p className="text-xs text-hotel-gold">
-                <span className="font-semibold">Lot (Event):</span> A Lot groups
-                services attached to an event for negotiating prices and
-                accounting for services provided. At each Lot, multiple supplies
-                or services are defined, quantified, and priced.
-              </p>
-            </div>
-            <h3 className="text-base font-semibold text-hotel-text-primary">
-              {isNew ? t("newEvent") : t("editEvent")}
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
-                  {t("lot")} <span className="text-hotel-gold">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={selected.lot}
-                  onChange={(e) =>
-                    handleFieldChange("lot", e.target.value)
-                  }
-                  title={t("lot")}
-                  className={`w-full border-2 hover:border-hotel-border focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors ${
-                    getErrorMessage("lot")
-                      ? "border-hotel-gold focus:border-hotel-gold"
-                      : "border-hotel-border focus:border-hotel-gold"
-                  }`}
-                />
-                {getErrorMessage("lot") && (
-                  <p className="text-xs text-hotel-gold mt-1">
-                    {getErrorMessage("lot")}
-                  </p>
-                )}
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
-                  Event Type <span className="text-hotel-gold">*</span>
-                </label>
-                <select
-                  value={selected.nature}
-                  onChange={(e) => handleFieldChange("nature", e.target.value)}
-                  title="Event Type"
-                  className={`w-full border-2 hover:border-hotel-border focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors ${
-                    getErrorMessage("nature")
-                      ? "border-hotel-gold focus:border-hotel-gold"
-                      : "border-hotel-border focus:border-hotel-gold"
-                  }`}
-                >
-                  <option value="">Select event type...</option>
-                  {EVENT_TYPES.map((type) => (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
-                    </option>
-                  ))}
-                </select>
-                {getErrorMessage("nature") && (
-                  <p className="text-xs text-hotel-gold mt-1">
-                    {getErrorMessage("nature")}
-                  </p>
-                )}
-              </div>
-            </div>
-            <div className="flex gap-3 pt-4 border-t-2 border-hotel-border">
-              <button
-                onClick={handleSave}
-                className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-2 rounded flex items-center gap-2 text-sm hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-colors"
-              >
-                <Save size={16} />
-                {t("save")}
-              </button>
-              {!isNew && (
-                <button
-                  onClick={handleDelete}
-                  className="bg-hotel-cream0 text-white px-6 py-2 rounded flex items-center gap-2 text-sm hover:bg-hotel-gold-dark transition-colors"
-                >
-                  <Trash2 size={16} />
-                  {t("delete")}
-                </button>
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <button
+          onClick={() => {
+            setSelected({ lot: String(events.length + 1).padStart(2, "0"), nature: "" });
+            setIsNew(true);
+            setErrors({ isValid: true, errors: [] });
+          }}
+          className="bg-hotel-gold text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
+        >
+          <Plus size={14} />
+          {t("newRecord")}
+        </button>
+      </div>
+      {selected && (
+        <div className="bg-white rounded p-4 space-y-4">
+          <div className="p-3 bg-hotel-cream border border-hotel-border rounded flex gap-2">
+            <Info size={16} className="text-hotel-gold flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-hotel-gold">
+              <span className="font-semibold">Lot (Event):</span> A Lot groups
+              services attached to an event for negotiating prices and
+              accounting for services provided. At each Lot, multiple supplies
+              or services are defined, quantified, and priced.
+            </p>
+          </div>
+          <h3 className="text-sm font-semibold text-hotel-text-primary uppercase tracking-wide">
+            {isNew ? t("newEvent") : t("editEvent")}
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
+                {t("lot")} <span className="text-hotel-gold">*</span>
+              </label>
+              <input
+                type="text"
+                value={selected.lot}
+                onChange={(e) =>
+                  handleFieldChange("lot", e.target.value)
+                }
+                title={t("lot")}
+                className={`w-full border border-gray-300 rounded px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-hotel-gold ${
+                  getErrorMessage("lot")
+                    ? "border-hotel-gold"
+                    : ""
+                }`}
+              />
+              {getErrorMessage("lot") && (
+                <p className="text-xs text-hotel-gold mt-1">
+                  {getErrorMessage("lot")}
+                </p>
               )}
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
+                Event Type <span className="text-hotel-gold">*</span>
+              </label>
+              <select
+                value={selected.nature}
+                onChange={(e) => handleFieldChange("nature", e.target.value)}
+                title="Event Type"
+                className={`w-full border border-gray-300 rounded px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-hotel-gold ${
+                  getErrorMessage("nature")
+                    ? "border-hotel-gold"
+                    : ""
+                }`}
+              >
+                <option value="">Select event type...</option>
+                {EVENT_TYPES.map((type) => (
+                  <option key={type.value} value={type.value}>
+                    {type.label}
+                  </option>
+                ))}
+              </select>
+              {getErrorMessage("nature") && (
+                <p className="text-xs text-hotel-gold mt-1">
+                  {getErrorMessage("nature")}
+                </p>
+              )}
+            </div>
+          </div>
+          <div className="flex gap-3 pt-2 border-t border-hotel-border">
+            <button
+              onClick={handleSave}
+              className="bg-hotel-gold text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
+            >
+              <Save size={14} />
+              {t("save")}
+            </button>
+            {!isNew && (
               <button
-                onClick={() => setSelected(null)}
-                className="border-2 border-hotel-border hover:border-hotel-border px-6 py-2 rounded text-sm font-medium transition-colors"
+                onClick={handleDelete}
+                className="bg-hotel-danger text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium hover:bg-red-700 transition-colors"
+              >
+                <Trash2 size={14} />
+                {t("delete")}
+              </button>
+            )}
+            <button
+              onClick={() => setSelected(null)}
+              className="border border-hotel-border text-hotel-text-primary px-4 py-2 rounded text-sm font-medium hover:bg-hotel-cream transition-colors"
+            >
+              {t("cancel")}
+            </button>
+          </div>
+        </div>
+      )}
+      <div className="bg-white rounded overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="bg-hotel-navy text-white sticky top-0">
+            <tr>
+              <th className="text-left py-2 px-2 font-medium">
+                {t("lot")}
+              </th>
+              <th className="text-left py-2 px-2 font-medium">
+                Event Type
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {events.map((e) => (
+              <tr
+                key={e.lot}
+                className="border-b border-hotel-border hover:bg-hotel-cream cursor-pointer transition-colors"
+                onClick={() => {
+                  setSelected({ ...e });
+                  setIsNew(false);
+                }}
+              >
+                <td className="py-2 px-2 font-medium text-hotel-text-primary font-mono">{e.lot}</td>
+                <td className="py-2 px-2">
+                  {EVENT_TYPES.find((t) => t.value === e.nature)?.label ||
+                    e.nature}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {confirmAction && confirmType === "save" && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded p-4 max-w-md mx-4 animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-hotel-cream mb-4">
+              <Save size={24} className="text-hotel-gold" />
+            </div>
+            <h3 className="text-sm font-semibold text-hotel-text-primary uppercase tracking-wide mb-2">
+              Confirm Event
+            </h3>
+            <p className="text-hotel-text-secondary mb-6 text-sm leading-relaxed">
+              {isNew ? "Add" : "Update"} event lot{" "}
+              <span className="font-semibold text-hotel-gold">
+                {selected?.lot}
+              </span>{" "}
+              as a{" "}
+              <span className="font-semibold">
+                {EVENT_TYPES.find((t) => t.value === selected?.nature)?.label}
+              </span>
+              ?
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setConfirmAction(false)}
+                className="border border-hotel-border text-hotel-text-primary px-4 py-2 rounded text-sm font-medium hover:bg-hotel-cream transition-colors"
               >
                 {t("cancel")}
               </button>
+              <button
+                onClick={confirmSave}
+                className="bg-hotel-gold text-white px-4 py-2 rounded text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
+              >
+                Confirm
+              </button>
             </div>
           </div>
-        )}
-        <div className="bg-white rounded border-2 border-hotel-border overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-white border-b-2 border-hotel-border">
-              <tr>
-                <th className="text-left px-4 py-3 font-medium text-hotel-text-secondary">
-                  {t("lot")}
-                </th>
-                <th className="text-left px-4 py-3 font-medium text-hotel-text-secondary">
-                  Event Type
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {events.map((e) => (
-                <tr
-                  key={e.lot}
-                  className="border-b hover:bg-hotel-cream/50 cursor-pointer transition-colors"
-                  onClick={() => {
-                    setSelected({ ...e });
-                    setIsNew(false);
-                  }}
-                >
-                  <td className="px-4 py-3 font-mono">{e.lot}</td>
-                  <td className="px-4 py-3">
-                    {EVENT_TYPES.find((t) => t.value === e.nature)?.label ||
-                      e.nature}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         </div>
+      )}
 
-        {confirmAction && confirmType === "save" && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-white rounded p-4 max-w-md mx-4 animate-in fade-in zoom-in-95">
-              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-hotel-cream mb-4">
-                <Save size={24} className="text-hotel-gold" />
-              </div>
-              <h3 className="text-base font-bold text-hotel-text-primary mb-2">
-                Confirm Event
-              </h3>
-              <p className="text-hotel-text-secondary mb-6 text-sm leading-relaxed">
-                {isNew ? "Add" : "Update"} event lot{" "}
-                <span className="font-semibold text-hotel-gold">
-                  {selected?.lot}
-                </span>{" "}
-                as a{" "}
-                <span className="font-semibold">
-                  {EVENT_TYPES.find((t) => t.value === selected?.nature)?.label}
-                </span>
-                ?
-              </p>
-              <div className="flex gap-3 justify-end">
-                <button
-                  onClick={() => setConfirmAction(false)}
-                  className="border-2 border-hotel-border hover:border-hotel-border px-6 py-2.5 rounded text-sm font-semibold text-hotel-text-primary hover:bg-hotel-cream transition-colors"
-                >
-                  {t("cancel")}
-                </button>
-                <button
-                  onClick={confirmSave}
-                  className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-2.5 rounded text-sm font-semibold hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-colors"
-                >
-                  Confirm
-                </button>
-              </div>
+      {confirmAction && confirmType === "delete" && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded p-4 max-w-md mx-4 animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-hotel-cream mb-4">
+              <Trash2 size={24} className="text-hotel-gold" />
+            </div>
+            <h3 className="text-sm font-semibold text-hotel-text-primary uppercase tracking-wide mb-2">
+              Confirm Delete
+            </h3>
+            <p className="text-hotel-text-secondary mb-6 text-sm leading-relaxed">
+              Delete event lot{" "}
+              <span className="font-semibold text-hotel-gold">
+                {selected?.lot}
+              </span>{" "}
+              (
+              <span className="font-semibold">
+                {EVENT_TYPES.find((t) => t.value === selected?.nature)?.label}
+              </span>
+              )? This action cannot be undone.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setConfirmAction(false)}
+                className="border border-hotel-border text-hotel-text-primary px-4 py-2 rounded text-sm font-medium hover:bg-hotel-cream transition-colors"
+              >
+                {t("cancel")}
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="bg-hotel-gold text-white px-4 py-2 rounded text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
+              >
+                {t("delete")}
+              </button>
             </div>
           </div>
-        )}
-
-        {confirmAction && confirmType === "delete" && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-white rounded p-4 max-w-md mx-4 animate-in fade-in zoom-in-95">
-              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-hotel-cream mb-4">
-                <Trash2 size={24} className="text-hotel-gold" />
-              </div>
-              <h3 className="text-base font-bold text-hotel-text-primary mb-2">
-                Confirm Delete
-              </h3>
-              <p className="text-hotel-text-secondary mb-6 text-sm leading-relaxed">
-                Delete event lot{" "}
-                <span className="font-semibold text-hotel-gold">
-                  {selected?.lot}
-                </span>{" "}
-                (
-                <span className="font-semibold">
-                  {EVENT_TYPES.find((t) => t.value === selected?.nature)?.label}
-                </span>
-                )? This action cannot be undone.
-              </p>
-              <div className="flex gap-3 justify-end">
-                <button
-                  onClick={() => setConfirmAction(false)}
-                  className="border-2 border-hotel-border hover:border-hotel-border px-6 py-2.5 rounded text-sm font-semibold text-hotel-text-primary hover:bg-hotel-cream transition-colors"
-                >
-                  {t("cancel")}
-                </button>
-                <button
-                  onClick={confirmDelete}
-                  className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-2.5 rounded text-sm font-semibold hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-colors"
-                >
-                  {t("delete")}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
-
-
-

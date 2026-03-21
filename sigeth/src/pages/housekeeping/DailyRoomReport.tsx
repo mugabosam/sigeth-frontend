@@ -29,31 +29,25 @@ export default function DailyRoomReport() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-hotel-paper to-hotel-cream p-4 space-y-4">
-      <div className="space-y-2">
-        <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent">
-          {t("dailyRoomReport")}
-        </h1>
-        <p className="text-sm text-hotel-text-secondary">{t("dailyRoomReportDesc")}</p>
-      </div>
+    <div className="space-y-4">
       <div className="flex gap-3">
         <button
           onClick={() => window.print()}
-          className="bg-hotel-gold text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:bg-hotel-gold-dark transition-colors"
+          className="bg-hotel-gold text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
         >
-          <Printer size={16} />
+          <Printer size={14} />
           {t("print")}
         </button>
         <button
           onClick={handleExport}
-          className="bg-hotel-gold text-white px-5 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:bg-hotel-gold-dark transition-colors"
+          className="bg-hotel-gold text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
         >
-          <FileSpreadsheet size={16} />
+          <FileSpreadsheet size={14} />
           {t("excel")}
         </button>
       </div>
-      <div className="bg-white rounded border border-hotel-border p-4">
-        <label className="block text-sm font-semibold text-hotel-text-primary mb-3">
+      <div className="bg-white rounded p-4">
+        <label className="block text-xs font-medium text-hotel-text-secondary mb-1">
           {t("selectStatus")}
         </label>
         <select
@@ -62,7 +56,7 @@ export default function DailyRoomReport() {
             setStatusFilter(e.target.value as RoomStatusCode | "")
           }
           title={t("selectStatus")}
-          className="border-2 border-hotel-border hover:border-hotel-border focus:border-hotel-gold focus:outline-none rounded px-4 py-2.5 text-sm font-medium transition-colors w-full max-w-xs"
+          className="border border-gray-300 rounded px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-hotel-gold w-full max-w-xs"
         >
           <option value="">{t("allStatuses")}</option>
           {statuses.map((s) => (
@@ -72,9 +66,9 @@ export default function DailyRoomReport() {
           ))}
         </select>
       </div>
-      <div className="bg-white rounded border border-hotel-border overflow-hidden">
+      <div className="bg-white rounded overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-white border-b-2 border-hotel-border">
+          <thead className="bg-hotel-navy text-white sticky top-0">
             <tr>
               {[
                 t("roomNum"),
@@ -85,7 +79,7 @@ export default function DailyRoomReport() {
               ].map((h) => (
                 <th
                   key={h}
-                  className="text-left px-6 py-3 font-bold text-hotel-text-primary"
+                  className="text-left py-2 px-2 font-medium"
                 >
                   {h}
                 </th>
@@ -96,19 +90,19 @@ export default function DailyRoomReport() {
             {filtered.map((r) => (
               <tr
                 key={r.room_num}
-                className="border-b hover:bg-hotel-cream/50 transition-colors duration-150"
+                className="border-b border-hotel-border hover:bg-hotel-cream transition-colors"
               >
-                <td className="px-6 py-3 font-semibold text-hotel-gold">
+                <td className="py-2 px-2 font-medium text-hotel-text-primary">
                   {r.room_num}
                 </td>
-                <td className="px-6 py-3 text-hotel-text-primary">{r.designation}</td>
-                <td className="px-6 py-3 text-hotel-text-primary">
+                <td className="py-2 px-2 text-hotel-text-primary">{r.designation}</td>
+                <td className="py-2 px-2 text-hotel-text-primary">
                   {r.price_1.toLocaleString()}
                 </td>
-                <td className="px-6 py-3 text-hotel-text-primary">
+                <td className="py-2 px-2 text-hotel-text-primary">
                   {r.price_2.toLocaleString()}
                 </td>
-                <td className="px-6 py-3">
+                <td className="py-2 px-2">
                   <span className="px-3 py-1.5 rounded-full text-xs font-semibold bg-hotel-cream text-hotel-gold">
                     {r.status}
                   </span>
@@ -117,7 +111,7 @@ export default function DailyRoomReport() {
             ))}
           </tbody>
         </table>
-        <div className="px-6 py-3 bg-gradient-to-r from-hotel-paper to-hotel-cream border-t-2 border-hotel-border text-sm font-semibold text-hotel-text-primary">
+        <div className="px-2 py-2 border-t border-hotel-border text-sm font-semibold text-hotel-text-primary">
           {t("totalRooms")}:{" "}
           <span className="text-hotel-gold">{filtered.length}</span>
         </div>
@@ -125,6 +119,3 @@ export default function DailyRoomReport() {
     </div>
   );
 }
-
-
-

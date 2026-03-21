@@ -118,314 +118,304 @@ export default function BanquetOrders() {
   const grandTotal = buffer.reduce((s, b) => s + b.total, 0);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-hotel-paper to-hotel-cream p-4">
-      <div className="max-w-6xl mx-auto space-y-4">
-        <div>
-          <h1 className="text-2xl font-bold bg-hotel-gold bg-clip-text text-transparent mb-4">
-            {t("banquetOrders")}
-          </h1>
+    <div className="space-y-4">
+      {error && (
+        <div className="bg-hotel-cream border border-hotel-border text-hotel-gold px-4 py-3 rounded text-sm">
+          {error}
         </div>
-
-        {error && (
-          <div className="bg-hotel-cream border border-hotel-border text-hotel-gold px-4 py-3 rounded text-sm">
-            {error}
-          </div>
+      )}
+      {/* Step 1: Select active group (from GRC.dat) */}
+      <div className="bg-white rounded p-4 space-y-3">
+        <h3 className="text-sm font-semibold text-hotel-text-primary uppercase tracking-wide">
+          {t("step")} 1: {t("selectGroup")}
+        </h3>
+        <select
+          value={selectedGroup}
+          onChange={(e) => {
+            setSelectedGroup(e.target.value);
+            setSelectedLot(null);
+            setBuffer([]);
+            setError("");
+          }}
+          title={t("selectGroup")}
+          className="border border-gray-300 rounded px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-hotel-gold w-full max-w-md"
+        >
+          <option value="">{t("selectGroup")}...</option>
+          {activeGroups.map((g) => (
+            <option key={g.code_g} value={g.code_g}>
+              {g.code_g} — {g.groupe_name}
+            </option>
+          ))}
+        </select>
+        {selectedGroup && !group && (
+          <p className="text-hotel-gold text-sm">{t("groupClosed")}</p>
         )}
-        {/* Step 1: Select active group (from GRC.dat) */}
-        <div className="bg-white rounded border-2 border-hotel-border p-4 space-y-3">
-          <h3 className="font-semibold text-sm">
-            {t("step")} 1: {t("selectGroup")}
+      </div>
+      {/* Step 2: Select event (from EVENTS.dat) */}
+      {group && (
+        <div className="bg-white rounded p-4 space-y-3">
+          <h3 className="text-sm font-semibold text-hotel-text-primary uppercase tracking-wide">
+            {t("step")} 2: {t("selectEvent")}
           </h3>
-          <select
-            value={selectedGroup}
-            onChange={(e) => {
-              setSelectedGroup(e.target.value);
-              setSelectedLot(null);
-              setBuffer([]);
-              setError("");
-            }}
-            title={t("selectGroup")}
-            className="border-2 border-hotel-border hover:border-hotel-border focus:border-hotel-gold focus:outline-none rounded px-4 py-2.5 text-sm font-medium w-full max-w-md transition-colors"
-          >
-            <option value="">{t("selectGroup")}...</option>
-            {activeGroups.map((g) => (
-              <option key={g.code_g} value={g.code_g}>
-                {g.code_g} — {g.groupe_name}
-              </option>
-            ))}
-          </select>
-          {selectedGroup && !group && (
-            <p className="text-hotel-gold text-sm">{t("groupClosed")}</p>
-          )}
+          <div className="space-y-2">
+            <div className="text-xs text-hotel-text-secondary font-medium">
+              {t("availableEvents")}:
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {events.map((e) => (
+                <button
+                  key={e.lot}
+                  onClick={() => loadServices(e.lot)}
+                  className={`px-4 py-2 rounded text-sm border transition-colors ${selectedLot === e.lot ? "bg-hotel-gold text-white border-hotel-gold" : "border-hotel-border hover:bg-hotel-cream"}`}
+                >
+                  <div className="font-bold">
+                    {String(e.lot).padStart(2, "0")}
+                  </div>
+                  <div className="text-xs">
+                    {EVENT_TYPES.find((t) => t.value === e.nature)?.label ||
+                      e.nature}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
-        {/* Step 2: Select event (from EVENTS.dat) */}
-        {group && (
-          <div className="bg-white rounded border-2 border-hotel-border p-4 space-y-3">
-            <h3 className="font-semibold text-sm">
-              {t("step")} 2: {t("selectEvent")}
+      )}
+      {/* Step 3: Enter quantities (from BANQUET.dat) */}
+      {buffer.length > 0 && (
+        <div className="bg-white rounded overflow-hidden">
+          <div className="p-4 border-b border-hotel-border space-y-2">
+            <h3 className="text-sm font-semibold text-hotel-text-primary uppercase tracking-wide">
+              {t("step")} 3: {t("enterQuantities")}
             </h3>
-            <div className="space-y-2">
-              <div className="text-xs text-hotel-text-secondary font-medium">
-                {t("availableEvents")}:
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {events.map((e) => (
-                  <button
-                    key={e.lot}
-                    onClick={() => loadServices(e.lot)}
-                    className={`px-4 py-2 rounded text-sm border-2 transition-colors ${selectedLot === e.lot ? "bg-gradient-to-r from-amber-500 to-amber-600 text-white border-hotel-gold" : "border-hotel-border hover:border-hotel-border hover:bg-hotel-cream"}`}
-                  >
-                    <div className="font-bold">
-                      {String(e.lot).padStart(2, "0")}
-                    </div>
-                    <div className="text-xs">
-                      {EVENT_TYPES.find((t) => t.value === e.nature)?.label ||
-                        e.nature}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-        {/* Step 3: Enter quantities (from BANQUET.dat) */}
-        {buffer.length > 0 && (
-          <div className="bg-white rounded border-2 border-hotel-border overflow-hidden">
-            <div className="p-4 border-b-2 border-hotel-border space-y-2">
-              <h3 className="font-semibold text-sm">
-                {t("step")} 3: {t("enterQuantities")}
-              </h3>
-              <p className="text-xs text-hotel-text-secondary">
-                <Clock size={14} className="inline mr-1" />
-                <strong>{t("date")}:</strong> {t("autoGenerated")}.{" "}
-                <strong>{t("qty")}:</strong> {t("enterQuantities")}.
-              </p>
-            </div>
-            <table className="w-full text-sm">
-              <thead className="bg-white border-b-2 border-hotel-border">
-                <tr>
-                  <th className="text-left px-4 py-3 font-medium text-hotel-text-secondary">
-                    {t("designation")}
-                  </th>
-                  <th className="text-left px-4 py-3 font-medium text-hotel-text-secondary">
-                    {t("unity")}
-                  </th>
-                  <th className="text-left px-4 py-3 font-medium text-hotel-text-secondary">
-                    {t("unitPrice")}
-                  </th>
-                  <th className="text-left px-4 py-3 font-medium text-hotel-text-secondary">
-                    {t("qty")}
-                  </th>
-                  <th className="text-left px-4 py-3 font-medium text-hotel-text-secondary">
-                    {t("total")}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {buffer.map((b, i) => (
-                  <tr
-                    key={i}
-                    className="border-b hover:bg-hotel-cream/50 transition-colors"
-                  >
-                    <td className="px-4 py-3">{b.item}</td>
-                    <td className="px-4 py-3">{b.unity}</td>
-                    <td className="px-4 py-3">{b.price.toLocaleString()}</td>
-                    <td className="px-4 py-3">
-                      <input
-                        type="number"
-                        min={0}
-                        value={b.qty}
-                        onChange={(e) => updateQty(i, Number(e.target.value))}
-                        title={t("qty")}
-                        className="w-20 border-2 border-hotel-border hover:border-hotel-border focus:border-hotel-gold focus:outline-none rounded px-2 py-1 text-sm transition-colors"
-                      />
-                    </td>
-                    <td className="px-4 py-3 font-semibold">
-                      {b.total.toLocaleString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-              <tfoot className="bg-hotel-cream border-t-2 border-hotel-border">
-                <tr>
-                  <td
-                    colSpan={4}
-                    className="px-4 py-3 font-semibold text-right"
-                  >
-                    {t("grandTotal")}
-                  </td>
-                  <td className="px-4 py-3 font-bold">
-                    {grandTotal.toLocaleString()}
-                  </td>
-                </tr>
-              </tfoot>
-            </table>
-            <div className="p-4 border-t-2 border-hotel-border">
-              <button
-                onClick={handleTransfer}
-                className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-2 rounded flex items-center gap-2 text-sm hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-colors"
-              >
-                <Save size={16} />
-                {t("transferToJournal")}
-              </button>
-            </div>
-          </div>
-        )}
-        {/* Existing JBANQUET records */}
-        <div className="bg-white rounded border-2 border-hotel-border overflow-hidden">
-          <div className="p-4 border-b-2 border-hotel-border flex items-center gap-2 bg-hotel-cream">
-            <ShoppingCart size={18} className="text-hotel-gold" />
-            <h3 className="font-semibold text-sm text-hotel-text-primary">
-              {t("journalEntries")}: {jbanquet.length}
-            </h3>
+            <p className="text-xs text-hotel-text-secondary">
+              <Clock size={14} className="inline mr-1" />
+              <strong>{t("date")}:</strong> {t("autoGenerated")}.{" "}
+              <strong>{t("qty")}:</strong> {t("enterQuantities")}.
+            </p>
           </div>
           <table className="w-full text-sm">
-            <thead className="bg-white border-b-2 border-hotel-border">
+            <thead className="bg-hotel-navy text-white sticky top-0">
               <tr>
-                {[
-                  "Lot",
-                  "Date",
-                  "Designation",
-                  "Unity",
-                  "Qty",
-                  "Price",
-                  "Total",
-                ].map((h) => (
-                  <th
-                    key={h}
-                    className="text-left px-4 py-3 font-medium text-hotel-text-secondary"
-                  >
-                    {h}
-                  </th>
-                ))}
+                <th className="text-left py-2 px-2 font-medium">
+                  {t("designation")}
+                </th>
+                <th className="text-left py-2 px-2 font-medium">
+                  {t("unity")}
+                </th>
+                <th className="text-left py-2 px-2 font-medium">
+                  {t("unitPrice")}
+                </th>
+                <th className="text-left py-2 px-2 font-medium">
+                  {t("qty")}
+                </th>
+                <th className="text-left py-2 px-2 font-medium">
+                  {t("total")}
+                </th>
               </tr>
             </thead>
             <tbody>
-              {jbanquet.map((j, i) => (
+              {buffer.map((b, i) => (
                 <tr
                   key={i}
-                  className="border-b hover:bg-hotel-cream/50 transition-colors"
+                  className="border-b border-hotel-border hover:bg-hotel-cream cursor-pointer transition-colors"
                 >
-                  <td className="px-4 py-3 font-mono font-semibold">
-                    {String(j.lot).padStart(2, "0")}
+                  <td className="py-2 px-2">{b.item}</td>
+                  <td className="py-2 px-2">{b.unity}</td>
+                  <td className="py-2 px-2">{b.price.toLocaleString()}</td>
+                  <td className="py-2 px-2">
+                    <input
+                      type="number"
+                      min={0}
+                      value={b.qty}
+                      onChange={(e) => updateQty(i, Number(e.target.value))}
+                      title={t("qty")}
+                      className="w-20 border border-gray-300 rounded px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-hotel-gold"
+                    />
                   </td>
-                  <td className="px-4 py-3">{j.date}</td>
-                  <td className="px-4 py-3">{j.item}</td>
-                  <td className="px-4 py-3">{j.unity}</td>
-                  <td className="px-4 py-3 font-semibold">{j.qty}</td>
-                  <td className="px-4 py-3">{j.price.toLocaleString()}</td>
-                  <td className="px-4 py-3 font-semibold">
-                    {j.total.toLocaleString()}
+                  <td className="py-2 px-2 font-semibold">
+                    {b.total.toLocaleString()}
                   </td>
                 </tr>
               ))}
             </tbody>
+            <tfoot className="bg-hotel-cream border-t border-hotel-border">
+              <tr>
+                <td
+                  colSpan={4}
+                  className="py-2 px-2 font-semibold text-right"
+                >
+                  {t("grandTotal")}
+                </td>
+                <td className="py-2 px-2 font-bold">
+                  {grandTotal.toLocaleString()}
+                </td>
+              </tr>
+            </tfoot>
           </table>
+          <div className="p-4 pt-2 border-t border-hotel-border">
+            <button
+              onClick={handleTransfer}
+              className="bg-hotel-gold text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
+            >
+              <Save size={14} />
+              {t("transferToJournal")}
+            </button>
+          </div>
+        </div>
+      )}
+      {/* Existing JBANQUET records */}
+      <div className="bg-white rounded overflow-hidden">
+        <div className="p-4 border-b border-hotel-border flex items-center gap-2">
+          <ShoppingCart size={18} className="text-hotel-gold" />
+          <h3 className="text-sm font-semibold text-hotel-text-primary uppercase tracking-wide">
+            {t("journalEntries")}: {jbanquet.length}
+          </h3>
+        </div>
+        <table className="w-full text-sm">
+          <thead className="bg-hotel-navy text-white sticky top-0">
+            <tr>
+              {[
+                "Lot",
+                "Date",
+                "Designation",
+                "Unity",
+                "Qty",
+                "Price",
+                "Total",
+              ].map((h) => (
+                <th
+                  key={h}
+                  className="text-left py-2 px-2 font-medium"
+                >
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {jbanquet.map((j, i) => (
+              <tr
+                key={i}
+                className="border-b border-hotel-border hover:bg-hotel-cream cursor-pointer transition-colors"
+              >
+                <td className="py-2 px-2 font-medium text-hotel-text-primary font-mono">
+                  {String(j.lot).padStart(2, "0")}
+                </td>
+                <td className="py-2 px-2">{j.date}</td>
+                <td className="py-2 px-2">{j.item}</td>
+                <td className="py-2 px-2">{j.unity}</td>
+                <td className="py-2 px-2 font-semibold">{j.qty}</td>
+                <td className="py-2 px-2">{j.price.toLocaleString()}</td>
+                <td className="py-2 px-2 font-semibold">
+                  {j.total.toLocaleString()}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
 
-          {/* Approval Section */}
-          <div className="bg-gradient-to-r from-hotel-paper to-hotel-cream p-4 border-t-2 border-hotel-border">
-            <div className="grid grid-cols-2 gap-12 max-w-2xl mx-auto">
-              {/* Established By */}
-              <div className="space-y-4">
-                <div className="text-sm font-semibold text-hotel-text-primary">
-                  {t("establishedBy")}
+        {/* Approval Section */}
+        <div className="p-4 border-t border-hotel-border">
+          <div className="grid grid-cols-2 gap-12 max-w-2xl mx-auto">
+            {/* Established By */}
+            <div className="space-y-4">
+              <div className="text-sm font-semibold text-hotel-text-primary">
+                {t("establishedBy")}
+              </div>
+              <div className="space-y-2">
+                <div className="text-xs text-hotel-text-secondary">
+                  {t("companyManager")}
                 </div>
-                <div className="space-y-2">
-                  <div className="text-xs text-hotel-text-secondary">
-                    {t("companyManager")}
-                  </div>
-                  <div className="border-b-2 border-hotel-border py-8"></div>
-                  <div className="text-xs text-hotel-text-secondary">
-                    {t("signatureDate")}
-                  </div>
+                <div className="border-b border-hotel-border py-8"></div>
+                <div className="text-xs text-hotel-text-secondary">
+                  {t("signatureDate")}
                 </div>
               </div>
+            </div>
 
-              {/* Verified & Approved By */}
-              <div className="space-y-4">
-                <div className="text-sm font-semibold text-hotel-text-primary">
-                  {t("verifiedApprovedBy")}
+            {/* Verified & Approved By */}
+            <div className="space-y-4">
+              <div className="text-sm font-semibold text-hotel-text-primary">
+                {t("verifiedApprovedBy")}
+              </div>
+              <div className="space-y-2">
+                <div className="text-xs text-hotel-text-secondary">
+                  {t("customerGroup")}
                 </div>
-                <div className="space-y-2">
-                  <div className="text-xs text-hotel-text-secondary">
-                    {t("customerGroup")}
-                  </div>
-                  <div className="border-b-2 border-hotel-border py-8"></div>
-                  <div className="text-xs text-hotel-text-secondary">
-                    {t("signatureDate")}
-                  </div>
+                <div className="border-b border-hotel-border py-8"></div>
+                <div className="text-xs text-hotel-text-secondary">
+                  {t("signatureDate")}
                 </div>
               </div>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Success / Error Result Modal */}
-        {resultModal && (
-          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-            <div className="bg-white rounded p-6 w-full max-w-md text-center space-y-4">
-              {resultModal.type === "success" ? (
-                <CheckCircle2 size={40} className="text-emerald-500 mx-auto" />
-              ) : (
-                <AlertTriangle size={40} className="text-hotel-danger mx-auto" />
-              )}
-              <h3 className="text-base font-semibold text-hotel-text-primary">
-                {resultModal.type === "success" ? t("success") : t("error")}
-              </h3>
-              <p className="text-sm text-hotel-text-secondary">{resultModal.message}</p>
+      {/* Success / Error Result Modal */}
+      {resultModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded p-6 w-full max-w-md text-center space-y-4">
+            {resultModal.type === "success" ? (
+              <CheckCircle2 size={40} className="text-emerald-500 mx-auto" />
+            ) : (
+              <AlertTriangle size={40} className="text-hotel-danger mx-auto" />
+            )}
+            <h3 className="text-sm font-semibold text-hotel-text-primary">
+              {resultModal.type === "success" ? t("success") : t("error")}
+            </h3>
+            <p className="text-sm text-hotel-text-secondary">{resultModal.message}</p>
+            <button
+              onClick={() => setResultModal(null)}
+              className={`px-4 py-2 rounded text-sm font-medium text-white ${
+                resultModal.type === "success"
+                  ? "bg-emerald-500 hover:bg-emerald-600"
+                  : "bg-hotel-danger hover:bg-red-700"
+              }`}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Transfer Confirmation Modal */}
+      {confirmTransfer && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded p-4 max-w-md mx-4 animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-hotel-cream mb-4">
+              <ShoppingCart size={24} className="text-hotel-gold" />
+            </div>
+            <h3 className="text-sm font-semibold text-hotel-text-primary uppercase tracking-wide mb-2">
+              Confirm Transfer to Journal
+            </h3>
+            <p className="text-hotel-text-secondary mb-6 text-sm leading-relaxed">
+              You are about to transfer{" "}
+              <span className="font-semibold text-hotel-gold">
+                {itemsToTransfer} item(s)
+              </span>{" "}
+              to the journal for{" "}
+              <span className="font-semibold">{group?.groupe_name}</span>.
+              This action cannot be undone.
+            </p>
+            <div className="flex gap-3 justify-end">
               <button
-                onClick={() => setResultModal(null)}
-                className={`px-6 py-2 rounded text-sm font-medium text-white ${
-                  resultModal.type === "success"
-                    ? "bg-emerald-500 hover:bg-emerald-600"
-                    : "bg-hotel-danger hover:bg-red-700"
-                }`}
+                onClick={() => setConfirmTransfer(false)}
+                className="border border-hotel-border text-hotel-text-primary px-4 py-2 rounded text-sm font-medium hover:bg-hotel-cream transition-colors"
               >
-                OK
+                Cancel
+              </button>
+              <button
+                onClick={confirmTransferAction}
+                className="bg-hotel-gold text-white px-4 py-2 rounded text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
+              >
+                Transfer
               </button>
             </div>
           </div>
-        )}
-
-        {/* Transfer Confirmation Modal */}
-        {confirmTransfer && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-white rounded p-4 max-w-md mx-4 animate-in fade-in zoom-in-95">
-              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-hotel-cream mb-4">
-                <ShoppingCart size={24} className="text-hotel-gold" />
-              </div>
-              <h3 className="text-base font-bold text-hotel-text-primary mb-2">
-                Confirm Transfer to Journal
-              </h3>
-              <p className="text-hotel-text-secondary mb-6 text-sm leading-relaxed">
-                You are about to transfer{" "}
-                <span className="font-semibold text-hotel-gold">
-                  {itemsToTransfer} item(s)
-                </span>{" "}
-                to the journal for{" "}
-                <span className="font-semibold">{group?.groupe_name}</span>.
-                This action cannot be undone.
-              </p>
-              <div className="flex gap-3 justify-end">
-                <button
-                  onClick={() => setConfirmTransfer(false)}
-                  className="border-2 border-hotel-border hover:border-hotel-border px-6 py-2.5 rounded text-sm font-semibold text-hotel-text-primary hover:bg-hotel-cream transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={confirmTransferAction}
-                  className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-2.5 rounded text-sm font-semibold hover:shadow-lg hover:from-amber-600 hover:to-amber-700 transition-colors"
-                >
-                  Transfer
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
-
-
