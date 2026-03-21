@@ -180,28 +180,6 @@ export function HotelDataProvider({ children }: { children: ReactNode }) {
       setGroupReservations(groupsData);
       setGroupArchive(groupArchivesData);
 
-      // Manager_R also needs laundry + banquet journals
-      // for Invoice Preview and Daily Consumptions
-      try {
-        const [laundryJournalData, laundryArchiveData] = await Promise.all([
-          housekeepingApi.laundryJournal(),
-          housekeepingApi.laundryArchive(),
-        ]);
-        setJlaundry(laundryJournalData.concat(laundryArchiveData));
-      } catch {
-        // Laundry data may not be accessible — fail silently
-      }
-
-      try {
-        const [banquetJournalData, banquetArchiveData] = await Promise.all([
-          banquetingApi.journal(),
-          banquetingApi.archive(),
-        ]);
-        setJbanquet(banquetJournalData.concat(banquetArchiveData));
-      } catch {
-        // Banquet data may not be accessible — fail silently
-      }
-
       return;
     }
 
