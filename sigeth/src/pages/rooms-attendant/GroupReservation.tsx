@@ -120,7 +120,7 @@ export default function GroupReservation() {
         : 0;
     const base = qty * f.puv * f.number_pers;
     const stay_cost = f.discount > 0 ? base * (1 - f.discount / 100) : base;
-    return { ...f, stay_cost };
+    return { ...f, qty, stay_cost };
   };
 
   const handleChange = (field: keyof GRC, value: string | number) => {
@@ -369,19 +369,21 @@ export default function GroupReservation() {
                 value={selected.current_mon || "RWF"}
                 onChange={(e) => {
                   const code = e.target.value;
+                  const base = localPuv > 0 ? localPuv : selected.puv;
+                  if (!localPuv && selected.puv) setLocalPuv(selected.puv);
+                  let newPuv = selected.puv;
                   if (code === "RWF") {
-                    if (localPuv > 0) handleChange("puv", localPuv);
-                    handleChange("current_mon", "RWF");
+                    if (base > 0) newPuv = base;
                   } else {
                     const rate =
                       currencyOptions.find((c) => c.code === code)
                         ?.exchange_rate || 1;
-                    if (localPuv > 0) {
-                      const converted = Math.round(localPuv / rate);
-                      handleChange("puv", converted);
-                    }
-                    handleChange("current_mon", code);
+                    if (base > 0) newPuv = Math.round(base / rate);
                   }
+                  // Update puv and current_mon together so calc() sees both
+                  const updated = calc({ ...selected, puv: newPuv, current_mon: code });
+                  setSelected(updated);
+                  setErrors(validateGroupReservation(updated));
                 }}
                 className="w-full border border-hotel-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-hotel-gold"
               >

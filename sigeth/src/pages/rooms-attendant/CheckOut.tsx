@@ -173,6 +173,13 @@ export default function CheckOut() {
         room_num: room.room_num,
         guest_name: room.guest_name,
       });
+      // RCS (reservation) is the source of truth for currency
+      const rcs = reservations.find(
+        (r) => r.room_num === room.room_num && r.guest_name === room.guest_name,
+      );
+      const currency = data.current_mon && data.current_mon !== "RWF"
+        ? data.current_mon
+        : rcs?.current_mon || data.current_mon || room.current_mon || "RWF";
       setPreview({
         room_num: data.room_num ?? room.room_num,
         guest_name: data.guest_name ?? room.guest_name,
@@ -182,8 +189,9 @@ export default function CheckOut() {
         total_charges: data.total_charges,
         total_paid: data.total_paid,
         balance_due: data.balance_due,
-        current_mon: room.current_mon ?? "RWF",
+        current_mon: currency,
       });
+      if (data.payt_mode) setGenPaytMode(data.payt_mode);
       setStep("preview");
     } catch (err) {
       setErrorMsg(extractError(err, "Failed to load invoice preview"));
@@ -218,7 +226,7 @@ export default function CheckOut() {
         date: data.date ?? "",
         username: data.username ?? "",
         tax: (data.tax as InvoiceData["tax"]) ?? {},
-        current_mon: preview.current_mon,
+        current_mon: data.current_mon ?? preview.current_mon,
       });
       setShowGenModal(false);
       setStep("invoice");
@@ -312,8 +320,9 @@ export default function CheckOut() {
         group_deposit: data.group_deposit ?? 0,
         total_paid: data.total_paid,
         balance_due: data.balance_due,
-        current_mon: group.current_mon ?? "RWF",
+        current_mon: data.current_mon ?? group.current_mon ?? "RWF",
       });
+      if (data.payt_mode) setGenPaytMode(data.payt_mode);
       setStep("preview");
     } catch (err) {
       setErrorMsg(extractError(err, "Failed to load group invoice preview"));
@@ -348,7 +357,7 @@ export default function CheckOut() {
         date: data.date ?? "",
         username: data.username ?? "",
         tax: (data.tax as GroupInvoiceData["tax"]) ?? {},
-        current_mon: groupPreview.current_mon,
+        current_mon: data.current_mon ?? groupPreview.current_mon,
       });
       setShowGenModal(false);
       setStep("invoice");
@@ -556,6 +565,11 @@ export default function CheckOut() {
                     room.arrival_date,
                     room.depart_date,
                   );
+                  // Use reservation currency (RCS) as source of truth, fallback to room (RDF)
+                  const rcs = reservations.find(
+                    (r) => r.room_num === room.room_num && r.guest_name === room.guest_name,
+                  );
+                  const currency = rcs?.current_mon || room.current_mon || "RWF";
                   return (
                     <button
                       key={room.room_num}
@@ -613,7 +627,7 @@ export default function CheckOut() {
                               </span>
                               <p className="font-semibold text-hotel-text-primary">
                                 {room.deposit.toLocaleString()}{" "}
-                                {room.current_mon}
+                                {currency}
                               </p>
                             </div>
                           </div>

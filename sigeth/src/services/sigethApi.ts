@@ -58,6 +58,8 @@ interface InvoicePreviewResponse {
   date?: string;
   username?: string;
   tax?: Record<string, unknown>;
+  current_mon?: string;
+  payt_mode?: string;
 }
 
 const numberValue = (value: unknown): number => {
@@ -321,6 +323,8 @@ const normalizeInvoicePreview = (raw: ApiRecord): InvoicePreviewResponse => ({
   date: stringValue(raw.date),
   username: stringValue(raw.username),
   tax: (raw.tax as Record<string, unknown> | undefined) ?? {},
+  current_mon: stringValue(raw.current_mon, "RWF"),
+  payt_mode: stringValue(raw.payt_mode),
 });
 
 // ══════════════════════════════════════════════════════
@@ -583,7 +587,7 @@ export const frontOfficeApi = {
   async deleteReservation(id: string) {
     await api.delete(`/v1/front-office/reservations/${id}/`);
   },
-  async checkin(payload: { room_num: string; guest_name: string }) {
+  async checkin(payload: { room_num: string; guest_name: string; current_mon?: string; puv?: number }) {
     const { data } = await api.post<ApiRecord>(
       "/v1/front-office/reservations/checkin/",
       payload,

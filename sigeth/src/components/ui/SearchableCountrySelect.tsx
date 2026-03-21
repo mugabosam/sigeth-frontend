@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { COUNTRIES } from "../../utils/countries";
 import type { Country } from "../../utils/countries";
 import { ChevronDown, Search, X } from "lucide-react";
@@ -12,6 +12,12 @@ interface SearchableCountrySelectProps {
   className?: string;
 }
 
+// Pre-compute lowercase search fields once to avoid per-keystroke allocations
+const SEARCH_INDEX = COUNTRIES.map((c) => ({
+  country: c,
+  lower: `${c.name}\t${c.nationality}\t${c.code}\t${c.phoneCode}`.toLowerCase(),
+}));
+
 export default function SearchableCountrySelect({
   value,
   onChange,
@@ -22,8 +28,6 @@ export default function SearchableCountrySelect({
 }: SearchableCountrySelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredCountries, setFilteredCountries] =
-    useState<Country[]>(COUNTRIES);
   const containerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -40,28 +44,16 @@ export default function SearchableCountrySelect({
     return placeholder;
   };
 
-  // Filter countries based on search term
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (!searchTerm.trim()) {
-        setFilteredCountries(COUNTRIES);
-        return;
-      }
-
-      const term = searchTerm.toLowerCase();
-      const filtered = COUNTRIES.filter((country) => {
-        const nameMatch = country.name.toLowerCase().includes(term);
-        const nationalityMatch = country.nationality
-          .toLowerCase()
-          .includes(term);
-        const codeMatch = country.code.toLowerCase().includes(term);
-        const phoneCodeMatch = country.phoneCode.toLowerCase().includes(term);
-        return nameMatch || nationalityMatch || codeMatch || phoneCodeMatch;
-      });
-      setFilteredCountries(filtered);
-    }, 100);
-
-    return () => clearTimeout(timer);
+  // Filter countries synchronously via useMemo — no timer needed
+  const filteredCountries = useMemo<Country[]>(() => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) {
+      // Show first 30 when no search to keep initial render fast
+      return COUNTRIES.slice(0, 30);
+    }
+    return SEARCH_INDEX
+      .filter((entry) => entry.lower.includes(term))
+      .map((entry) => entry.country);
   }, [searchTerm]);
 
   // Focus search input when dropdown opens
@@ -173,37 +165,44 @@ export default function SearchableCountrySelect({
                 No countries found
               </li>
             ) : (
-              filteredCountries.map((country) => {
-                const displayValue =
-                  type === "nationality" ? country.nationality : country.name;
-                const isSelected = value === displayValue;
-                return (
-                  <li key={country.code}>
-                    <button
-                      type="button"
-                      onClick={() => handleSelect(country)}
-                      className={`w-full text-left px-4 py-3 text-sm hover:bg-amber-50 transition-colors flex items-center gap-3 border-b border-gray-100 last:border-b-0 ${
-                        isSelected
-                          ? "bg-amber-100 font-semibold text-gray-900"
-                          : "text-gray-700"
-                      }`}
-                    >
-                      <span className="text-lg flex-shrink-0">
-                        {country.flag}
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium">{country.name}</div>
-                        <div className="text-xs text-gray-500">
-                          {type === "nationality"
-                            ? country.nationality
-                            : country.code}{" "}
-                          • {country.phoneCode}
+              <>
+                {filteredCountries.map((country) => {
+                  const displayValue =
+                    type === "nationality" ? country.nationality : country.name;
+                  const isSelected = value === displayValue;
+                  return (
+                    <li key={country.code}>
+                      <button
+                        type="button"
+                        onClick={() => handleSelect(country)}
+                        className={`w-full text-left px-4 py-3 text-sm hover:bg-amber-50 transition-colors flex items-center gap-3 border-b border-gray-100 last:border-b-0 ${
+                          isSelected
+                            ? "bg-amber-100 font-semibold text-gray-900"
+                            : "text-gray-700"
+                        }`}
+                      >
+                        <span className="text-lg flex-shrink-0">
+                          {country.flag}
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium">{country.name}</div>
+                          <div className="text-xs text-gray-500">
+                            {type === "nationality"
+                              ? country.nationality
+                              : country.code}{" "}
+                            • {country.phoneCode}
+                          </div>
                         </div>
-                      </div>
-                    </button>
+                      </button>
+                    </li>
+                  );
+                })}
+                {!searchTerm.trim() && filteredCountries.length < COUNTRIES.length && (
+                  <li className="px-4 py-2 text-xs text-gray-400 text-center">
+                    Type to search all {COUNTRIES.length} countries...
                   </li>
-                );
-              })
+                )}
+              </>
             )}
           </ul>
         </div>

@@ -14,6 +14,7 @@ interface PreviewData {
   total_charges: number;
   total_paid: number;
   balance_due: number;
+  current_mon: string;
 }
 
 interface InvoiceData extends PreviewData {
@@ -61,7 +62,9 @@ export default function InvoicePreview() {
         total_charges: data.total_charges,
         total_paid: data.total_paid,
         balance_due: data.balance_due,
+        current_mon: data.current_mon ?? room.current_mon ?? "RWF",
       });
+      if (data.payt_mode) setGenPaytMode(data.payt_mode);
     } catch (err: unknown) {
       const msg =
         err && typeof err === "object" && "response" in err
@@ -103,6 +106,7 @@ export default function InvoicePreview() {
         date: data.date ?? "",
         username: data.username ?? "",
         tax: (data.tax as InvoiceData["tax"]) ?? {},
+        current_mon: data.current_mon ?? preview.current_mon,
       });
       setShowGenerateModal(false);
     } catch (err: unknown) {
@@ -327,7 +331,7 @@ export default function InvoicePreview() {
                     Total Charges
                   </span>
                   <span className="border-2 border-gray-400 bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
-                    {fmt(displayData.total_charges)} RWF
+                    {fmt(displayData.total_charges)} {displayData.current_mon}
                   </span>
                 </div>
                 <div className="flex items-center justify-end gap-3">
@@ -335,7 +339,7 @@ export default function InvoicePreview() {
                     Total Paid
                   </span>
                   <span className="border-2 border-gray-400 bg-gradient-to-r from-blue-50 to-cyan-50 px-3 py-1.5 w-28 text-right font-bold text-blue-700">
-                    {fmt(displayData.total_paid)} RWF
+                    {fmt(displayData.total_paid)} {displayData.current_mon}
                   </span>
                 </div>
                 <div className="flex items-center justify-end gap-3">
@@ -343,7 +347,7 @@ export default function InvoicePreview() {
                     Balance Due
                   </span>
                   <span className="border-2 border-gray-400 bg-gradient-to-r from-orange-50 to-red-50 px-3 py-1.5 w-28 text-right font-bold text-red-700">
-                    {fmt(displayData.balance_due)} RWF
+                    {fmt(displayData.balance_due)} {displayData.current_mon}
                   </span>
                 </div>
                 {invoice?.tax?.taux != null && (
@@ -351,7 +355,7 @@ export default function InvoicePreview() {
                     <div className="flex items-center justify-end gap-3 pt-2 border-t border-hotel-border">
                       <span className="font-semibold text-hotel-text-primary">HTVA</span>
                       <span className="border-2 border-gray-400 px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
-                        {fmt(invoice.tax.htva ?? 0)} RWF
+                        {fmt(invoice.tax.htva ?? 0)} {displayData.current_mon}
                       </span>
                     </div>
                     <div className="flex items-center justify-end gap-3">
@@ -359,7 +363,7 @@ export default function InvoicePreview() {
                         TVA ({invoice.tax.taux}%)
                       </span>
                       <span className="border-2 border-gray-400 px-3 py-1.5 w-28 text-right font-bold text-hotel-text-primary">
-                        {fmt(invoice.tax.tva ?? 0)} RWF
+                        {fmt(invoice.tax.tva ?? 0)} {displayData.current_mon}
                       </span>
                     </div>
                     <div className="flex items-center justify-end gap-3">
@@ -367,7 +371,7 @@ export default function InvoicePreview() {
                         Total TTC
                       </span>
                       <span className="border-2 border-gray-400 bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-1.5 w-28 text-right font-bold text-green-800">
-                        {fmt(invoice.tax.total_ttc ?? 0)} RWF
+                        {fmt(invoice.tax.total_ttc ?? 0)} {displayData.current_mon}
                       </span>
                     </div>
                   </>
