@@ -133,7 +133,7 @@ export default function RoomCategories() {
               </label>
               <input
                 type="number"
-                value={selected.code}
+                value={selected.code || ""}
                 onChange={(e) =>
                   setSelected({ ...selected, code: Number(e.target.value) })
                 }

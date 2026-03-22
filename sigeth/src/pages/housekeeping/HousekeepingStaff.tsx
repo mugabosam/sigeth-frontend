@@ -172,7 +172,7 @@ export default function HousekeepingStaff() {
               </label>
               <input
                 type="number"
-                value={selected.number}
+                value={selected.number || ""}
                 onChange={(e) =>
                   handleFieldChange("number", Number(e.target.value))
                 }
@@ -259,20 +259,20 @@ export default function HousekeepingStaff() {
               )}
             </div>
           </div>
-          <div className="flex gap-3 pt-5 border-t border-hotel-border">
+          <div className="flex gap-3 pt-2 border-t border-hotel-border">
             <button
               onClick={handleSave}
-              className="bg-hotel-gold text-white px-6 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:bg-hotel-gold-dark transition-colors"
+              className="bg-hotel-gold text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium hover:bg-hotel-gold-dark transition-colors"
             >
-              <Save size={16} />
+              <Save size={14} />
               {t("save")}
             </button>
             {!isNew && (
               <button
                 onClick={() => setShowDeleteConfirm(true)}
-                className="bg-hotel-danger text-white px-6 py-2.5 rounded flex items-center gap-2 text-sm font-semibold hover:bg-red-700 transition-colors"
+                className="bg-hotel-danger text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium hover:bg-red-700 transition-colors"
               >
-                <Trash2 size={16} />
+                <Trash2 size={14} />
                 {t("delete")}
               </button>
             )}
@@ -281,7 +281,7 @@ export default function HousekeepingStaff() {
                 setSelected(null);
                 setErrors({ isValid: true, errors: [] });
               }}
-              className="border-2 border-hotel-border px-6 py-2.5 rounded text-sm font-semibold text-hotel-text-primary hover:bg-hotel-cream transition-colors"
+              className="border border-hotel-border text-hotel-text-primary px-4 py-2 rounded text-sm font-medium hover:bg-hotel-cream transition-colors"
             >
               {t("cancel")}
             </button>
@@ -314,11 +314,9 @@ export default function HousekeepingStaff() {
       />
 
       {/* Staff Table */}
-      <div className="bg-white rounded border border-hotel-border overflow-hidden">
-        <div className="bg-gradient-to-r from-hotel-paper to-hotel-cream px-6 py-4 border-b border-hotel-border flex items-center justify-between">
-          <h2 className="text-base font-bold text-hotel-text-primary">Staff Directory</h2>
-        </div>
-        <div className="px-6 py-4 border-b border-hotel-border">
+      <div className="bg-white rounded overflow-hidden">
+        <h2 className="text-sm font-semibold text-hotel-text-primary mb-2 uppercase tracking-wide">Staff Directory</h2>
+        <div className="px-4 py-3 border-b border-hotel-border">
           <div className="relative">
             <Search
               className="absolute left-3 top-1/2 transform -translate-y-1/2 text-hotel-text-secondary"
@@ -329,7 +327,7 @@ export default function HousekeepingStaff() {
               placeholder={`${t("search")} staff by name, number, or position...`}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-10 py-2.5 border-2 border-hotel-border hover:border-hotel-border focus:border-hotel-gold focus:outline-none rounded text-sm font-medium transition-colors"
+              className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-hotel-gold"
             />
             {searchTerm && (
               <button
@@ -342,7 +340,7 @@ export default function HousekeepingStaff() {
           </div>
         </div>
         <table className="w-full text-sm">
-          <thead className="bg-white border-b-2 border-hotel-border">
+          <thead className="bg-hotel-navy text-white sticky top-0">
             <tr>
               {[
                 t("staffNumber"),
@@ -352,7 +350,7 @@ export default function HousekeepingStaff() {
               ].map((h) => (
                 <th
                   key={h}
-                  className="text-left px-6 py-3 font-bold text-hotel-text-primary"
+                  className="text-left py-2 px-2 font-medium"
                 >
                   {h}
                 </th>
@@ -363,25 +361,25 @@ export default function HousekeepingStaff() {
             {filteredStaff.map((s) => (
               <tr
                 key={s.number}
-                className="border-b hover:bg-hotel-cream/50 cursor-pointer transition-colors duration-150"
+                className="border-b border-hotel-border hover:bg-hotel-cream cursor-pointer transition-colors"
                 onClick={() => {
                   setSelected({ ...s });
                   setIsNew(false);
                   setErrors({ isValid: true, errors: [] });
                 }}
               >
-                <td className="px-6 py-3 font-semibold text-hotel-gold">
+                <td className="py-2 px-2 font-medium text-hotel-text-primary">
                   {s.number}
                 </td>
-                <td className="px-6 py-3 text-hotel-text-primary">{s.first_name}</td>
-                <td className="px-6 py-3 text-hotel-text-primary">{s.last_name}</td>
-                <td className="px-6 py-3 text-hotel-text-secondary italic">{s.poste}</td>
+                <td className="py-2 px-2 text-hotel-text-primary">{s.first_name}</td>
+                <td className="py-2 px-2 text-hotel-text-primary">{s.last_name}</td>
+                <td className="py-2 px-2 text-hotel-text-secondary italic">{s.poste}</td>
               </tr>
             ))}
           </tbody>
         </table>
         {filteredStaff.length === 0 && (
-          <div className="px-6 py-12 text-center text-hotel-text-secondary">
+          <div className="px-4 py-8 text-center text-hotel-text-secondary">
             <p className="text-sm">
               {searchTerm
                 ? `No staff members match "${searchTerm}". Try a different search.`

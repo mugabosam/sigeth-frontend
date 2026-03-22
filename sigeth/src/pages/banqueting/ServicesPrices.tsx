@@ -274,7 +274,7 @@ export default function ServicesPrices() {
                     </label>
                     <input
                       type="number"
-                      value={selected.qty}
+                      value={selected.qty || ""}
                       onChange={(e) =>
                         handleFieldChange("qty", Number(e.target.value))
                       }
@@ -299,7 +299,7 @@ export default function ServicesPrices() {
                     </label>
                     <input
                       type="number"
-                      value={selected.puv}
+                      value={selected.puv || ""}
                       onChange={(e) =>
                         handleFieldChange("puv", Number(e.target.value))
                       }

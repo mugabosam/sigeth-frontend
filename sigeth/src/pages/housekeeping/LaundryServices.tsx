@@ -144,7 +144,7 @@ export default function LaundryServices() {
               </label>
               <input
                 type="number"
-                value={selected.qty}
+                value={selected.qty || ""}
                 onChange={(e) =>
                   setSelected({ ...selected, qty: Number(e.target.value) })
                 }
@@ -158,7 +158,7 @@ export default function LaundryServices() {
               </label>
               <input
                 type="number"
-                value={selected.puv}
+                value={selected.puv || ""}
                 onChange={(e) =>
                   setSelected({ ...selected, puv: Number(e.target.value) })
                 }

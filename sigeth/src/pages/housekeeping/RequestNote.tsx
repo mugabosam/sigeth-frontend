@@ -233,7 +233,7 @@ export default function RequestNote({
               </label>
               <input
                 type="number"
-                value={selected.qty}
+                value={selected.qty || ""}
                 min="0"
                 onChange={(e) => {
                   setSelected({ ...selected, qty: Number(e.target.value) });
@@ -258,7 +258,7 @@ export default function RequestNote({
               </label>
               <input
                 type="number"
-                value={selected.credit_1}
+                value={selected.credit_1 || ""}
                 onChange={(e) =>
                   setSelected({ ...selected, credit_1: Number(e.target.value) })
                 }
@@ -272,7 +272,7 @@ export default function RequestNote({
               </label>
               <input
                 type="number"
-                value={selected.credit_2}
+                value={selected.credit_2 || ""}
                 onChange={(e) =>
                   setSelected({ ...selected, credit_2: Number(e.target.value) })
                 }
